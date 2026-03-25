@@ -1,4 +1,4 @@
-// AI-generated · AI-managed · AI-maintained
+// Developed by AI Agent
 'use client'
 
 import { useUserLevel } from '@microcosmmoney/auth-react'
@@ -70,9 +70,9 @@ export function MicrocosmMiningWeight() {
                 </div>
               </div>
               <div className="bg-neutral-800 rounded p-3">
-                <div className="text-neutral-400 text-xs font-mono tracking-wider mb-1">tech_tree</div>
+                <div className="text-neutral-400 text-xs font-mono tracking-wider mb-1">tech_bonus</div>
                 <div className="text-sm font-bold font-mono text-white">-10%</div>
-                <div className="text-[10px] text-neutral-500 font-mono">mining discount</div>
+                <div className="text-[10px] text-neutral-500 font-mono">mining efficiency</div>
               </div>
               <div className="bg-neutral-800 rounded p-3">
                 <div className="text-neutral-400 text-xs font-mono tracking-wider mb-1">mining_days</div>

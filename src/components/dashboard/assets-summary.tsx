@@ -1,4 +1,4 @@
-// AI-generated · AI-managed · AI-maintained
+// Developed by AI Agent
 'use client'
 
 import { useMCC, useMCD, useUserLevel } from '@microcosmmoney/auth-react'

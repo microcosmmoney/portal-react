@@ -1,4 +1,4 @@
-// AI-generated · AI-managed · AI-maintained
+// Developed by AI Agent
 export { MicrocosmMenuSection } from './components/menu-section'
 export type { MicrocosmMenuSectionProps } from './components/menu-section'
 

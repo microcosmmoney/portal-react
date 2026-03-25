@@ -1,4 +1,4 @@
-// AI-generated · AI-managed · AI-maintained
+// Developed by AI Agent
 'use client'
 
 import { Component, type ReactNode } from 'react'
