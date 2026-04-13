@@ -113,3 +113,18 @@ export type { MicrocosmVotingPageProps } from './components/voting/voting-page'
 
 export { MicrocosmReincarnationPage } from './components/reincarnation/reincarnation-page'
 export type { MicrocosmReincarnationPageProps } from './components/reincarnation/reincarnation-page'
+
+export { MicrocosmManagerIncomePage } from './components/income/manager-income-page'
+export type { MicrocosmManagerIncomePageProps } from './components/income/manager-income-page'
+
+export { MicrocosmQueueStatusPage } from './components/queue/queue-status-page'
+export type { MicrocosmQueueStatusPageProps } from './components/queue/queue-status-page'
+
+export { MicrocosmStationListPage } from './components/stations/station-list-page'
+export type { MicrocosmStationListPageProps } from './components/stations/station-list-page'
+
+export { MicrocosmRewardsPage } from './components/rewards/rewards-page'
+export type { MicrocosmRewardsPageProps } from './components/rewards/rewards-page'
+
+export { MicrocosmProfilePage } from './components/profile/profile-page'
+export type { MicrocosmProfilePageProps } from './components/profile/profile-page'
