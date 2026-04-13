@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react'
 import { useMicrocosmApi, useMicrocosmContext, useAuth } from '@microcosmmoney/auth-react'
 import { TerminalCard } from '../terminal'
+import { MicrocosmEmailChangeCard } from './email-change-card'
+import { MicrocosmTwoFactorSettings } from './two-factor-settings'
 
 const API_BASE = 'https://api.microcosm.money/v1'
 
@@ -45,11 +47,11 @@ const LEVEL_INFO: Record<string, { label: string; description: string; color: st
 export interface MicrocosmProfilePageProps {
   basePath?: string
   onNavigate?: (path: string) => void
-  mainPortalSettingsUrl?: string
+  walletSection?: ReactNode
 }
 
 export function MicrocosmProfilePage({
-  mainPortalSettingsUrl = '/user-system/profile',
+  walletSection,
 }: MicrocosmProfilePageProps = {}) {
   const api = useMicrocosmApi()
   const { getAccessToken } = useMicrocosmContext()
@@ -63,6 +65,8 @@ export function MicrocosmProfilePage({
   const [saving, setSaving] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [resendingVerification, setResendingVerification] = useState(false)
+  const [resendMessage, setResendMessage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadProfile = useCallback(async () => {
@@ -330,20 +334,53 @@ export function MicrocosmProfilePage({
         </TerminalCard>
       )}
 
-      <TerminalCard title="Advanced Settings">
-        <div className="space-y-3 text-sm text-neutral-400">
-          <p>
-            Email verification, email change, two-factor authentication, and wallet management are
-            available on the main portal:
-          </p>
-          <a
-            href={mainPortalSettingsUrl}
-            className="inline-block px-3 py-1.5 border border-cyan-800 text-cyan-400 hover:bg-cyan-950 rounded text-sm"
-          >
-            Open main portal settings →
-          </a>
+      <TerminalCard title="Email Verification">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs text-neutral-400 tracking-wider mb-1">STATUS</div>
+              {profile?.email_verified ? (
+                <div className="text-green-400 text-sm">Verified</div>
+              ) : (
+                <div className="text-red-400 text-sm">Unverified</div>
+              )}
+            </div>
+            {!profile?.email_verified && (
+              <button
+                onClick={async () => {
+                  setResendingVerification(true)
+                  setResendMessage(null)
+                  try {
+                    await api.post('/users/me/resend-verification', {})
+                    setResendMessage('Verification email sent — check your inbox')
+                  } catch (e) {
+                    setResendMessage(e instanceof Error ? e.message : 'Failed to send')
+                  } finally {
+                    setResendingVerification(false)
+                  }
+                }}
+                disabled={resendingVerification}
+                className="px-3 py-1.5 border border-cyan-800 text-cyan-400 hover:bg-cyan-950 rounded text-xs disabled:opacity-50"
+              >
+                {resendingVerification ? 'Sending...' : 'Resend Email'}
+              </button>
+            )}
+          </div>
+          {resendMessage && (
+            <div className="text-xs text-cyan-400">{resendMessage}</div>
+          )}
         </div>
       </TerminalCard>
+
+      <MicrocosmEmailChangeCard
+        onSuccess={(newEmail) => {
+          setProfile(prev => (prev ? { ...prev, email: newEmail, email_verified: true } : prev))
+        }}
+      />
+
+      <MicrocosmTwoFactorSettings />
+
+      {walletSection}
 
       <TerminalCard>
         <div className="text-neutral-400 text-sm mb-3">

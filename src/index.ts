@@ -128,3 +128,9 @@ export type { MicrocosmRewardsPageProps } from './components/rewards/rewards-pag
 
 export { MicrocosmProfilePage } from './components/profile/profile-page'
 export type { MicrocosmProfilePageProps } from './components/profile/profile-page'
+
+export { MicrocosmEmailChangeCard } from './components/profile/email-change-card'
+export type { MicrocosmEmailChangeCardProps } from './components/profile/email-change-card'
+
+export { MicrocosmTwoFactorSettings } from './components/profile/two-factor-settings'
+export type { MicrocosmTwoFactorSettingsProps } from './components/profile/two-factor-settings'
