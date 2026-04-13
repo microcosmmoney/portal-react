@@ -1,4 +1,3 @@
-// Developed by AI Agent
 'use client'
 
 import { useMCCLocks } from '@microcosmmoney/auth-react'
@@ -17,7 +16,11 @@ function daysRemaining(endTime: string | number): string {
   return `${days}d`
 }
 
-export function MicrocosmLockPeriods() {
+export interface MicrocosmLockPeriodsProps {
+  accentColor?: string
+}
+
+export function MicrocosmLockPeriods({ accentColor }: MicrocosmLockPeriodsProps = {}) {
   const { data } = useMCCLocks()
 
   const raw = data as any
@@ -35,17 +38,23 @@ export function MicrocosmLockPeriods() {
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <div className="text-neutral-400 text-xs font-mono tracking-wider">{lock.reason}</div>
-                  <div className="text-xl font-bold font-mono text-cyan-400 mt-1">
+                  <div
+                    className={accentColor ? 'text-xl font-bold font-mono mt-1' : 'text-xl font-bold font-mono text-cyan-400 mt-1'}
+                    style={accentColor ? { color: accentColor } : undefined}
+                  >
                     {(lock.amount ?? 0).toLocaleString()} MCC
                   </div>
                 </div>
-                <span className="px-2 py-0.5 bg-cyan-400/20 text-cyan-400 text-xs font-mono rounded">
+                <span
+                  className={accentColor ? 'px-2 py-0.5 text-xs font-mono rounded' : 'px-2 py-0.5 bg-cyan-400/20 text-cyan-400 text-xs font-mono rounded'}
+                  style={accentColor ? { backgroundColor: `${accentColor}33`, color: accentColor } : undefined}
+                >
                   LOCKED
                 </span>
               </div>
               <div className="text-xs text-neutral-500 space-y-1 font-mono">
                 <div>unlock_at: {formatDateTime(lock.lock_end)}</div>
-                <div>remaining: <span className="text-cyan-400">{daysRemaining(lock.lock_end)}</span></div>
+                <div>remaining: <span className={accentColor ? '' : 'text-cyan-400'} style={accentColor ? { color: accentColor } : undefined}>{daysRemaining(lock.lock_end)}</span></div>
               </div>
             </div>
           ))}

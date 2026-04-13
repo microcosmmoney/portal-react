@@ -1,4 +1,3 @@
-// Developed by AI Agent
 export { MicrocosmMenuSection } from './components/menu-section'
 export type { MicrocosmMenuSectionProps } from './components/menu-section'
 
@@ -9,8 +8,10 @@ export {
   microcosmMenuGroups,
   getAllMenuItems,
   resolveMenuPath,
+  getMenuTitle,
+  getMenuDescription,
 } from './menu-config'
-export type { MicrocosmMenuItem, MicrocosmMenuGroup } from './menu-config'
+export type { MicrocosmMenuItem, MicrocosmMenuGroup, MenuLocale } from './menu-config'
 
 export {
   TerminalCard,
@@ -58,11 +59,51 @@ export type { KPIRadialChartProps } from './components/kpi-radial-chart'
 export { MicrocosmDashboardOverview } from './components/dashboard/dashboard-overview'
 export type { MicrocosmDashboardOverviewProps } from './components/dashboard/dashboard-overview'
 export { MicrocosmMarketBar } from './components/dashboard/market-overview-bar'
+export type { MicrocosmMarketBarProps } from './components/dashboard/market-overview-bar'
 export { MicrocosmQuickActions } from './components/dashboard/quick-actions'
 export type { MicrocosmQuickActionsProps } from './components/dashboard/quick-actions'
 export { MicrocosmAssetsSummary } from './components/dashboard/assets-summary'
 export type { MicrocosmAssetsSummaryProps } from './components/dashboard/assets-summary'
 export { MicrocosmPriceChart } from './components/dashboard/price-chart'
+export type { MicrocosmPriceChartProps } from './components/dashboard/price-chart'
 export { MicrocosmMintingStats } from './components/dashboard/minting-stats'
+export type { MicrocosmMintingStatsProps } from './components/dashboard/minting-stats'
 export { MicrocosmMiningWeight } from './components/dashboard/mining-weight'
+export type { MicrocosmMiningWeightProps } from './components/dashboard/mining-weight'
+export { MicrocosmMyMining } from './components/dashboard/my-mining'
+export type { MicrocosmMyMiningProps } from './components/dashboard/my-mining'
+export { MicrocosmEcosystemStats } from './components/dashboard/ecosystem-stats'
+export type { MicrocosmEcosystemStatsProps } from './components/dashboard/ecosystem-stats'
+export { MicrocosmMCCTokenStats } from './components/dashboard/mcc-token-stats'
+export type { MicrocosmMCCTokenStatsProps } from './components/dashboard/mcc-token-stats'
+export { MicrocosmMCDStats } from './components/dashboard/mcd-stats'
+export type { MicrocosmMCDStatsProps } from './components/dashboard/mcd-stats'
 export { MicrocosmLockPeriods } from './components/dashboard/lock-periods'
+export type { MicrocosmLockPeriodsProps } from './components/dashboard/lock-periods'
+
+export { MicrocosmFragmentPage } from './components/fragment/fragment-page'
+export type { MicrocosmFragmentPageProps } from './components/fragment/fragment-page'
+
+export { MicrocosmLendingPage } from './components/lending/lending-page'
+export type { MicrocosmLendingPageProps } from './components/lending/lending-page'
+
+export { MicrocosmWalletPage } from './components/wallet/wallet-page'
+export type { MicrocosmWalletPageProps } from './components/wallet/wallet-page'
+
+export { MicrocosmMiningPage } from './components/mining/mining-page'
+export type { MicrocosmMiningPageProps } from './components/mining/mining-page'
+
+export { MicrocosmMCDPage } from './components/mcd/mcd-page'
+export type { MicrocosmMCDPageProps } from './components/mcd/mcd-page'
+
+export { MicrocosmAuctionPage } from './components/auction/auction-page'
+export type { MicrocosmAuctionPageProps } from './components/auction/auction-page'
+
+export { MicrocosmTerritoryPage } from './components/territory/territory-page'
+export type { MicrocosmTerritoryPageProps } from './components/territory/territory-page'
+
+export { MicrocosmOrganizationPage } from './components/organization/organization-page'
+export type { MicrocosmOrganizationPageProps } from './components/organization/organization-page'
+
+export { MicrocosmVotingPage } from './components/voting/voting-page'
+export type { MicrocosmVotingPageProps } from './components/voting/voting-page'

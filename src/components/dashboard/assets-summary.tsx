@@ -1,146 +1,148 @@
-// Developed by AI Agent
 'use client'
 
-import { useMCC, useMCD, useUserLevel } from '@microcosmmoney/auth-react'
-import { UserRank } from '@microcosmmoney/auth-core'
+import { useMCC, useMCD, useUserLevel, useWallets, useMCCLocks, useMarketData } from '@microcosmmoney/auth-react'
 
 export interface MicrocosmAssetsSummaryProps {
   basePath?: string
   onNavigate?: (path: string) => void
+  accentColor?: string
 }
 
 const RANK_COLOR: Record<string, string> = {
-  Recruit: 'text-neutral-500',
-  Prospect: 'text-neutral-400',
-  Miner: 'text-cyan-300',
-  Commander: 'text-white',
-  Pioneer: 'text-cyan-400',
-  Warden: 'text-cyan-300',
-  Admiral: 'text-cyan-300',
+  miner: 'text-cyan-300',
+  commander: 'text-white', pioneer: 'text-cyan-400', warden: 'text-cyan-300', admiral: 'text-cyan-300',
 }
 
-const RANK_BG: Record<string, string> = {
-  Recruit: 'bg-neutral-800',
-  Prospect: 'bg-neutral-800',
-  Miner: 'bg-cyan-950/50',
-  Commander: 'bg-white/10',
-  Pioneer: 'bg-cyan-950/50',
-  Warden: 'bg-cyan-950/50',
-  Admiral: 'bg-cyan-950/50',
-}
-
-export function MicrocosmAssetsSummary({ basePath = '', onNavigate }: MicrocosmAssetsSummaryProps) {
+export function MicrocosmAssetsSummary({ basePath = '', onNavigate, accentColor }: MicrocosmAssetsSummaryProps) {
   const { balance: mccData, loading: mccLoading } = useMCC(120_000)
   const { balance: mcdData, loading: mcdLoading } = useMCD(120_000)
   const { data: levelData } = useUserLevel()
+  const { data: wallets } = useWallets()
+  const { data: locks } = useMCCLocks()
+  const { data: marketData } = useMarketData()
 
   const resolvePath = (p: string) => basePath ? `${basePath.replace(/\/$/, '')}${p}` : p
 
   const mccBalance = mccData?.balance ?? 0
+  const mccPrice = marketData?.price_usd ?? 0
+  const mccUsdValue = mccPrice > 0 ? mccBalance * mccPrice : 0
   const mcdAmount = parseFloat(mcdData?.available_balance ?? '0')
   const mcdReceived = parseFloat(mcdData?.total_balance ?? '0')
   const mcdSpent = parseFloat(mcdData?.frozen_balance ?? '0')
+  const walletCount = Array.isArray(wallets) ? wallets.length : 0
+  const activeLocks = Array.isArray(locks) ? locks.filter((l: any) => l.status === 'locked') : []
+  const lockedAmount = activeLocks.reduce((sum: number, l: any) => sum + (l.amount || 0), 0)
   const rank = levelData?.level ?? null
-  const nextRank: string | null = null
-  const progress = levelData?.upgrade_progress?.percentage ?? 0
-  const requirementsMet: Record<string, boolean> | undefined = undefined
+  const nextRank = (levelData as any)?.next_level ?? null
+  const progress = (levelData as any)?.upgrade_progress?.percentage ?? 0
 
-  const fmt = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const fmt = (n: number, d = 2) => n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })
+
+  const rankColor = accentColor
+    ? undefined
+    : RANK_COLOR[(rank ?? '').toLowerCase()] ?? 'text-neutral-500'
+  const rankStyle = accentColor ? { color: accentColor } : undefined
+
+  const spinnerBorderColor = accentColor ? { borderColor: accentColor, borderTopColor: 'transparent' } : undefined
+  const spinnerClass = accentColor ? 'inline-block w-5 h-5 border-2 rounded-full animate-spin' : 'inline-block w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin'
 
   return (
-    <div className="bg-neutral-900 border border-neutral-700 rounded-lg overflow-hidden h-full hover:border-cyan-400/50 transition-colors">
-      <div className="p-6 space-y-4">
-        <div
-          className="block group cursor-pointer"
-          onClick={() => onNavigate?.(resolvePath('/mcc/wallet'))}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && onNavigate?.(resolvePath('/mcc/wallet'))}
-        >
-          <div>
-            <div className="text-neutral-400 text-[10px] font-mono tracking-wider mb-1">MCC_BALANCE</div>
-            <div className="text-2xl font-bold font-mono text-cyan-400">
-              {mccLoading
-                ? <span className="inline-block w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-                : fmt(mccBalance)
-              }
-            </div>
-            <div className="text-neutral-500 text-xs font-mono mt-1">on-chain balance (API)</div>
-          </div>
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      {/* MCC Balance */}
+      <div
+        className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:border-cyan-400/50 transition-colors cursor-pointer h-full"
+        onClick={() => onNavigate?.(resolvePath('/mcc/wallet'))}
+        role="button" tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && onNavigate?.(resolvePath('/mcc/wallet'))}
+      >
+        <div className="flex items-center gap-1.5 mb-2">
+          <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span className="text-neutral-400 text-[10px] font-mono tracking-wider">MCC_BALANCE</span>
         </div>
+        <div className={accentColor ? 'text-2xl font-bold font-mono' : 'text-2xl font-bold font-mono text-cyan-400'} style={accentColor ? { color: accentColor } : undefined}>
+          {mccLoading
+            ? <span className={spinnerClass} style={spinnerBorderColor} />
+            : fmt(mccBalance, 3)
+          }
+        </div>
+        {mccUsdValue > 0 && (
+          <div className="text-xs text-neutral-500 font-mono mt-1">
+            ≈ ${fmt(mccUsdValue)}
+          </div>
+        )}
+      </div>
 
-        <div className="h-px bg-neutral-700" />
+      {/* MCD Balance */}
+      <div
+        className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:border-cyan-400/50 transition-colors cursor-pointer h-full"
+        onClick={() => onNavigate?.(resolvePath('/mcc/mcd'))}
+        role="button" tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && onNavigate?.(resolvePath('/mcc/mcd'))}
+      >
+        <div className="flex items-center gap-1.5 mb-2">
+          <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          <span className="text-neutral-400 text-[10px] font-mono tracking-wider">MCD_BALANCE</span>
+        </div>
+        <div className="text-2xl font-bold font-mono text-white">
+          {mcdLoading
+            ? <span className={spinnerClass} style={spinnerBorderColor} />
+            : fmt(mcdAmount)
+          }
+        </div>
+        <div className="text-[10px] text-neutral-500 font-mono mt-1">
+          in: {fmt(mcdReceived, 0)} out: {fmt(mcdSpent, 0)}
+        </div>
+      </div>
 
-        <div
-          className="block group cursor-pointer"
-          onClick={() => onNavigate?.(resolvePath('/mcc/mcd'))}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && onNavigate?.(resolvePath('/mcc/mcd'))}
-        >
-          <div>
-            <div className="text-neutral-400 text-[10px] font-mono tracking-wider mb-1">MCD_BALANCE</div>
-            <div className="text-2xl font-bold font-mono text-cyan-400">
-              {mcdLoading
-                ? <span className="inline-block w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-                : fmt(mcdAmount)
-              }
+      {/* Locked */}
+      <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:border-cyan-400/50 transition-colors">
+        <div className="flex items-center gap-1.5 mb-2">
+          <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <span className="text-neutral-400 text-[10px] font-mono tracking-wider">LOCKED</span>
+        </div>
+        <div className="text-2xl font-bold font-mono text-white">{fmt(lockedAmount, 0)}</div>
+        <div className="text-[10px] text-neutral-500 font-mono mt-1">
+          {activeLocks.length} lock period{activeLocks.length !== 1 ? 's' : ''}
+        </div>
+      </div>
+
+      {/* Wallets */}
+      <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:border-cyan-400/50 transition-colors">
+        <div className="flex items-center gap-1.5 mb-2">
+          <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+          </svg>
+          <span className="text-neutral-400 text-[10px] font-mono tracking-wider">WALLETS</span>
+        </div>
+        <div className="text-2xl font-bold font-mono text-white">{walletCount}</div>
+      </div>
+
+      {/* Rank */}
+      <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:border-cyan-400/50 transition-colors">
+        <div className="text-neutral-400 text-[10px] font-mono tracking-wider mb-2">RANK</div>
+        <div className={`text-lg font-bold font-mono ${rankColor ?? ''}`} style={rankStyle}>
+          {rank || 'N/A'}
+        </div>
+        {nextRank && (
+          <div className="mt-2">
+            <div className="w-full bg-neutral-800 rounded-full h-1.5">
+              <div
+                className={accentColor ? 'h-1.5 rounded-full transition-all' : 'bg-cyan-400 h-1.5 rounded-full transition-all'}
+                style={{ width: `${Math.min(progress, 100)}%`, ...(accentColor ? { backgroundColor: accentColor } : {}) }}
+              />
             </div>
-            <div className="text-neutral-500 text-xs font-mono mt-1 space-x-3">
-              <span>Income: <span className="text-white">{fmt(mcdReceived)}</span></span>
-              <span>Spent: <span className="text-neutral-400">{fmt(mcdSpent)}</span></span>
+            <div className="text-[10px] text-neutral-500 font-mono mt-1">
+              {progress.toFixed(0)}% → {nextRank}
             </div>
           </div>
-        </div>
-
-        <div className="h-px bg-neutral-700" />
-
-        <div>
-          <div className="text-neutral-400 text-[10px] font-mono tracking-wider mb-2">USER_RANK</div>
-          <div className="flex items-center gap-3 mb-2">
-            <span className={`px-2.5 py-1 rounded text-sm font-bold font-mono ${RANK_COLOR[rank ?? ''] ?? 'text-neutral-500'} ${RANK_BG[rank ?? ''] ?? 'bg-neutral-800'}`}>
-              {rank || 'N/A'}
-            </span>
-            {nextRank && (
-              <span className="text-neutral-500 text-xs font-mono">→ {nextRank}</span>
-            )}
-          </div>
-
-          {nextRank && (
-            <div>
-              <div className="flex justify-between items-center mb-1.5 text-xs font-mono">
-                <span className="text-neutral-500">upgrade_progress</span>
-                <span className="text-neutral-400">{progress.toFixed(1)}%</span>
-              </div>
-              <div className="w-full bg-neutral-800 rounded-full h-2">
-                <div
-                  className="bg-cyan-400 h-2 rounded-full transition-all"
-                  style={{ width: `${Math.min(progress, 100)}%` }}
-                />
-              </div>
-              {requirementsMet && (
-                <div className="mt-2 space-y-1">
-                  {Object.entries(requirementsMet).map(([req, met]) => (
-                    <div key={req} className="flex items-center gap-2 text-[11px] font-mono">
-                      <span className={met ? 'text-white' : 'text-neutral-600'}>
-                        {met ? '[✓]' : '[ ]'}
-                      </span>
-                      <span className={met ? 'text-neutral-400' : 'text-neutral-600'}>
-                        {req.replace(/_/g, ' ')}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {!nextRank && rank && (
-            <div className="bg-black border border-cyan-400/30 rounded p-2 text-center">
-              <div className="text-cyan-400 font-bold text-xs font-mono">MAX LEVEL</div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   )

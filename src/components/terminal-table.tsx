@@ -1,4 +1,3 @@
-// Developed by AI Agent
 "use client"
 
 import React from 'react'

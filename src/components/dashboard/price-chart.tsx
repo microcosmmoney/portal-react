@@ -1,7 +1,6 @@
-// Developed by AI Agent
 'use client'
 
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import { usePriceHistory } from '@microcosmmoney/auth-react'
 import {
   AreaChart,
@@ -21,14 +20,23 @@ const timeRanges: { label: string; value: TimeRange }[] = [
   { label: '30D', value: '30D' },
 ]
 
-export function MicrocosmPriceChart() {
+export interface MicrocosmPriceChartProps {
+  accentColor?: string
+}
+
+export function MicrocosmPriceChart({ accentColor }: MicrocosmPriceChartProps = {}) {
   const [range, setRange] = useState<TimeRange>('7D')
   const { data, loading } = usePriceHistory(range)
+  const gradientId = useId().replace(/:/g, '_') + '_mcPriceGradient'
+
+  const ac = accentColor || '#22d3ee'
 
   const raw = data as any
   const items: any[] = Array.isArray(raw) ? raw : raw?.records ?? []
   const chartData = items.map((item: any) => ({
-    time: typeof item.timestamp === 'number' ? item.timestamp * 1000 : new Date(item.timestamp).getTime(),
+    time: typeof item.timestamp === 'number'
+      ? (item.timestamp < 1e12 ? item.timestamp * 1000 : item.timestamp)
+      : new Date(item.timestamp).getTime(),
     price: item.price ?? item.close ?? 0,
   }))
 
@@ -43,8 +51,8 @@ export function MicrocosmPriceChart() {
   }
 
   return (
-    <div className="bg-neutral-900 border border-neutral-700 rounded-lg overflow-hidden h-full flex flex-col hover:border-cyan-400/50 transition-colors">
-      <div className="p-6 flex-1 flex flex-col">
+    <div className="bg-neutral-900 border border-neutral-700 rounded-lg overflow-hidden hover:border-cyan-400/50 transition-colors">
+      <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex gap-1 bg-black p-0.5 rounded">
             {timeRanges.map((tr) => (
@@ -53,9 +61,10 @@ export function MicrocosmPriceChart() {
                 onClick={() => setRange(tr.value)}
                 className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded transition-colors ${
                   range === tr.value
-                    ? 'bg-cyan-700 text-white'
+                    ? (accentColor ? 'text-white' : 'bg-cyan-700 text-white')
                     : 'text-neutral-500 hover:text-neutral-300'
                 }`}
+                style={range === tr.value && accentColor ? { backgroundColor: accentColor, opacity: 0.8 } : undefined}
               >
                 {tr.label}
               </button>
@@ -63,7 +72,7 @@ export function MicrocosmPriceChart() {
           </div>
         </div>
 
-        <div className="flex-1 min-h-[200px]">
+        <div className="h-[360px]">
           {loading ? (
             <div className="h-full bg-neutral-800 rounded animate-pulse" />
           ) : chartData.length === 0 ? (
@@ -74,9 +83,9 @@ export function MicrocosmPriceChart() {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="mcPriceGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
+                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={ac} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={ac} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#404040" />
@@ -108,9 +117,9 @@ export function MicrocosmPriceChart() {
                 <Area
                   type="monotone"
                   dataKey="price"
-                  stroke="#22d3ee"
+                  stroke={ac}
                   strokeWidth={2}
-                  fill="url(#mcPriceGradient)"
+                  fill={`url(#${gradientId})`}
                 />
               </AreaChart>
             </ResponsiveContainer>

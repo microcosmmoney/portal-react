@@ -1,15 +1,18 @@
-// Developed by AI Agent
 import React from 'react'
 import {
   microcosmMenuGroups,
   resolveMenuPath,
+  getMenuTitle,
+  getMenuDescription,
   type MicrocosmMenuGroup,
   type MicrocosmMenuItem,
+  type MenuLocale,
 } from '../menu-config'
 
 export interface MicrocosmMenuSectionProps {
   basePath?: string
   currentPath?: string
+  locale?: MenuLocale
   onNavigate?: (path: string) => void
   onItemClick?: (item: MicrocosmMenuItem, resolvedPath: string) => void
   groups?: MicrocosmMenuGroup[]
@@ -30,6 +33,7 @@ function isActive(itemPath: string, currentPath?: string): boolean {
 export function MicrocosmMenuSection({
   basePath,
   currentPath,
+  locale,
   onNavigate,
   onItemClick,
   groups = microcosmMenuGroups,
@@ -59,7 +63,7 @@ export function MicrocosmMenuSection({
           onItemClick?.(item, resolved)
           onNavigate?.(resolved)
         }}
-        title={item.description}
+        title={getMenuDescription(item, locale)}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -90,7 +94,7 @@ export function MicrocosmMenuSection({
         }}
       >
         <item.icon size={16} />
-        <span style={{ flex: 1 }}>{item.title}</span>
+        <span style={{ flex: 1 }}>{getMenuTitle(item, locale)}</span>
         {item.badge && (
           <span style={{
             fontSize: '10px',
@@ -135,7 +139,7 @@ export function MicrocosmMenuSection({
                 }}
               >
                 <group.icon size={14} />
-                <span>{group.title}</span>
+                <span>{getMenuTitle(group, locale)}</span>
               </div>
             )}
             {items.map(renderMenuItem)}
