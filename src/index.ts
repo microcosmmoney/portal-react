@@ -110,3 +110,6 @@ export type { MicrocosmOrganizationPageProps } from './components/organization/o
 
 export { MicrocosmVotingPage } from './components/voting/voting-page'
 export type { MicrocosmVotingPageProps } from './components/voting/voting-page'
+
+export { MicrocosmReincarnationPage } from './components/reincarnation/reincarnation-page'
+export type { MicrocosmReincarnationPageProps } from './components/reincarnation/reincarnation-page'
