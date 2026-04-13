@@ -1,8 +1,33 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { useMicrocosmApi } from '@microcosmmoney/auth-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useMicrocosmApi, useMicrocosmContext } from '@microcosmmoney/auth-react'
 import { TerminalCard } from '../terminal'
+
+const API_BASE = 'https://api.microcosm.money/v1'
+
+const cropToSquare = (file: File, size: number): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = size
+      canvas.height = size
+      const ctx = canvas.getContext('2d')
+      if (!ctx) { reject(new Error('Canvas not supported')); return }
+      const side = Math.min(img.width, img.height)
+      const sx = (img.width - side) / 2
+      const sy = (img.height - side) / 2
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size)
+      canvas.toBlob((blob) => {
+        if (!blob) { reject(new Error('Blob creation failed')); return }
+        resolve(new File([blob], file.name, { type: 'image/jpeg' }))
+      }, 'image/jpeg', 0.85)
+    }
+    img.onerror = () => reject(new Error('Image load failed'))
+    img.src = URL.createObjectURL(file)
+  })
+}
 
 type UnitType = 'station' | 'matrix' | 'sector' | 'system'
 
@@ -43,10 +68,12 @@ export interface MicrocosmStationListPageProps {
   basePath?: string
   onNavigate?: (path: string) => void
   currentUid?: string
+  isAdmin?: boolean
 }
 
-export function MicrocosmStationListPage({ currentUid }: MicrocosmStationListPageProps = {}) {
+export function MicrocosmStationListPage({ currentUid, isAdmin = false }: MicrocosmStationListPageProps = {}) {
   const api = useMicrocosmApi()
+  const { getAccessToken } = useMicrocosmContext()
   const [units, setUnits] = useState<Unit[]>([])
   const [summary, setSummary] = useState<UnitsSummary | null>(null)
   const [loading, setLoading] = useState(true)
@@ -57,6 +84,10 @@ export function MicrocosmStationListPage({ currentUid }: MicrocosmStationListPag
   const [editFormData, setEditFormData] = useState({ unit_name: '', description: '' })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadSummary = useCallback(async () => {
     try {
@@ -115,17 +146,79 @@ export function MicrocosmStationListPage({ currentUid }: MicrocosmStationListPag
   const openEditDialog = (unit: Unit) => {
     setEditingUnit(unit)
     setEditFormData({ unit_name: unit.unit_name, description: unit.description || '' })
+    setImageFile(null)
+    setImagePreview(null)
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) { setError('Please select an image file'); return }
+    if (file.size > 2 * 1024 * 1024) { setError('Image must be under 2MB'); return }
+    cropToSquare(file, 512)
+      .then(cropped => {
+        setImageFile(cropped)
+        const reader = new FileReader()
+        reader.onload = (ev) => setImagePreview(ev.target?.result as string)
+        reader.readAsDataURL(cropped)
+      })
+      .catch(() => setError('Image processing failed'))
+  }
+
+  const uploadImage = async (unitId: string): Promise<boolean> => {
+    if (!imageFile) return true
+    setUploadingImage(true)
+    try {
+      const token = await getAccessToken()
+      if (!token) throw new Error('Not authenticated')
+      const formData = new FormData()
+      formData.append('image', imageFile, imageFile.name)
+      const response = await fetch(`${API_BASE}/territories/${unitId}/image`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      })
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}))
+        throw new Error(err.detail || err.error || 'Image upload failed')
+      }
+      return true
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Image upload failed')
+      return false
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
+  const handleImageReview = async (unitId: string, status: 'approved' | 'rejected') => {
+    try {
+      await api.put(`/territories/${unitId}/image/review`, { status })
+      await loadUnits()
+      if (editingUnit && editingUnit.unit_id === unitId) {
+        setEditingUnit({ ...editingUnit, image_status: status })
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Review failed')
+    }
   }
 
   const handleEdit = async () => {
     if (!editingUnit || !editFormData.unit_name.trim()) return
     setSubmitting(true)
+    setError(null)
     try {
+      if (imageFile) {
+        const ok = await uploadImage(editingUnit.unit_id)
+        if (!ok) { setSubmitting(false); return }
+      }
       await api.put(`/territories/${editingUnit.unit_id}`, {
         unit_name: editFormData.unit_name,
         description: editFormData.description,
       })
       setEditingUnit(null)
+      setImageFile(null)
+      setImagePreview(null)
       await loadUnits()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to update unit')
@@ -258,8 +351,9 @@ export function MicrocosmStationListPage({ currentUid }: MicrocosmStationListPag
 
       {editingUnit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setEditingUnit(null)}>
-          <div className="bg-neutral-900 border border-neutral-700 rounded-lg w-full max-w-lg p-6 space-y-4" onClick={e => e.stopPropagation()}>
+          <div className="bg-neutral-900 border border-neutral-700 rounded-lg w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h3 className="text-white font-medium">Edit {editingUnit.unit_name}</h3>
+
             <div>
               <label className="text-xs text-neutral-400 tracking-wider block mb-1">Name</label>
               <input
@@ -269,6 +363,7 @@ export function MicrocosmStationListPage({ currentUid }: MicrocosmStationListPag
                 className="w-full bg-neutral-800 border border-neutral-600 text-white rounded px-3 py-2 text-sm"
               />
             </div>
+
             <div>
               <label className="text-xs text-neutral-400 tracking-wider block mb-1">Description</label>
               <textarea
@@ -278,22 +373,98 @@ export function MicrocosmStationListPage({ currentUid }: MicrocosmStationListPag
                 className="w-full bg-neutral-800 border border-neutral-600 text-white rounded px-3 py-2 text-sm"
               />
             </div>
-            <div className="text-xs text-neutral-500">
-              Note: image upload available on main portal only
+
+            <div>
+              <label className="text-xs text-neutral-400 tracking-wider block mb-1">Image</label>
+              <div className="flex items-start gap-3">
+                {(imagePreview || editingUnit.image_url) ? (
+                  <img
+                    src={imagePreview || editingUnit.image_url}
+                    alt=""
+                    className="w-24 h-24 rounded object-cover border border-neutral-700"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded bg-neutral-800 border border-neutral-700 flex items-center justify-center text-xs text-neutral-500">
+                    No image
+                  </div>
+                )}
+                <div className="flex-1 space-y-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingImage}
+                    className="w-full px-3 py-1.5 border border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white rounded text-sm"
+                  >
+                    {imageFile ? 'Change' : 'Select image'}
+                  </button>
+                  {imageFile && (
+                    <div className="text-xs text-neutral-500">
+                      {imageFile.name} ({(imageFile.size / 1024).toFixed(1)}KB)
+                    </div>
+                  )}
+                  {editingUnit.image_status && (
+                    <div
+                      className={`text-xs px-2 py-0.5 rounded inline-block ${
+                        editingUnit.image_status === 'approved'
+                          ? 'bg-green-900/30 text-green-400'
+                          : editingUnit.image_status === 'rejected'
+                          ? 'bg-red-900/30 text-red-400'
+                          : 'bg-yellow-900/30 text-yellow-400'
+                      }`}
+                    >
+                      {editingUnit.image_status}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-neutral-500 mt-2">
+                Max 2MB. Auto-cropped to square (512×512). JPG/PNG/WebP.
+              </p>
             </div>
-            <div className="flex gap-2">
+
+            {isAdmin && editingUnit.image_url && editingUnit.image_status === 'pending' && (
+              <div className="pt-3 border-t border-neutral-700 space-y-2">
+                <div className="text-xs text-cyan-400 tracking-wider">ADMIN REVIEW</div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleImageReview(editingUnit.unit_id, 'approved')}
+                    className="flex-1 px-3 py-1.5 bg-green-900/30 text-green-400 hover:bg-green-900/50 border border-green-800 rounded text-sm"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleImageReview(editingUnit.unit_id, 'rejected')}
+                    className="flex-1 px-3 py-1.5 bg-red-900/30 text-red-400 hover:bg-red-900/50 border border-red-800 rounded text-sm"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-2">
               <button
-                onClick={() => setEditingUnit(null)}
+                onClick={() => {
+                  setEditingUnit(null)
+                  setImageFile(null)
+                  setImagePreview(null)
+                }}
                 className="flex-1 px-3 py-2 border border-neutral-700 text-neutral-400 hover:bg-neutral-800 rounded text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={handleEdit}
-                disabled={submitting || !editFormData.unit_name.trim()}
+                disabled={submitting || uploadingImage || !editFormData.unit_name.trim()}
                 className="flex-1 px-3 py-2 bg-cyan-700 hover:bg-cyan-600 text-white rounded text-sm disabled:opacity-50"
               >
-                {submitting ? 'Saving...' : 'Save'}
+                {uploadingImage ? 'Uploading...' : submitting ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>

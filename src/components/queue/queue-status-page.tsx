@@ -17,6 +17,19 @@ interface UserQueueStatus {
   joined_at?: string
 }
 
+interface AdminQueueStatus {
+  pending_count?: number
+  processing_count?: number
+  total_in_queue?: number
+  oldest_pending?: string
+}
+
+interface ExpansionCheckResult {
+  needs_expansion?: boolean
+  reason?: string
+  current_stats?: Record<string, any>
+}
+
 const LEVEL_LABELS: Record<string, string> = {
   miner: 'Miner',
   commander: 'Commander',
@@ -28,11 +41,14 @@ const LEVEL_LABELS: Record<string, string> = {
 export interface MicrocosmQueueStatusPageProps {
   basePath?: string
   onNavigate?: (path: string) => void
+  isAdmin?: boolean
 }
 
-export function MicrocosmQueueStatusPage({}: MicrocosmQueueStatusPageProps = {}) {
+export function MicrocosmQueueStatusPage({ isAdmin = false }: MicrocosmQueueStatusPageProps = {}) {
   const api = useMicrocosmApi()
   const [userQueue, setUserQueue] = useState<UserQueueStatus | null>(null)
+  const [adminQueue, setAdminQueue] = useState<AdminQueueStatus | null>(null)
+  const [expansion, setExpansion] = useState<ExpansionCheckResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [showJoinConfirm, setShowJoinConfirm] = useState(false)
@@ -50,7 +66,41 @@ export function MicrocosmQueueStatusPage({}: MicrocosmQueueStatusPageProps = {})
     } finally {
       setLoading(false)
     }
-  }, [api])
+    if (isAdmin) {
+      try {
+        const adminRes = await api.get<any>('/territories/queue/admin')
+        setAdminQueue(adminRes?.data ?? adminRes)
+      } catch {}
+      try {
+        const expRes = await api.get<any>('/territories/expansion/check')
+        setExpansion(expRes?.data ?? expRes)
+      } catch {}
+    }
+  }, [api, isAdmin])
+
+  const handleProcessQueue = async () => {
+    setSubmitting(true)
+    try {
+      await api.post('/territories/queue/process', { batch_size: 50 })
+      await loadStatus()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to process queue')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleTriggerExpansion = async () => {
+    setSubmitting(true)
+    try {
+      await api.post('/territories/expansion/trigger', {})
+      await loadStatus()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to trigger expansion')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   useEffect(() => { loadStatus() }, [loadStatus])
 
@@ -206,6 +256,60 @@ export function MicrocosmQueueStatusPage({}: MicrocosmQueueStatusPageProps = {})
           </div>
         )}
       </TerminalCard>
+
+      {isAdmin && adminQueue && (
+        <TerminalCard title="Queue Management (Admin)">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div className="bg-neutral-950 rounded p-4 text-center border border-neutral-800">
+              <p className="text-3xl font-bold text-white">{adminQueue.pending_count ?? 0}</p>
+              <p className="text-xs text-neutral-400 mt-1">Pending</p>
+            </div>
+            <div className="bg-neutral-950 rounded p-4 text-center border border-neutral-800">
+              <p className="text-3xl font-bold text-white">{adminQueue.processing_count ?? 0}</p>
+              <p className="text-xs text-neutral-400 mt-1">Processing</p>
+            </div>
+            <div className="bg-neutral-950 rounded p-4 text-center border border-neutral-800">
+              <p className="text-3xl font-bold text-white">{adminQueue.total_in_queue ?? 0}</p>
+              <p className="text-xs text-neutral-400 mt-1">Total in queue</p>
+            </div>
+            <div className="bg-neutral-950 rounded p-4 text-center border border-neutral-800">
+              <p className="text-sm text-white">
+                {adminQueue.oldest_pending ? new Date(adminQueue.oldest_pending).toLocaleString() : '-'}
+              </p>
+              <p className="text-xs text-neutral-400 mt-1">Oldest pending</p>
+            </div>
+          </div>
+          <button
+            onClick={handleProcessQueue}
+            disabled={submitting}
+            className="w-full px-4 py-2 bg-cyan-700 hover:bg-cyan-600 text-white rounded text-sm disabled:opacity-50"
+          >
+            {submitting ? 'Processing...' : 'Process Queue (batch 50)'}
+          </button>
+        </TerminalCard>
+      )}
+
+      {isAdmin && expansion && (
+        <TerminalCard title="Station Expansion (Admin)">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <div className="text-sm text-neutral-300">
+                Needs expansion: {expansion.needs_expansion ? 'YES' : 'NO'}
+              </div>
+              {expansion.reason && (
+                <div className="text-xs text-neutral-500 mt-1">Reason: {expansion.reason}</div>
+              )}
+            </div>
+            <button
+              onClick={handleTriggerExpansion}
+              disabled={submitting || !expansion.needs_expansion}
+              className="px-4 py-2 bg-red-900/30 text-red-300 border border-red-800 hover:bg-red-900/50 rounded text-sm disabled:opacity-50"
+            >
+              {submitting ? 'Expanding...' : 'Trigger Expansion'}
+            </button>
+          </div>
+        </TerminalCard>
+      )}
 
       {showJoinConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowJoinConfirm(false)}>

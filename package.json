@@ -1,6 +1,6 @@
 {
   "name": "@microcosmmoney/portal-react",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "description": "Microcosm Portal UI components for React/Next.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
