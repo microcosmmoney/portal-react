@@ -1,6 +1,6 @@
 'use client'
 
-import { useMCC, useMCD, useUserLevel, useWallets, useMCCLocks, useMarketData } from '@microcosmmoney/auth-react'
+import { useMCC, useMCD, useLevelProgress, useWallets, useMCCLocks, useMarketData } from '@microcosmmoney/auth-react'
 
 export interface MicrocosmAssetsSummaryProps {
   basePath?: string
@@ -16,7 +16,7 @@ const RANK_COLOR: Record<string, string> = {
 export function MicrocosmAssetsSummary({ basePath = '', onNavigate, accentColor }: MicrocosmAssetsSummaryProps) {
   const { balance: mccData, loading: mccLoading } = useMCC(120_000)
   const { balance: mcdData, loading: mcdLoading } = useMCD(120_000)
-  const { data: levelData } = useUserLevel()
+  const { data: levelData } = useLevelProgress()
   const { data: wallets } = useWallets()
   const { data: locks } = useMCCLocks()
   const { data: marketData } = useMarketData()
@@ -34,7 +34,7 @@ export function MicrocosmAssetsSummary({ basePath = '', onNavigate, accentColor 
   const lockedAmount = activeLocks.reduce((sum: number, l: any) => sum + (l.amount || 0), 0)
   const rank = levelData?.level ?? null
   const nextRank = (levelData as any)?.next_level ?? null
-  const progress = (levelData as any)?.upgrade_progress?.percentage ?? 0
+  const progress = levelData?.progress_percent ?? 0
 
   const fmt = (n: number, d = 2) => n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })
 

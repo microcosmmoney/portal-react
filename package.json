@@ -1,6 +1,6 @@
 {
   "name": "@microcosmmoney/portal-react",
-  "version": "3.4.1",
+  "version": "3.5.0",
   "description": "Microcosm Portal UI components for React/Next.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,8 +18,8 @@
     "lucide-react": ">=0.300.0"
   },
   "dependencies": {
-    "@microcosmmoney/auth-core": "^2.3.1",
-    "@microcosmmoney/auth-react": "^2.3.1"
+    "@microcosmmoney/auth-core": "^2.3.2",
+    "@microcosmmoney/auth-react": "^2.3.2"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

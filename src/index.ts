@@ -1,6 +1,9 @@
 export { MicrocosmMenuSection } from './components/menu-section'
 export type { MicrocosmMenuSectionProps } from './components/menu-section'
 
+export { LinkProvider, useLinkComponent } from './link-context'
+export type { LinkProps, LinkComponent } from './link-context'
+
 export {
   blockchainMenu,
   web3OsMenu,

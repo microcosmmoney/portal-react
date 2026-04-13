@@ -1,6 +1,6 @@
 'use client'
 
-import { useUserLevel, useTechBonusDetail, useMiningStats } from '@microcosmmoney/auth-react'
+import { useLevelProgress, useTechBonusDetail, useMiningStats } from '@microcosmmoney/auth-react'
 
 const RANK_LABELS: Record<string, string> = {
   Miner: 'Miner \u77ff\u5de5',
@@ -71,15 +71,16 @@ export interface MicrocosmMiningWeightProps {
 }
 
 export function MicrocosmMiningWeight({ accentColor }: MicrocosmMiningWeightProps = {}) {
-  const { data, loading: loadingLevel } = useUserLevel()
+  const { data, loading: loadingLevel } = useLevelProgress()
   const { data: techBonus, loading: loadingTech } = useTechBonusDetail()
   const { data: miningStats, loading: loadingMining } = useMiningStats()
 
   const loading = loadingLevel || loadingTech || loadingMining
   const ac = accentColor || '#22d3ee'
 
-  const rank = data?.level ?? null
-  const miningDays = (data as any)?.upgrade_progress?.current_days ?? (miningStats as any)?.active_days_30d ?? 0
+  const rank = data?.current_rank?.toLowerCase() ?? null
+  const totalHoldings = data ? (data.holdings.station + data.holdings.matrix + data.holdings.sector + data.holdings.system) : 0
+  const miningDays = totalHoldings > 0 ? totalHoldings : ((miningStats as any)?.active_days_30d ?? 0)
   const companionYield = getCompanionYield(rank)
 
   const bonusMultiplier = (techBonus as any)?.bonus_multiplier ?? 0
