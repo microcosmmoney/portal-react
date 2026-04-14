@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback, useRef, useId } from 'react'
+import { useTranslations } from '../../i18n-context'
 import {
   useTerritories,
   useTerritorySummary,
@@ -732,6 +733,7 @@ export interface MicrocosmTerritoryPageProps {
 /* ------------------------------------------------------------------ */
 
 export function MicrocosmTerritoryPage({ basePath = '', onNavigate }: MicrocosmTerritoryPageProps) {
+  const t = useTranslations('territoryDash')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [filterType, setFilterType] = useState<UnitType | 'all'>('all')
   const [searchTerm, setSearchTerm] = useState('')
@@ -796,8 +798,8 @@ export function MicrocosmTerritoryPage({ basePath = '', onNavigate }: MicrocosmT
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Territory Management</h1>
-        <p className="text-neutral-400 text-sm mt-1">Manage territories, view KPI and vault balances</p>
+        <h1 className="text-2xl font-bold text-white">{t('title', 'Territory Management')}</h1>
+        <p className="text-neutral-400 text-sm mt-1">{t('subtitle', 'Manage territories, view KPI and vault balances')}</p>
       </div>
 
       {/* Stats bar - 4 columns */}
@@ -828,7 +830,7 @@ export function MicrocosmTerritoryPage({ basePath = '', onNavigate }: MicrocosmT
             <IconSearch className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
             <input
               type="text"
-              placeholder="Search territories..."
+              placeholder={t('searchPlaceholder', 'Search territories...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-white text-sm placeholder:text-neutral-500 outline-none focus:border-cyan-400/50 transition-colors"
@@ -863,9 +865,9 @@ export function MicrocosmTerritoryPage({ basePath = '', onNavigate }: MicrocosmT
         <div className="bg-neutral-900 border border-neutral-700 rounded-lg hover:border-cyan-400/50 transition-colors">
           <div className="p-12 text-center">
             <IconImage className="w-12 h-12 mx-auto mb-4 text-neutral-600" />
-            <p className="text-neutral-400">No territories found</p>
+            <p className="text-neutral-400">{t('nftNotFound', 'No territories found')}</p>
             {searchTerm && (
-              <p className="text-xs text-neutral-500 mt-1">Try adjusting your search or filter criteria</p>
+              <p className="text-xs text-neutral-500 mt-1">{t('searchHint', 'Try adjusting your search or filter criteria')}</p>
             )}
           </div>
         </div>

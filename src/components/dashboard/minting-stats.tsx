@@ -1,12 +1,14 @@
 'use client'
 
 import { useMCCStats, useMCCPrice } from '@microcosmmoney/auth-react'
+import { useTranslations } from '../../i18n-context'
 
 export interface MicrocosmMintingStatsProps {
   accentColor?: string
 }
 
 export function MicrocosmMintingStats({ accentColor }: MicrocosmMintingStatsProps = {}) {
+  const t = useTranslations('mccDashboard')
   const { data: mccStats, loading } = useMCCStats()
   const { data: mccPriceData } = useMCCPrice()
 
@@ -34,31 +36,31 @@ export function MicrocosmMintingStats({ accentColor }: MicrocosmMintingStatsProp
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <span className={accentColor ? '' : 'text-cyan-400'} style={accentColor ? { color: accentColor } : undefined}>⚡</span>
-              <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">MINTING_STATS</span>
+              <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">{t('mintingStats', 'MINTING_STATS')}</span>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
-                <div className="text-xs text-[#5EEAD4] font-mono tracking-widest uppercase mb-1">total_minted</div>
+                <div className="text-xs text-[#5EEAD4] font-mono tracking-widest uppercase mb-1">{t('totalMinted', 'total_minted')}</div>
                 <div className="text-xl font-bold font-mono text-white">
                   {totalMinted > 0 ? fmt(totalMinted) : '0'} MCC
                 </div>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
-                <div className="text-xs text-[#5EEAD4] font-mono tracking-widest uppercase mb-1">mining_price</div>
+                <div className="text-xs text-[#5EEAD4] font-mono tracking-widest uppercase mb-1">{t('miningPrice', 'mining_price')}</div>
                 <div className={accentColor ? 'text-xl font-bold font-mono' : 'text-xl font-bold font-mono text-cyan-400'} style={accentColor ? { color: accentColor } : undefined}>
                   ${miningPrice > 0 ? miningPrice.toFixed(4) : '--'}
                 </div>
-                <div className="text-[10px] text-neutral-500 font-mono">base × 4</div>
+                <div className="text-[10px] text-neutral-500 font-mono">{t('baseTimes4', 'base × 4')}</div>
               </div>
             </div>
 
             <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
               <div className="flex justify-between items-center mb-2 text-sm font-mono">
-                <span className="text-neutral-400">next_halving</span>
+                <span className="text-neutral-400">{t('nextHalving', 'next_halving')}</span>
                 <span className="text-white">
                   {nextHalving > totalMinted
                     ? (nextHalving - totalMinted).toLocaleString('en-US', { maximumFractionDigits: 0 })
-                    : 'N/A'
+                    : t('na', 'N/A')
                   } MCC
                 </span>
               </div>
@@ -72,8 +74,8 @@ export function MicrocosmMintingStats({ accentColor }: MicrocosmMintingStatsProp
                 />
               </div>
               <div className="flex justify-between items-center mt-2 text-xs text-neutral-500 font-mono">
-                <span>phase: {currentStage} | rate: {miningRate > 0 ? `${miningRate}:1` : '--'}</span>
-                <span>threshold: {(nextHalving / 1e6).toFixed(0)}M</span>
+                <span>{t('phase', 'phase')}: {currentStage} | {t('rate', 'rate')}: {miningRate > 0 ? `${miningRate}:1` : '--'}</span>
+                <span>{t('threshold', 'threshold')}: {(nextHalving / 1e6).toFixed(0)}M</span>
               </div>
             </div>
           </div>

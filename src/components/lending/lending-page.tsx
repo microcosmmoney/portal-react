@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from '../../i18n-context'
+
 export interface MicrocosmLendingPageProps {
   onNavigate?: (path: string) => void
 }
@@ -48,23 +50,24 @@ const COLLATERAL_TYPES = [
 ]
 
 export function MicrocosmLendingPage({ onNavigate }: MicrocosmLendingPageProps) {
+  const t = useTranslations('lendingDash')
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6 font-mono">
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-wider">NFT Collateral Lending</h1>
-        <p className="text-sm text-neutral-400">Borrow MCC using territory NFTs as collateral</p>
+        <h1 className="text-2xl font-bold text-white tracking-wider">{t('title', 'NFT Collateral Lending')}</h1>
+        <p className="text-sm text-neutral-400">{t('subtitle', 'Borrow MCC using territory NFTs as collateral')}</p>
       </div>
 
       <div className="bg-neutral-900 border border-neutral-700 rounded-lg">
         <div className="p-6">
           <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
             <IconWallet className="w-4 h-4" />
-            <span className="tracking-wider">MY_DEPOSITS</span>
+            <span className="tracking-wider">{t('myDeposits', 'My Deposits')}</span>
           </div>
           <div className="text-center py-8 text-neutral-500">
             <IconWallet className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>No deposits yet</p>
-            <p className="text-sm mt-1">Deposit MCC to earn interest from the lending pool</p>
+            <p>{t('noDeposits', 'No deposits')}</p>
+            <p className="text-sm mt-1">{t('noDepositsHint', 'Deposit MCC to earn interest')}</p>
           </div>
         </div>
       </div>
@@ -73,12 +76,12 @@ export function MicrocosmLendingPage({ onNavigate }: MicrocosmLendingPageProps) 
         <div className="p-6">
           <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
             <IconCreditCard className="w-4 h-4" />
-            <span className="tracking-wider">MY_LOANS</span>
+            <span className="tracking-wider">{t('myLoans', 'My Loans')}</span>
           </div>
           <div className="text-center py-8 text-neutral-500">
             <IconCreditCard className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>No active loans</p>
-            <p className="text-sm mt-1">Borrow MCC by staking your Territory NFTs as collateral</p>
+            <p>{t('noLoans', 'No loans')}</p>
+            <p className="text-sm mt-1">{t('noLoansHint', 'Collateralize territory NFTs to borrow MCC')}</p>
           </div>
         </div>
       </div>
@@ -87,28 +90,28 @@ export function MicrocosmLendingPage({ onNavigate }: MicrocosmLendingPageProps) 
         <div className="p-6">
           <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
             <IconInfo className="w-4 h-4" />
-            <span className="tracking-wider">PROTOCOL_INFO</span>
+            <span className="tracking-wider">{t('protocolInfo', 'Protocol Info')}</span>
           </div>
           <div className="space-y-4 text-sm">
             <div className="p-4 bg-neutral-800 rounded">
-              <div className="font-medium text-white mb-2">Loan Rules</div>
+              <div className="font-medium text-white mb-2">{t('loanRules', 'Loan Rules')}</div>
               <ul className="list-disc list-inside space-y-1 text-neutral-400">
-                <li>Collateral: Territory NFTs (Station, Matrix, Sector, System)</li>
-                <li>LTV: Up to 100% of NFT valuation</li>
-                <li>Interest: Variable rate based on pool utilization</li>
-                <li>Repayment: Monthly payments required to maintain the loan</li>
+                <li>{t('loanRule2', 'Collateral: Territory NFTs (Station/Matrix/Sector/System)')}</li>
+                <li>{t('loanRule1', 'LTV (Loan-to-Value): Maximum 100%')}</li>
+                <li>{t('loanRule3', 'Loan Asset: MCC Token')}</li>
+                <li>{t('loanRule4', 'Repayment Cycle: 30 days')}</li>
               </ul>
             </div>
             <div className="p-4 bg-neutral-800 rounded">
-              <div className="font-medium text-white mb-2">Liquidation Rules</div>
+              <div className="font-medium text-white mb-2">{t('liquidationRules', 'Liquidation Rules')}</div>
               <ul className="list-disc list-inside space-y-1 text-neutral-400">
-                <li>3 consecutive missed payments trigger liquidation</li>
-                <li>NFT collateral is seized and auctioned</li>
-                <li>Remaining funds returned to borrower after debt settlement</li>
+                <li>{t('liquidationRule1', '3 consecutive missed payments triggers liquidation')}</li>
+                <li>{t('liquidationRule2', 'Collateral NFT will be seized upon liquidation')}</li>
+                <li>{t('liquidationRule3', 'Loan is automatically closed after liquidation')}</li>
               </ul>
             </div>
             <div className="p-4 bg-neutral-800 rounded">
-              <div className="font-medium text-white mb-2">NFT Valuation</div>
+              <div className="font-medium text-white mb-2">{t('nftValuation', 'NFT Valuation')}</div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                 {COLLATERAL_TYPES.map(ct => (
                   <div key={ct.label} className="text-center">

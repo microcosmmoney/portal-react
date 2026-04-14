@@ -12,6 +12,7 @@ import { MicrocosmEcosystemStats } from './ecosystem-stats'
 import { MicrocosmMCCTokenStats } from './mcc-token-stats'
 import { MicrocosmMCDStats } from './mcd-stats'
 import { MicrocosmLockPeriods } from './lock-periods'
+import { useTranslations } from '../../i18n-context'
 
 class SafeRender extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false }
@@ -71,9 +72,11 @@ export function MicrocosmDashboardOverview({
   basePath = '',
   onNavigate,
   showHeader = true,
-  headerText = 'SHARED NETWORK · SHARED FUTURE',
+  headerText,
   accentColor,
 }: MicrocosmDashboardOverviewProps) {
+  const t = useTranslations('mccDashboard')
+  const resolvedHeader = headerText ?? t('headerText', 'SHARED NETWORK · SHARED FUTURE')
   const rootStyle = accentColor
     ? { '--mc-accent': accentColor, '--mc-accent-rgb': hexToRgb(accentColor) } as React.CSSProperties
     : undefined
@@ -87,7 +90,7 @@ export function MicrocosmDashboardOverview({
             className={accentColor ? 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight' : 'text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-cyan-200'}
             style={accentColor ? { backgroundImage: `linear-gradient(to right, ${accentColor}, ${accentColor}cc)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' } : undefined}
           >
-            {headerText}
+            {resolvedHeader}
           </h1>
         </div>
       )}

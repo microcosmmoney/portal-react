@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import { useEmailVerification } from '@microcosmmoney/auth-react'
 import { TerminalCard } from '../terminal'
+import { useTranslations } from '../../i18n-context'
 
 export interface MicrocosmEmailChangeCardProps {
   onSuccess?: (newEmail: string) => void
 }
 
 export function MicrocosmEmailChangeCard({ onSuccess }: MicrocosmEmailChangeCardProps = {}) {
+  const t = useTranslations('profile')
   const { requestEmailChange, verifyEmailChange, loading, error, clearError } = useEmailVerification()
   const [step, setStep] = useState<'idle' | 'form' | 'verify'>('idle')
   const [newEmail, setNewEmail] = useState('')
@@ -42,16 +44,16 @@ export function MicrocosmEmailChangeCard({ onSuccess }: MicrocosmEmailChangeCard
     return (
       <TerminalCard>
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-sm text-neutral-300 font-medium tracking-wider">CHANGE EMAIL</span>
+          <span className="text-sm text-neutral-300 font-medium tracking-wider">{t('changeEmail', 'CHANGE EMAIL')}</span>
         </div>
         <p className="text-xs text-neutral-400 mb-3">
-          Update your email address. A verification code will be sent to the new email.
+          {t('changeEmailDesc', 'Update your email address. A verification code will be sent to the new email.')}
         </p>
         <button
           onClick={() => setStep('form')}
           className="px-3 py-1.5 border border-neutral-700 text-neutral-300 hover:bg-neutral-800 rounded text-xs"
         >
-          Change Email
+          {t('changeEmailBtn', 'Change Email')}
         </button>
       </TerminalCard>
     )
@@ -61,7 +63,7 @@ export function MicrocosmEmailChangeCard({ onSuccess }: MicrocosmEmailChangeCard
     <TerminalCard>
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-neutral-300 font-medium tracking-wider">CHANGE EMAIL</span>
+          <span className="text-sm text-neutral-300 font-medium tracking-wider">{t('changeEmail', 'CHANGE EMAIL')}</span>
         </div>
 
         {error && (
@@ -74,14 +76,14 @@ export function MicrocosmEmailChangeCard({ onSuccess }: MicrocosmEmailChangeCard
               type="email"
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
-              placeholder="New email address"
+              placeholder={t('newEmailPlaceholder', 'New email address')}
               className="w-full bg-neutral-800 border border-neutral-700 text-white p-2 rounded text-sm outline-none focus:border-cyan-500"
             />
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Current password"
+              placeholder={t('currentPasswordPlaceholder', 'Current password')}
               className="w-full bg-neutral-800 border border-neutral-700 text-white p-2 rounded text-sm outline-none focus:border-cyan-500"
             />
             <div className="flex gap-2">
@@ -94,14 +96,14 @@ export function MicrocosmEmailChangeCard({ onSuccess }: MicrocosmEmailChangeCard
                 }}
                 className="flex-1 px-3 py-1.5 text-neutral-500 hover:text-neutral-300 text-xs"
               >
-                Cancel
+                {t('cancel', 'Cancel')}
               </button>
               <button
                 onClick={handleRequest}
                 disabled={loading || !newEmail || !password}
                 className="flex-1 px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white rounded text-xs disabled:opacity-50"
               >
-                {loading ? 'Sending...' : 'Send Code'}
+                {loading ? t('sending', 'Sending...') : t('sendCode', 'Send Code')}
               </button>
             </div>
           </>
@@ -110,7 +112,7 @@ export function MicrocosmEmailChangeCard({ onSuccess }: MicrocosmEmailChangeCard
         {step === 'verify' && (
           <>
             <p className="text-xs text-neutral-400">
-              Enter the 6-digit code sent to <span className="text-cyan-400">{newEmail}</span>
+              {t('enterCodeSentTo', 'Enter the 6-digit code sent to')} <span className="text-cyan-400">{newEmail}</span>
             </p>
             <input
               type="text"
@@ -125,14 +127,14 @@ export function MicrocosmEmailChangeCard({ onSuccess }: MicrocosmEmailChangeCard
                 onClick={() => { setStep('form'); setCode(''); clearError() }}
                 className="flex-1 px-3 py-1.5 text-neutral-500 hover:text-neutral-300 text-xs"
               >
-                Back
+                {t('back', 'Back')}
               </button>
               <button
                 onClick={handleVerify}
                 disabled={loading || code.length !== 6}
                 className="flex-1 px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white rounded text-xs disabled:opacity-50"
               >
-                {loading ? 'Verifying...' : 'Verify'}
+                {loading ? t('verifying', 'Verifying...') : t('verify', 'Verify')}
               </button>
             </div>
           </>

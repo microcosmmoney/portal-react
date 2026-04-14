@@ -1,6 +1,7 @@
 'use client'
 
 import { useMCDStats } from '@microcosmmoney/auth-react'
+import { useTranslations } from '../../i18n-context'
 
 /* Inline SVG icons (16x16, stroke-based) */
 const IconUsers = ({ stroke = '#22d3ee' }: { stroke?: string }) => (
@@ -51,14 +52,15 @@ export interface MicrocosmMCDStatsProps {
 }
 
 export function MicrocosmMCDStats({ accentColor }: MicrocosmMCDStatsProps = {}) {
+  const t = useTranslations('mccDashboard')
   const { data, loading } = useMCDStats()
   const ac = accentColor || '#22d3ee'
 
   const stats = [
-    { label: 'holders', value: (data as any)?.holders_count ?? (data as any)?.holder_count, format: (v: number) => v.toLocaleString(), icon: IconUsers },
-    { label: 'active_vaults', value: (data as any)?.total_vaults ?? (data as any)?.active_vaults, format: (v: number) => v.toLocaleString(), icon: IconVault },
-    { label: 'daily_distribution', value: (data as any)?.daily_distribution, format: (v: number) => v > 0 ? v.toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0', icon: IconArrowDown },
-    { label: 'total_vault_balance', value: (data as any)?.total_vault_balance, format: (v: number) => v > 0 ? `${(v / 1e6).toFixed(2)}M` : '0', icon: IconWallet },
+    { label: t('holders', 'holders'), value: (data as any)?.holders_count ?? (data as any)?.holder_count, format: (v: number) => v.toLocaleString(), icon: IconUsers },
+    { label: t('activeVaults', 'active_vaults'), value: (data as any)?.total_vaults ?? (data as any)?.active_vaults, format: (v: number) => v.toLocaleString(), icon: IconVault },
+    { label: t('dailyDistribution', 'daily_distribution'), value: (data as any)?.daily_distribution, format: (v: number) => v > 0 ? v.toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0', icon: IconArrowDown },
+    { label: t('totalVaultBalance', 'total_vault_balance'), value: (data as any)?.total_vault_balance, format: (v: number) => v > 0 ? `${(v / 1e6).toFixed(2)}M` : '0', icon: IconWallet },
   ]
 
   const spinnerBorderColor = accentColor ? { borderColor: accentColor, borderTopColor: 'transparent' } : undefined
@@ -69,7 +71,7 @@ export function MicrocosmMCDStats({ accentColor }: MicrocosmMCDStatsProps = {}) 
       <div className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <IconBanknote stroke="#5EEAD4" />
-          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">MCD_STATS</span>
+          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">{t('mcdStats', 'MCD_STATS')}</span>
         </div>
 
         {loading ? (

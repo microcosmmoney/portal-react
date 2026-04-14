@@ -1,6 +1,7 @@
 'use client'
 
 import { useMCCLocks } from '@microcosmmoney/auth-react'
+import { useTranslations } from '../../i18n-context'
 
 function formatDateTime(dt: string | number): string {
   const d = new Date(dt)
@@ -21,6 +22,7 @@ export interface MicrocosmLockPeriodsProps {
 }
 
 export function MicrocosmLockPeriods({ accentColor }: MicrocosmLockPeriodsProps = {}) {
+  const t = useTranslations('mccDashboard')
   const { data } = useMCCLocks()
 
   const raw = data as any
@@ -49,12 +51,12 @@ export function MicrocosmLockPeriods({ accentColor }: MicrocosmLockPeriodsProps 
                   className={accentColor ? 'px-2 py-0.5 text-xs font-mono rounded' : 'px-2 py-0.5 bg-cyan-400/20 text-cyan-400 text-xs font-mono rounded'}
                   style={accentColor ? { backgroundColor: `${accentColor}33`, color: accentColor } : undefined}
                 >
-                  LOCKED
+                  {t('lockedStatus', 'LOCKED')}
                 </span>
               </div>
               <div className="text-xs text-neutral-500 space-y-1 font-mono">
-                <div>unlock_at: {formatDateTime(lock.lock_end)}</div>
-                <div>remaining: <span className={accentColor ? '' : 'text-cyan-400'} style={accentColor ? { color: accentColor } : undefined}>{daysRemaining(lock.lock_end)}</span></div>
+                <div>{t('unlockAt', 'unlock_at')}: {formatDateTime(lock.lock_end)}</div>
+                <div>{t('remaining', 'remaining')}: <span className={accentColor ? '' : 'text-cyan-400'} style={accentColor ? { color: accentColor } : undefined}>{daysRemaining(lock.lock_end)}</span></div>
               </div>
             </div>
           ))}

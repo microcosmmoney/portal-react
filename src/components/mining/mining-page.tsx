@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useMiningStats, useMiningRecords, useMCCStats, useMarketData, useMCCPrice, useEcosystemOperations, useMCC, useWallets, useMiningFlow } from '@microcosmmoney/auth-react'
+import { useTranslations } from '../../i18n-context'
 
 /* ─── Inline SVG Icons (lucide style, 24x24 viewBox) ─── */
 
@@ -117,6 +118,7 @@ export interface MicrocosmMiningPageProps {
 /* ─── Component ─── */
 
 export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMiningPageProps) {
+  const t = useTranslations('miningDash')
   const { data: stats, loading: statsLoading } = useMiningStats()
   const [recordsPage, setRecordsPage] = useState(1)
   const RECORDS_PAGE_SIZE = 10
@@ -189,12 +191,12 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
     return (
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-wider">Mining</h1>
-          <p className="text-sm text-neutral-400 mt-1">MCC minting via X402 protocol</p>
+          <h1 className="text-2xl font-bold text-white tracking-wider">{t('title', 'Mining')}</h1>
+          <p className="text-sm text-neutral-400 mt-1">{t('subtitle', 'MCC minting via X402 protocol')}</p>
         </div>
         <div className="flex items-center justify-center py-12">
           <Spinner className="mr-3" />
-          <span className="text-neutral-400 text-sm">Loading mining data...</span>
+          <span className="text-neutral-400 text-sm">{t('loadingMintData', 'Loading mining data...')}</span>
         </div>
       </div>
     )
@@ -206,15 +208,15 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-wider">Mining</h1>
-          <p className="text-sm text-neutral-400 mt-1">MCC minting via X402 protocol</p>
+          <h1 className="text-2xl font-bold text-white tracking-wider">{t('title', 'Mining')}</h1>
+          <p className="text-sm text-neutral-400 mt-1">{t('subtitle', 'MCC minting via X402 protocol')}</p>
         </div>
         <button
           onClick={() => refreshRecords()}
           className="inline-flex items-center gap-2 px-3 py-1.5 text-sm border border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent rounded-md transition-colors"
         >
           <IconRefresh className={mccStatsLoading ? 'animate-spin' : ''} />
-          Refresh
+          {t('refresh', 'Refresh')}
         </button>
       </div>
 
@@ -224,7 +226,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
           <div className="space-y-3">
             {/* Badges */}
             <div className="flex items-center gap-3">
-              <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-medium">X402 Protocol</span>
+              <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded font-medium">{t('x402Protocol', 'X402 Protocol')}</span>
               <span className="text-xs bg-cyan-400/20 text-cyan-400 px-2 py-0.5 rounded font-medium">Solana Mainnet</span>
             </div>
 
@@ -245,11 +247,11 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
             <div className="flex items-start gap-4 text-xs text-neutral-500">
               <div className="flex items-center gap-1.5">
                 <IconShield className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0" />
-                <span>Stablecoin direct payment</span>
+                <span>{t('stablecoinDirectDesc', 'Stablecoin direct payment')}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <IconZap className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0" />
-                <span>Instant on-chain minting</span>
+                <span>{t('instantMintDesc', 'Instant on-chain minting')}</span>
               </div>
             </div>
           </div>
@@ -261,7 +263,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
             className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-medium bg-cyan-700 hover:bg-cyan-600 text-white rounded-md whitespace-nowrap flex-shrink-0 disabled:opacity-50 transition-colors"
           >
             <IconZap className="w-5 h-5" />
-            {miningLoading ? 'Processing...' : 'Start Minting'}
+            {miningLoading ? t('processing', 'Processing...') : t('startMinting', 'Start Minting')}
           </button>
         </div>
 
@@ -317,23 +319,23 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <IconWallet className="text-white" />
-            <span className="text-sm text-neutral-300 tracking-wider font-medium">On-Chain Balance</span>
+            <span className="text-sm text-neutral-300 tracking-wider font-medium">{t('onChainBalance', 'On-Chain Balance')}</span>
             {walletList.length > 0 && (
               <span className="inline-flex items-center gap-1 text-xs bg-white/20 text-white px-1.5 py-0.5 rounded">
                 <IconCheckCircle />
-                {walletList.length} wallet{walletList.length !== 1 ? 's' : ''}
+                {walletList.length} {t('walletsCount', 'wallets')}
               </span>
             )}
           </div>
         </div>
         <p className="text-neutral-500 text-xs mb-4">
-          Real-time on-chain MCC balance across all bound wallets
+          {t('onChainBalanceDesc', 'Real-time on-chain MCC balance across all bound wallets')}
         </p>
 
         {walletsLoading && walletList.length === 0 ? (
           <div className="flex items-center justify-center py-8">
             <Spinner className="mr-2" />
-            <span className="text-neutral-400 text-sm">Loading on-chain balance...</span>
+            <span className="text-neutral-400 text-sm">{t('loadingOnChainBalance', 'Loading on-chain balance...')}</span>
           </div>
         ) : walletList.length === 0 ? (
           /* Fallback: show aggregate balance from useMCC */
@@ -352,7 +354,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
                 <div className="text-2xl font-bold font-mono text-white">
                   {fmt(totalBalance)} MCC
                 </div>
-                <div className="text-neutral-500 text-xs mt-1">{walletList.length} wallet{walletList.length !== 1 ? 's' : ''} total</div>
+                <div className="text-neutral-500 text-xs mt-1">{walletList.length} {t('walletsTotal', 'wallets total')}</div>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
                 <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1 font-mono">primary_wallet</div>
@@ -360,7 +362,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
                   {primaryWallet ? fmt(primaryWallet.mcc_balance ?? 0) : '--'}
                 </div>
                 <div className="text-neutral-500 text-xs mt-1 truncate font-mono">
-                  {primaryAddress ? `${primaryAddress.slice(0, 6)}...${primaryAddress.slice(-4)}` : 'No primary wallet'}
+                  {primaryAddress ? `${primaryAddress.slice(0, 6)}...${primaryAddress.slice(-4)}` : t('noPrimaryWallet', 'No primary wallet')}
                 </div>
               </div>
             </div>
@@ -371,7 +373,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
               className="flex items-center gap-2 text-xs text-neutral-400 hover:text-cyan-400 transition-colors mb-2"
             >
               {walletsExpanded ? <IconChevronUp /> : <IconChevronDown />}
-              {walletsExpanded ? 'Collapse' : 'Expand'} ({walletList.length})
+              {walletsExpanded ? t('collapse', 'Collapse') : t('expand', 'Expand')} ({walletList.length})
             </button>
 
             {walletsExpanded && (
@@ -392,7 +394,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
                         {w.wallet_address.slice(0, 8)}...{w.wallet_address.slice(-6)}
                       </a>
                       {w.is_primary && (
-                        <span className="px-1.5 py-0.5 bg-cyan-400/20 text-cyan-400 rounded text-[10px] flex-shrink-0">Primary</span>
+                        <span className="px-1.5 py-0.5 bg-cyan-400/20 text-cyan-400 rounded text-[10px] flex-shrink-0">{t('primaryLabel', 'Primary')}</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0 ml-4">
@@ -423,18 +425,18 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
           >
             <div className="flex items-center gap-3">
               <IconHistory />
-              <span className="text-sm text-neutral-300 tracking-wider font-medium">Mining Records</span>
+              <span className="text-sm text-neutral-300 tracking-wider font-medium">{t('mintRecords', 'Mining Records')}</span>
               {recordsTotal > 0 && (
                 <span className="text-xs bg-neutral-500/20 text-neutral-300 px-1.5 py-0.5 rounded">
-                  {recordsTotal} records
+                  {recordsTotal} {t('records', 'records')}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-1 text-xs text-neutral-400 group-hover:text-cyan-400 transition-colors">
               {showRecords ? (
-                <>Collapse <IconChevronUp /></>
+                <>{t('collapse', 'Collapse')} <IconChevronUp /></>
               ) : (
-                <>Expand <IconChevronDown /></>
+                <>{t('expand', 'Expand')} <IconChevronDown /></>
               )}
             </div>
           </button>
@@ -442,7 +444,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
           {showRecords && (
             <div className="mt-4 pt-4 border-t border-neutral-700">
               <p className="text-neutral-500 text-xs mb-4">
-                All x402 non-custodial minting transaction records
+                {t('allRecordsDesc', 'All x402 non-custodial minting transaction records')}
               </p>
 
               {recordsLoading ? (
@@ -452,10 +454,10 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-neutral-400 text-xs border-b border-neutral-700">
-                        <th className="text-left py-2 font-normal">Time</th>
-                        <th className="text-right py-2 font-normal">Paid</th>
-                        <th className="text-right py-2 font-normal">Minted</th>
-                        <th className="text-right py-2 font-normal">Status</th>
+                        <th className="text-left py-2 font-normal">{t('colTime', 'Time')}</th>
+                        <th className="text-right py-2 font-normal">{t('payment', 'Paid')}</th>
+                        <th className="text-right py-2 font-normal">{t('earnedMcc', 'Minted')}</th>
+                        <th className="text-right py-2 font-normal">{t('colStatus', 'Status')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -477,7 +479,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
                               rel="noopener noreferrer"
                               className="text-xs px-1.5 py-0.5 rounded bg-white/20 text-white hover:bg-cyan-400/30 hover:text-cyan-200 transition-colors"
                             >
-                              confirmed
+                              {t('completed', 'confirmed')}
                             </a>
                           </td>
                         </tr>
@@ -487,7 +489,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
                 </div>
               ) : (
                 <div className="text-center py-8 text-neutral-500 text-sm">
-                  No mining records yet
+                  {t('noMintRecords', 'No mining records yet')}
                 </div>
               )}
 
@@ -502,14 +504,14 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
                       disabled={recordsPage <= 1 || recordsLoading}
                       className="px-3 py-1 border border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white rounded disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
-                      ‹ Prev
+                      ‹ {t('prevPage', 'Prev')}
                     </button>
                     <button
                       onClick={() => setRecordsPage(p => Math.min(recordsTotalPages, p + 1))}
                       disabled={recordsPage >= recordsTotalPages || recordsLoading}
                       className="px-3 py-1 border border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white rounded disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
-                      Next ›
+                      {t('nextPage', 'Next')} ›
                     </button>
                   </div>
                 </div>
@@ -580,7 +582,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
       <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 blockchain-card">
         <div className="flex items-start gap-2 text-neutral-400 text-sm">
           <IconShield className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
-          <span>All transactions are executed on-chain via X402 protocol. Your private keys never leave your wallet. Microcosm uses non-custodial minting with atomic on-chain verification.</span>
+          <span>{t('securityNote', 'All transactions are executed on-chain via X402 protocol. Your private keys never leave your wallet. Microcosm uses non-custodial minting with atomic on-chain verification.')}</span>
         </div>
       </div>
     </div>

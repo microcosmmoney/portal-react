@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from '../../i18n-context'
+
 export interface MicrocosmFragmentPageProps {
   onNavigate?: (path: string) => void
 }
@@ -41,23 +43,24 @@ function IconInfo({ className }: { className?: string }) {
 }
 
 export function MicrocosmFragmentPage({ onNavigate }: MicrocosmFragmentPageProps) {
+  const t = useTranslations('fragmentDash')
   return (
     <div className="max-w-7xl mx-auto p-6 font-mono space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Fragment</h1>
-        <p className="text-neutral-400 text-sm mt-1">NFT fractionalization protocol</p>
+        <h1 className="text-2xl font-bold text-white">{t('title', 'NFT Fragmentation')}</h1>
+        <p className="text-neutral-400 text-sm mt-1">{t('subtitle', 'Territory NFT fragmentation marketplace')}</p>
       </div>
 
       <div className="bg-neutral-900 border border-neutral-700 rounded-lg">
         <div className="p-6">
           <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
             <IconWallet className="w-4 h-4" />
-            <span>MY_HOLDINGS</span>
+            <span>{t('myHoldings', 'My Fragment Holdings')}</span>
           </div>
           <div className="text-center py-8 text-neutral-400">
             <IconPuzzle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>No fragment holdings</p>
-            <p className="text-sm mt-1">Purchase fragments from available vaults below</p>
+            <p>{t('noHoldings', 'No fragment holdings')}</p>
+            <p className="text-sm mt-1">{t('noHoldingsHint', 'Purchase fragments to become a partial NFT owner')}</p>
           </div>
         </div>
       </div>
@@ -66,12 +69,12 @@ export function MicrocosmFragmentPage({ onNavigate }: MicrocosmFragmentPageProps
         <div className="p-6">
           <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
             <IconImage className="w-4 h-4" />
-            <span>FRAGMENT_VAULTS</span>
+            <span>{t('fragmentVaults', 'Fragment Vaults')}</span>
           </div>
           <div className="text-center py-8 text-neutral-400">
             <IconImage className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>No fragment vaults available</p>
-            <p className="text-sm mt-1">Check back later for new NFT fragmentation opportunities</p>
+            <p>{t('noVaults', 'No fragment vaults')}</p>
+            <p className="text-sm mt-1">{t('noVaultsHint', 'Check back later')}</p>
           </div>
         </div>
       </div>
@@ -80,21 +83,21 @@ export function MicrocosmFragmentPage({ onNavigate }: MicrocosmFragmentPageProps
         <div className="p-6">
           <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
             <IconInfo className="w-4 h-4" />
-            <span>PROTOCOL_INFO</span>
+            <span>{t('protocolInfo', 'Protocol Info')}</span>
           </div>
           <div className="space-y-4 text-sm">
             <div className="p-4 bg-neutral-800 rounded border border-neutral-700">
-              <div className="font-medium text-white mb-2">What is Fragmentation?</div>
+              <div className="font-medium text-white mb-2">{t('whatIsFragmentation', 'What is NFT Fragmentation?')}</div>
               <p className="text-neutral-400">
-                Fragment allows NFT owners to split Territory NFTs into tradeable fragments, enabling shared ownership and community buyout mechanics.
+                {t('fragmentationDesc', 'NFT fragmentation allows high-value territory NFTs to be split into multiple fragments, enabling more users to participate in investment. Each fragment represents partial ownership of the NFT.')}
               </p>
             </div>
             <div className="p-4 bg-neutral-800 rounded border border-neutral-700">
-              <div className="font-medium text-white mb-2">Fragment Holder Rights</div>
+              <div className="font-medium text-white mb-2">{t('fragmentRights', 'Fragment Rights')}</div>
               <ul className="list-disc list-inside space-y-1 text-neutral-400">
-                <li>Proportional ownership of the underlying NFT</li>
-                <li>Participate in buyout proposals</li>
-                <li>Trade fragments freely on the market</li>
+                <li>{t('fragmentRight1', 'Share NFT revenue proportionally based on holdings')}</li>
+                <li>{t('fragmentRight2', 'Redeem original NFT with 100% fragment ownership')}</li>
+                <li>{t('fragmentRight3', 'Fragments can be freely traded on the market')}</li>
               </ul>
             </div>
           </div>

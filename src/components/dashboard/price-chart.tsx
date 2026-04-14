@@ -2,6 +2,7 @@
 
 import { useState, useId } from 'react'
 import { usePriceHistory } from '@microcosmmoney/auth-react'
+import { useTranslations } from '../../i18n-context'
 import {
   AreaChart,
   Area,
@@ -25,6 +26,7 @@ export interface MicrocosmPriceChartProps {
 }
 
 export function MicrocosmPriceChart({ accentColor }: MicrocosmPriceChartProps = {}) {
+  const t = useTranslations('mccDashboard')
   const [range, setRange] = useState<TimeRange>('7D')
   const { data, loading } = usePriceHistory(range)
   const gradientId = useId().replace(/:/g, '_') + '_mcPriceGradient'
@@ -77,7 +79,7 @@ export function MicrocosmPriceChart({ accentColor }: MicrocosmPriceChartProps = 
             <div className="h-full bg-neutral-800 rounded animate-pulse" />
           ) : chartData.length === 0 ? (
             <div className="h-full flex items-center justify-center text-neutral-500 font-mono text-sm">
-              No price data available
+              {t('noPriceData', 'No price data available')}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -112,7 +114,7 @@ export function MicrocosmPriceChart({ accentColor }: MicrocosmPriceChartProps = 
                     fontSize: '11px',
                   }}
                   labelFormatter={(ts: any) => new Date(ts).toLocaleString()}
-                  formatter={(value: any) => [`$${Number(value).toFixed(4)}`, 'Price']}
+                  formatter={(value: any) => [`$${Number(value).toFixed(4)}`, t('price', 'Price')]}
                 />
                 <Area
                   type="monotone"

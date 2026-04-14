@@ -1,6 +1,7 @@
 'use client'
 
 import { useMCCStats } from '@microcosmmoney/auth-react'
+import { useTranslations } from '../../i18n-context'
 
 /* Inline SVG icons (16x16, stroke-based) */
 const IconUsers = ({ stroke = '#22d3ee' }: { stroke?: string }) => (
@@ -47,14 +48,15 @@ export interface MicrocosmMCCTokenStatsProps {
 }
 
 export function MicrocosmMCCTokenStats({ accentColor }: MicrocosmMCCTokenStatsProps = {}) {
+  const t = useTranslations('mccDashboard')
   const { data, loading } = useMCCStats()
   const ac = accentColor || '#22d3ee'
 
   const stats = [
-    { label: 'holders', value: (data as any)?.holders_count, format: (v: number) => v.toLocaleString(), icon: IconUsers },
-    { label: 'circulating', value: (data as any)?.circulating_supply, format: (v: number) => `${(v / 1e6).toFixed(2)}M`, icon: IconCircle },
-    { label: 'total_mining_tx', value: (data as any)?.total_mining_count, format: (v: number) => v.toLocaleString(), icon: IconPickaxe },
-    { label: 'total_mining_usdc', value: (data as any)?.total_mining_usdc, format: (v: number) => `$${(v / 1e6).toFixed(2)}M`, icon: IconDollarSign },
+    { label: t('holders', 'holders'), value: (data as any)?.holders_count, format: (v: number) => v.toLocaleString(), icon: IconUsers },
+    { label: t('circulating', 'circulating'), value: (data as any)?.circulating_supply, format: (v: number) => `${(v / 1e6).toFixed(2)}M`, icon: IconCircle },
+    { label: t('totalMiningTx', 'total_mining_tx'), value: (data as any)?.total_mining_count, format: (v: number) => v.toLocaleString(), icon: IconPickaxe },
+    { label: t('totalMiningUsdc', 'total_mining_usdc'), value: (data as any)?.total_mining_usdc, format: (v: number) => `$${(v / 1e6).toFixed(2)}M`, icon: IconDollarSign },
   ]
 
   const spinnerBorderColor = accentColor ? { borderColor: accentColor, borderTopColor: 'transparent' } : undefined
@@ -65,7 +67,7 @@ export function MicrocosmMCCTokenStats({ accentColor }: MicrocosmMCCTokenStatsPr
       <div className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <IconCoin stroke={ac} />
-          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">MCC_STATS</span>
+          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">{t('mccStats', 'MCC_STATS')}</span>
         </div>
 
         {loading ? (

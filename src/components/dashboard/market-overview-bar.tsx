@@ -1,6 +1,7 @@
 'use client'
 
 import { useMarketData } from '@microcosmmoney/auth-react'
+import { useTranslations } from '../../i18n-context'
 
 function formatCompact(value: number): string {
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(2)}M`
@@ -13,6 +14,7 @@ export interface MicrocosmMarketBarProps {
 }
 
 export function MicrocosmMarketBar({ accentColor }: MicrocosmMarketBarProps = {}) {
+  const t = useTranslations('mccDashboard')
   const { data, loading } = useMarketData()
   const ac = accentColor || '#22d3ee'
 
@@ -37,7 +39,7 @@ export function MicrocosmMarketBar({ accentColor }: MicrocosmMarketBarProps = {}
 
   const stats: { label: string; value: string; sub?: string; subColor?: string; subStyle?: React.CSSProperties; color: string; colorStyle?: React.CSSProperties }[] = [
     {
-      label: 'MCC_PRICE',
+      label: t('mccPrice', 'MCC_PRICE'),
       value: `$${(data.price_usd ?? 0).toFixed(4)}`,
       sub: `${isPositive ? '~+' : '~'}${priceChange24h.toFixed(2)}%`,
       subColor: isPositive ? (accentColor ? '' : 'text-cyan-400') : 'text-red-400',
@@ -45,11 +47,11 @@ export function MicrocosmMarketBar({ accentColor }: MicrocosmMarketBarProps = {}
       color: accentColor ? '' : 'text-cyan-400',
       colorStyle: accentColor ? { color: accentColor } : undefined,
     },
-    { label: '24H_VOLUME', value: `$${formatCompact(data.volume_24h ?? 0)}`, color: accentColor ? '' : 'text-cyan-300', colorStyle: accentColor ? { color: accentColor } : undefined },
-    { label: 'LIQUIDITY', value: (data.liquidity_usd ?? 0) > 0 ? `$${formatCompact(data.liquidity_usd)}` : '-', color: 'text-white' },
-    { label: 'FDV', value: (data.fdv ?? 0) > 0 ? `$${formatCompact(data.fdv)}` : '-', color: 'text-white' },
-    { label: '24H_TRADES', value: `${trades}`, color: accentColor ? '' : 'text-cyan-400', colorStyle: accentColor ? { color: accentColor } : undefined },
-    { label: 'BUY/SELL', value: `${buys}/${sells}`, color: 'text-white' },
+    { label: t('volume24h', '24H_VOLUME'), value: `$${formatCompact(data.volume_24h ?? 0)}`, color: accentColor ? '' : 'text-cyan-300', colorStyle: accentColor ? { color: accentColor } : undefined },
+    { label: t('liquidity', 'LIQUIDITY'), value: (data.liquidity_usd ?? 0) > 0 ? `$${formatCompact(data.liquidity_usd)}` : '-', color: 'text-white' },
+    { label: t('fdv', 'FDV'), value: (data.fdv ?? 0) > 0 ? `$${formatCompact(data.fdv)}` : '-', color: 'text-white' },
+    { label: t('trades24h', '24H_TRADES'), value: `${trades}`, color: accentColor ? '' : 'text-cyan-400', colorStyle: accentColor ? { color: accentColor } : undefined },
+    { label: t('buySell', 'BUY/SELL'), value: `${buys}/${sells}`, color: 'text-white' },
   ]
 
   return (

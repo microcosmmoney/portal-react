@@ -1,6 +1,7 @@
 'use client'
 
 import { useMiningStats } from '@microcosmmoney/auth-react'
+import { useTranslations } from '../../i18n-context'
 
 export interface MicrocosmMyMiningProps {
   detailsPath?: string
@@ -9,6 +10,7 @@ export interface MicrocosmMyMiningProps {
 }
 
 export function MicrocosmMyMining({ detailsPath, onNavigate, accentColor }: MicrocosmMyMiningProps) {
+  const t = useTranslations('mccDashboard')
   const { data, loading } = useMiningStats()
 
   const fmt = (v: number) => v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -20,12 +22,12 @@ export function MicrocosmMyMining({ detailsPath, onNavigate, accentColor }: Micr
   }
 
   const items = data ? [
-    { label: 'total_mined', value: fmt(data.total_mined ?? 0) },
-    { label: 'total_paid', value: fmt(data.total_paid ?? 0) },
-    { label: 'mining_count', value: `${data.mining_count ?? 0}` },
-    { label: 'last_30d', value: fmt(data.last_30d_mined ?? 0) },
-    { label: 'active_days', value: `${data.active_days_30d ?? 0}` },
-    { label: 'last_mined', value: formatDateTime(data.last_mined_at) },
+    { label: t('totalMined', 'total_mined'), value: fmt(data.total_mined ?? 0) },
+    { label: t('totalPaid', 'total_paid'), value: fmt(data.total_paid ?? 0) },
+    { label: t('miningCount', 'mining_count'), value: `${data.mining_count ?? 0}` },
+    { label: t('last30d', 'last_30d'), value: fmt(data.last_30d_mined ?? 0) },
+    { label: t('activeDays', 'active_days'), value: `${data.active_days_30d ?? 0}` },
+    { label: t('lastMined', 'last_mined'), value: formatDateTime(data.last_mined_at) },
   ] : []
 
   const handleDetailsClick = () => {
@@ -39,14 +41,14 @@ export function MicrocosmMyMining({ detailsPath, onNavigate, accentColor }: Micr
     <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl blockchain-card h-full">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">MY_MINING</span>
+          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">{t('myMining', 'MY_MINING')}</span>
           {detailsPath && (
             <button
               onClick={handleDetailsClick}
               className={accentColor ? 'text-xs text-neutral-500 font-mono' : 'text-xs text-neutral-500 hover:text-cyan-400 font-mono'}
               style={accentColor ? { '--hover-color': accentColor } as React.CSSProperties : undefined}
             >
-              details &gt;
+              {t('details', 'details')} &gt;
             </button>
           )}
         </div>
@@ -57,7 +59,7 @@ export function MicrocosmMyMining({ detailsPath, onNavigate, accentColor }: Micr
           </div>
         ) : !data || (data.mining_count ?? 0) === 0 ? (
           <div className="text-center py-8 text-neutral-500 font-mono text-sm">
-            no mining records
+            {t('noMiningRecords', 'no mining records')}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">

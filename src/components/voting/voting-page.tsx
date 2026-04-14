@@ -1,5 +1,7 @@
 'use client'
 
+import { useTranslations } from '../../i18n-context'
+
 export interface MicrocosmVotingPageProps {
   basePath?: string
   onNavigate?: (path: string) => void
@@ -81,18 +83,19 @@ const CoinsIcon = ({ className }: { className?: string }) => (
 )
 
 export function MicrocosmVotingPage({ basePath = '', onNavigate }: MicrocosmVotingPageProps) {
+  const t = useTranslations('votingDash')
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div>
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-white tracking-wider">Community Voting</h1>
+          <h1 className="text-2xl font-bold text-white tracking-wider">{t('title', 'Community Voting')}</h1>
           <span className="inline-flex items-center bg-cyan-400/20 text-cyan-400 border border-cyan-400/30 text-xs px-2.5 py-0.5 rounded-full font-medium">
             <ConstructionIcon className="w-3 h-3 mr-1" />
-            Under Construction
+            {t('underConstruction', 'Under Construction')}
           </span>
         </div>
-        <p className="text-sm text-neutral-400">Token-driven community governance and decision-making mechanism</p>
+        <p className="text-sm text-neutral-400">{t('subtitle', 'Token-driven community governance and decision-making mechanism')}</p>
       </div>
 
       {/* Build Goal Card */}
@@ -100,27 +103,27 @@ export function MicrocosmVotingPage({ basePath = '', onNavigate }: MicrocosmVoti
         <div className="p-6">
           <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
             <TargetIcon className="w-4 h-4" />
-            <span className="tracking-wider">Build Goal</span>
+            <span className="tracking-wider">{t('buildGoal', 'Build Goal')}</span>
           </div>
           <div className="space-y-4">
             <p className="text-neutral-300 text-sm leading-relaxed">
-              Microcosm community voting system uses a &quot;Capital Voting&quot; mechanism -- users vote with MCC Tokens, making every vote carry real economic weight.
+              {t('buildDesc', 'Microcosm community voting system uses a "Capital Voting" mechanism -- users vote with MCC Tokens, making every vote carry real economic weight.')}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 bg-neutral-800 rounded border border-neutral-700 hover:border-cyan-400/50 transition-colors">
                 <ShieldIcon className="w-5 h-5 text-white mb-2" />
-                <div className="text-white text-sm font-medium mb-1">Anti-Sybil Attack</div>
-                <div className="text-neutral-500 text-xs">Voting requires real capital investment, effectively preventing ballot stuffing and fake votes</div>
+                <div className="text-white text-sm font-medium mb-1">{t('antiSybil', 'Anti-Sybil Attack')}</div>
+                <div className="text-neutral-500 text-xs">{t('antiSybilDesc', 'Voting requires real capital investment, effectively preventing ballot stuffing and fake votes')}</div>
               </div>
               <div className="p-4 bg-neutral-800 rounded border border-neutral-700 hover:border-cyan-400/50 transition-colors">
                 <CoinsIcon className="w-5 h-5 text-white mb-2" />
-                <div className="text-white text-sm font-medium mb-1">Economic Game Theory</div>
-                <div className="text-neutral-500 text-xs">Voters bear economic consequences for their choices, promoting rational decision-making</div>
+                <div className="text-white text-sm font-medium mb-1">{t('economicGame', 'Economic Game Theory')}</div>
+                <div className="text-neutral-500 text-xs">{t('economicGameDesc', 'Voters bear economic consequences for their choices, promoting rational decision-making')}</div>
               </div>
               <div className="p-4 bg-neutral-800 rounded border border-neutral-700 hover:border-cyan-400/50 transition-colors">
                 <UsersIcon className="w-5 h-5 text-white mb-2" />
-                <div className="text-white text-sm font-medium mb-1">Community Self-governance</div>
-                <div className="text-neutral-500 text-xs">Major decisions are made jointly by token-holding community, achieving decentralized governance</div>
+                <div className="text-white text-sm font-medium mb-1">{t('communityGov', 'Community Governance')}</div>
+                <div className="text-neutral-500 text-xs">{t('communityGovDesc', 'Major decisions are made jointly by token-holding community, achieving decentralized governance')}</div>
               </div>
             </div>
           </div>
@@ -137,35 +140,35 @@ export function MicrocosmVotingPage({ basePath = '', onNavigate }: MicrocosmVoti
                 <SwordsIcon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <div className="text-white font-medium">Betting Mode Voting</div>
+                <div className="text-white font-medium">{t('bettingMode', 'Betting Mode Voting')}</div>
                 <span className="inline-block bg-cyan-400/20 text-cyan-400 border border-cyan-400/30 text-xs px-2.5 py-0.5 rounded-full font-medium mt-1">
-                  Betting Mode
+                  {t('bettingVote', 'Betting Vote')}
                 </span>
               </div>
             </div>
             <div className="space-y-3">
               <p className="text-neutral-400 text-sm leading-relaxed">
-                Voters invest MCC into their supported option. After voting ends, funds from the losing side are distributed equally among all voters on the winning side.
+                {t('bettingDesc', 'Voters invest MCC into their supported option. After voting ends, funds from the losing side are distributed equally among all voters on the winning side.')}
               </p>
               <div className="p-3 bg-neutral-800 rounded border border-neutral-700">
-                <div className="text-xs text-neutral-400 tracking-wider mb-2">Mechanism</div>
+                <div className="text-xs text-neutral-400 tracking-wider mb-2">{t('mechanismLabel', 'Mechanism')}</div>
                 <div className="space-y-1.5 text-xs text-neutral-400">
                   <div className="flex items-start gap-2">
                     <span className="text-neutral-500 mt-0.5">1.</span>
-                    <span>Users vote for an option with MCC</span>
+                    <span>{t('bettingStep1', 'Users vote for an option with MCC')}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-neutral-500 mt-0.5">2.</span>
-                    <span>After voting closes, results are tallied, the side with more votes wins</span>
+                    <span>{t('bettingStep2', 'After voting closes, results are tallied, the side with more votes wins')}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-neutral-500 mt-0.5">3.</span>
-                    <span>MCC from losing side distributed proportionally to winning voters</span>
+                    <span>{t('bettingStep3', 'MCC from losing side distributed proportionally to winning voters')}</span>
                   </div>
                 </div>
               </div>
               <div className="text-xs text-neutral-500">
-                Use cases: Market predictions, community disputes, direction choices
+                {t('bettingUseCase', 'Use cases: Market predictions, community disputes, direction choices')}
               </div>
             </div>
           </div>
@@ -179,35 +182,35 @@ export function MicrocosmVotingPage({ basePath = '', onNavigate }: MicrocosmVoti
                 <HeartIcon className="w-5 h-5 text-red-400" />
               </div>
               <div>
-                <div className="text-white font-medium">Public Welfare Voting</div>
+                <div className="text-white font-medium">{t('publicWelfareMode', 'Public Welfare Voting')}</div>
                 <span className="inline-block bg-white/20 text-white border border-white/30 text-xs px-2.5 py-0.5 rounded-full font-medium mt-1">
-                  Public Welfare Mode
+                  {t('publicWelfareVote', 'Public Welfare Vote')}
                 </span>
               </div>
             </div>
             <div className="space-y-3">
               <p className="text-neutral-400 text-sm leading-relaxed">
-                Regardless of outcome, all MCC invested by voters goes to the foundation pool, funding third-party project development and ecosystem building.
+                {t('publicWelfareDesc', 'Regardless of outcome, all MCC invested by voters goes to the foundation pool, funding third-party project development and ecosystem building.')}
               </p>
               <div className="p-3 bg-neutral-800 rounded border border-neutral-700">
-                <div className="text-xs text-neutral-400 tracking-wider mb-2">Mechanism</div>
+                <div className="text-xs text-neutral-400 tracking-wider mb-2">{t('mechanismLabel', 'Mechanism')}</div>
                 <div className="space-y-1.5 text-xs text-neutral-400">
                   <div className="flex items-start gap-2">
                     <span className="text-neutral-500 mt-0.5">1.</span>
-                    <span>Users vote for an option with MCC</span>
+                    <span>{t('welfareStep1', 'Users vote with MCC on an option')}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-neutral-500 mt-0.5">2.</span>
-                    <span>After voting closes, results are tallied, majority decision is executed</span>
+                    <span>{t('welfareStep2', 'Results tallied after deadline, majority decision executed')}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-neutral-500 mt-0.5">3.</span>
-                    <span>All voting funds (both sides) enter the foundation</span>
+                    <span>{t('welfareStep3', 'All voting funds (both sides) go to the foundation')}</span>
                   </div>
                 </div>
               </div>
               <div className="text-xs text-neutral-500">
-                Use cases: Public proposals, ecosystem fund allocation, project support decisions
+                {t('publicUseCase', 'Use cases: Public proposals, ecosystem fund allocation, project support decisions')}
               </div>
             </div>
           </div>
@@ -219,28 +222,28 @@ export function MicrocosmVotingPage({ basePath = '', onNavigate }: MicrocosmVoti
         <div className="p-6">
           <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
             <VoteIcon className="w-4 h-4" />
-            <span className="tracking-wider">Voting Rules</span>
+            <span className="tracking-wider">{t('votingRules', 'Voting Rules')}</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 bg-neutral-800 rounded border border-neutral-700">
               <div className="text-xs text-neutral-400 tracking-wider mb-1">voting_currency</div>
-              <div className="text-white text-sm font-medium">MCC (Microcosm Coin)</div>
-              <div className="text-neutral-500 text-xs mt-1">Votes use MCC Token, invested funds are locked</div>
+              <div className="text-white text-sm font-medium">{t('votingCurrency', 'MCC (Microcosm Coin)')}</div>
+              <div className="text-neutral-500 text-xs mt-1">{t('votingCurrencyDesc', 'Votes use MCC Token, invested funds are locked')}</div>
             </div>
             <div className="p-4 bg-neutral-800 rounded border border-neutral-700">
               <div className="text-xs text-neutral-400 tracking-wider mb-1">vote_weight</div>
-              <div className="text-white text-sm font-medium">1 MCC = 1 Vote</div>
-              <div className="text-neutral-500 text-xs mt-1">Voting weight proportional to invested amount</div>
+              <div className="text-white text-sm font-medium">{t('voteWeight', '1 MCC = 1 Vote')}</div>
+              <div className="text-neutral-500 text-xs mt-1">{t('voteWeightDesc', 'Voting weight proportional to invested amount')}</div>
             </div>
             <div className="p-4 bg-neutral-800 rounded border border-neutral-700">
               <div className="text-xs text-neutral-400 tracking-wider mb-1">min_participation</div>
-              <div className="text-white text-sm font-medium">Miner Level or Above</div>
-              <div className="text-neutral-500 text-xs mt-1">Must reach Miner rank to participate in voting</div>
+              <div className="text-white text-sm font-medium">{t('minParticipation', 'Miner Level or Above')}</div>
+              <div className="text-neutral-500 text-xs mt-1">{t('minParticipationDesc', 'Must reach Miner rank to participate in voting')}</div>
             </div>
             <div className="p-4 bg-neutral-800 rounded border border-neutral-700">
               <div className="text-xs text-neutral-400 tracking-wider mb-1">foundation_fund</div>
-              <div className="text-white text-sm font-medium">Support Third-party Projects</div>
-              <div className="text-neutral-500 text-xs mt-1">Public welfare voting funds used for ecosystem building</div>
+              <div className="text-white text-sm font-medium">{t('foundationFund', 'Support Third-party Projects')}</div>
+              <div className="text-neutral-500 text-xs mt-1">{t('foundationFundDesc', 'Public welfare voting funds used for ecosystem building')}</div>
             </div>
           </div>
         </div>
@@ -249,7 +252,7 @@ export function MicrocosmVotingPage({ basePath = '', onNavigate }: MicrocosmVoti
       {/* Coming Soon Footer */}
       <div className="text-center py-8">
         <ConstructionIcon className="w-10 h-10 text-neutral-700 mx-auto mb-3" />
-        <p className="text-neutral-500 text-sm">Community voting feature is under development, stay tuned</p>
+        <p className="text-neutral-500 text-sm">{t('comingSoon', 'Community voting feature is under development, stay tuned')}</p>
         <p className="text-neutral-500 text-xs mt-1">Coming Soon</p>
       </div>
     </div>

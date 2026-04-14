@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useMCC, useMCD, useWallets, useMCCLocks, useMarketData, useMultiWalletBalance } from '@microcosmmoney/auth-react'
 import { TOKEN_BY_SYMBOL } from '../../config/mainstream-tokens'
+import { useTranslations } from '../../i18n-context'
 
 /* ── helpers ── */
 const fmt = (n: number, d = 2) =>
@@ -217,12 +218,13 @@ function AssetList({
   showWalletColumn?: boolean
   isLoading?: boolean
 }) {
+  const t = useTranslations('walletDash')
   if (isLoading) {
     return (
       <div className="py-8 px-4">
         <div className="flex items-center justify-center gap-3">
           <Spinner size="w-4 h-4" />
-          <span className="text-neutral-500 text-sm">Syncing on-chain data...</span>
+          <span className="text-neutral-500 text-sm">{t('syncingOnChainData', 'Syncing on-chain data...')}</span>
         </div>
         <div className="mt-3 max-w-xs mx-auto">
           <div className="bg-neutral-800 rounded-full h-1.5 overflow-hidden">
@@ -236,7 +238,7 @@ function AssetList({
   if (holdings.length === 0) {
     return (
       <div className="text-center py-8 text-neutral-500">
-        <p className="text-sm">No valued assets found</p>
+        <p className="text-sm">{t('noValuedAssets', 'No valued assets found')}</p>
       </div>
     )
   }
@@ -246,10 +248,10 @@ function AssetList({
   return (
     <div>
       <div className={`gap-4 py-2 px-4 border-b border-neutral-700 text-xs font-medium text-neutral-400 tracking-wider grid ${gridCols}`}>
-        <div>Token</div>
-        {showWalletColumn && <div>Wallet</div>}
-        <div className="text-right">Amount</div>
-        <div className="text-right">Valuation</div>
+        <div>{t('token', 'Token')}</div>
+        {showWalletColumn && <div>{t('wallet', 'Wallet')}</div>}
+        <div className="text-right">{t('amount', 'Amount')}</div>
+        <div className="text-right">{t('valuation', 'Valuation')}</div>
       </div>
       <div className="divide-y divide-neutral-800">
         {holdings.map((h, idx) => (
@@ -267,7 +269,7 @@ function AssetList({
             {showWalletColumn && (
               <div>
                 <code className="text-xs text-neutral-400 font-mono">{h.walletShort}</code>
-                {h.isPrimary && <span className="ml-1 text-[10px] text-cyan-400">Primary</span>}
+                {h.isPrimary && <span className="ml-1 text-[10px] text-cyan-400">{t('primary', 'Primary')}</span>}
               </div>
             )}
             <div className="text-right">
@@ -295,6 +297,7 @@ export interface MicrocosmWalletPageProps {
 }
 
 export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWalletPageProps) {
+  const t = useTranslations('walletDash')
   const { balance: mccData, price: mccPrice, loading: mccLoading, refresh: refreshMCC } = useMCC(60_000)
   const { balance: mcdData, loading: mcdLoading, refresh: refreshMCD } = useMCD(60_000)
   const { data: wallets, loading: walletsLoading } = useWallets()
@@ -440,8 +443,8 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-wider">Wallet</h1>
-          <p className="text-sm text-neutral-400 mt-1">On-chain assets & balances</p>
+          <h1 className="text-2xl font-bold text-white tracking-wider">{t('title', 'Wallet')}</h1>
+          <p className="text-sm text-neutral-400 mt-1">{t('subtitle', 'On-chain assets & balances')}</p>
         </div>
         <button
           className="flex items-center gap-2 px-3 py-1.5 text-sm border border-neutral-700 rounded text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent transition-colors disabled:opacity-50"
@@ -449,7 +452,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
           disabled={isRefreshing || multiLoading}
         >
           <IconRefresh className={isRefreshing || multiLoading ? 'animate-spin' : ''} />
-          Refresh
+          {t('refresh', 'Refresh')}
         </button>
       </div>
 
@@ -459,7 +462,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2 text-neutral-400 text-sm">
               <IconWallet className="text-cyan-400" />
-              <span>{isAllTab ? 'Total Asset Value' : 'Wallet Asset Value'}</span>
+              <span>{isAllTab ? t('totalAssetValue', 'Total Asset Value') : t('walletAssetValue', 'Wallet Asset Value')}</span>
               <button
                 onClick={() => setHideBalance(!hideBalance)}
                 className="hover:text-white transition-colors"
@@ -474,7 +477,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
             </span>
           </div>
           <div className="text-neutral-500 text-xs">
-            {hideBalance ? '****' : 'Aggregated from on-chain token balances'}
+            {hideBalance ? '****' : t('aggregatedDesc', 'Aggregated from on-chain token balances')}
           </div>
         </div>
       </div>
@@ -493,7 +496,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
                     : 'bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700'
                 }`}
               >
-                Overview ({walletList.length} wallets)
+                {t('overview', 'Overview')} ({walletList.length} {t('wallets', 'wallets')})
               </button>
               {walletList.map((w: any) => (
                 <button
@@ -508,7 +511,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
                   <code className="font-mono">
                     {w.wallet_address.slice(0, 4)}...{w.wallet_address.slice(-4)}
                   </code>
-                  {w.is_primary && <span className="text-cyan-400 text-[10px]">Primary</span>}
+                  {w.is_primary && <span className="text-cyan-400 text-[10px]">{t('primary', 'Primary')}</span>}
                 </button>
               ))}
             </div>
@@ -516,7 +519,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
 
           <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
             <IconCreditCard className="text-cyan-400" />
-            <span className="tracking-wider">On-Chain Assets</span>
+            <span className="tracking-wider">{t('onChainAssets', 'On-Chain Assets')}</span>
             {multiLoading && <Spinner size="w-3 h-3" />}
           </div>
 
@@ -524,7 +527,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
             <div className="py-10">
               <div className="flex flex-col items-center gap-3">
                 <Spinner size="w-6 h-6" />
-                <p className="text-sm text-neutral-400">Syncing on-chain data...</p>
+                <p className="text-sm text-neutral-400">{t('syncingOnChainData', 'Syncing on-chain data...')}</p>
                 <div className="w-48 h-1 bg-neutral-800 rounded-full overflow-hidden">
                   <div className="h-full bg-cyan-400/60 rounded-full animate-pulse" style={{ width: '60%' }} />
                 </div>
@@ -545,8 +548,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
               <div className="flex items-start gap-2 text-xs text-neutral-500">
                 <IconInfo className="mt-0.5 shrink-0" />
                 <span>
-                  Aggregated on-chain balances across {walletList.length} wallet{walletList.length !== 1 ? 's' : ''}.
-                  Low-value assets (&lt;$1) are hidden.
+                  {t('allWalletsNote', 'Aggregated on-chain balances across {count} wallets. Low-value assets (<$1) are hidden.', { count: walletList.length })}
                 </span>
               </div>
             ) : (
@@ -554,13 +556,13 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-xs text-neutral-500">
                     <IconInfo className="shrink-0" />
-                    <span>Current wallet:</span>
+                    <span>{t('currentWallet', 'Current wallet')}:</span>
                     <code className="text-neutral-400 bg-neutral-800 px-2 py-0.5 rounded font-mono">
                       {activeTab}
                     </code>
                     {walletList.find((w: any) => w.wallet_address === activeTab)?.is_primary && (
                       <span className="text-cyan-400 bg-cyan-400/20 px-1.5 py-0.5 rounded text-[10px]">
-                        Primary
+                        {t('primary', 'Primary')}
                       </span>
                     )}
                   </div>
@@ -570,12 +572,12 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
                     rel="noopener noreferrer"
                     className="text-cyan-400 hover:text-cyan-300 text-xs flex items-center gap-1"
                   >
-                    View on Solscan <IconExternalLink className="w-3 h-3" />
+                    {t('viewOnSolscan', 'View on Solscan')} <IconExternalLink className="w-3 h-3" />
                   </a>
                 </div>
                 <div className="flex items-start gap-2 text-xs text-neutral-500">
                   <IconInfo className="mt-0.5 shrink-0" />
-                  <span>Showing on-chain balances for this wallet only. Low-value assets (&lt;$1) are hidden.</span>
+                  <span>{t('singleWalletNote', 'Showing on-chain balances for this wallet only. Low-value assets (<$1) are hidden.')}</span>
                 </div>
               </div>
             )}
@@ -592,7 +594,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
                 <IconWallet className="w-8 h-8 text-cyan-400" />
               </div>
               <div>
-                <div className="text-xs text-neutral-400 tracking-wider mb-1">MCC Balance</div>
+                <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('mccBalance', 'MCC Balance')}</div>
                 <div className="text-4xl font-bold text-white font-mono">
                   {mccLoading ? <Spinner /> : mask(fmt(mccBalance))}
                 </div>
@@ -611,7 +613,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
               className="flex items-center gap-2 px-4 py-2 bg-cyan-700 hover:bg-cyan-600 text-white rounded text-sm transition-colors"
             >
               <IconExternalLink className="h-4 w-4" />
-              Mining Records
+              {t('mintRecords', 'Mining Records')}
             </button>
           </div>
 
@@ -648,14 +650,14 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
         <div className="p-6">
           <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
             <IconGift className="text-cyan-400" />
-            <span className="tracking-wider">MCD Points</span>
+            <span className="tracking-wider">{t('mcdPoints', 'MCD Points')}</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 bg-neutral-800 rounded border border-neutral-700">
               <div className="flex items-center gap-2 mb-2">
                 <IconCreditCard className="h-4 w-4 text-cyan-400" />
-                <span className="text-xs text-neutral-400 tracking-wider">Current Balance</span>
+                <span className="text-xs text-neutral-400 tracking-wider">{t('currentBalance', 'Current Balance')}</span>
               </div>
               <div className="text-2xl font-bold text-cyan-400 font-mono">
                 {mcdLoading ? <Spinner /> : mask(fmt(mcdAmount, 6))}
@@ -665,7 +667,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
             <div className="p-4 bg-neutral-800 rounded border border-neutral-700">
               <div className="flex items-center gap-2 mb-2">
                 <IconTrendingUp className="h-4 w-4 text-neutral-400" />
-                <span className="text-xs text-neutral-400 tracking-wider">Total Received</span>
+                <span className="text-xs text-neutral-400 tracking-wider">{t('totalReceived', 'Total Received')}</span>
               </div>
               <div className="text-2xl font-bold text-white font-mono">
                 {mcdLoading ? <Spinner /> : mask(fmt(mcdTotalReceived, 6))}
@@ -678,9 +680,9 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
             <div className="flex items-start gap-2 text-xs text-neutral-500">
               <IconGift className="w-3 h-3 mt-0.5 shrink-0" />
               <span>
-                Income: <span className="text-white">{mask(fmt(mcdTotalReceived, 0))}</span>
-                {' · '}Spent: <span className="text-neutral-400">{mask(fmt(mcdSpent, 0))}</span>
-                {' · '}MCD is distributed daily to eligible miners.
+                {t('income', 'Income')}: <span className="text-white">{mask(fmt(mcdTotalReceived, 0))}</span>
+                {' · '}{t('spent', 'Spent')}: <span className="text-neutral-400">{mask(fmt(mcdSpent, 0))}</span>
+                {' · '}{t('mcdDistributionNote', 'MCD is distributed daily to eligible miners.')}
               </span>
             </div>
           </div>
@@ -693,7 +695,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
           <div className="p-6">
             <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
               <IconLock className="w-4 h-4" />
-              <span className="tracking-wider">Lock Period (14 days)</span>
+              <span className="tracking-wider">{t('lockPeriod14Days', 'Lock Period (14 days)')}</span>
             </div>
             <div className="space-y-3">
               {activeLocks.map((lock: any) => (
@@ -701,7 +703,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
               ))}
             </div>
             <div className="mt-3 text-xs text-neutral-500 font-mono">
-              Total locked: {mask(fmt(lockedAmount, 2))} MCC
+              {t('totalLocked', 'Total locked')}: {mask(fmt(lockedAmount, 2))} MCC
             </div>
           </div>
         </div>
@@ -713,7 +715,7 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
           <div className="p-6">
             <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
               <IconWallet className="w-4 h-4 text-cyan-400" />
-              <span className="tracking-wider">Connected Wallets</span>
+              <span className="tracking-wider">{t('connectedWallets', 'Connected Wallets')}</span>
             </div>
             <div className="space-y-2">
               {walletList.map((w: any) => (

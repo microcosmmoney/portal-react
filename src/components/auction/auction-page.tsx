@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
+import { useTranslations } from '../../i18n-context'
 import { useAuctions, useMyBids, useAuctionBid, useAuctionHistory } from '@microcosmmoney/auth-react'
 
 /* ─── Inline SVG Icons (lucide style, 24x24) ─── */
@@ -229,6 +230,7 @@ export interface MicrocosmAuctionPageProps {
 }
 
 export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuctionPageProps) {
+  const t = useTranslations('auctionsDash')
   const { data: auctions, loading, refresh: refreshAuctions } = useAuctions({ refetchInterval: 30000 })
   const { data: myBids, refresh: refreshBids } = useMyBids({ refetchInterval: 30000 })
   const { data: history, refresh: refreshHistory } = useAuctionHistory()
@@ -270,9 +272,9 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
   const handlePlaceBid = async () => {
     if (!selectedAuction) return
     const amount = parseFloat(bidAmount)
-    if (isNaN(amount) || amount <= 0) { setActionError('Enter a valid bid amount'); return }
+    if (isNaN(amount) || amount <= 0) { setActionError(t('invalidBidAmount', 'Enter a valid bid amount')); return }
     const minBid = (selectedAuction.current_price ?? 0) + (selectedAuction.bid_increment ?? 0)
-    if (amount < minBid) { setActionError(`Minimum bid is ${minBid.toLocaleString()} MCC`); return }
+    if (amount < minBid) { setActionError(t('minBidError', `Minimum bid is ${minBid.toLocaleString()} MCC`, { amount: minBid.toLocaleString() })); return }
     try {
       setActionError(null)
       await placeBid(selectedAuction.auction_id ?? selectedAuction.id, amount)
@@ -281,7 +283,7 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
       setSelectedAuction(null)
       handleRefresh()
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Bid failed')
+      setActionError(err instanceof Error ? err.message : t('bidFailed', 'Bid failed'))
     }
   }
 
@@ -296,8 +298,8 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-wider">Territory Auctions</h1>
-          <p className="text-sm text-neutral-400">Bid for magistrate positions across the Microcosm</p>
+          <h1 className="text-2xl font-bold text-white tracking-wider">{t('title', 'Territory Auctions')}</h1>
+          <p className="text-sm text-neutral-400">{t('subtitle', 'Bid for magistrate positions across the Microcosm')}</p>
         </div>
         <button
           onClick={handleRefresh}
@@ -305,7 +307,7 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
           className="flex items-center gap-2 px-3 py-1.5 text-sm border border-neutral-700 rounded text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 disabled:opacity-50 bg-transparent"
         >
           <IconRefresh className={cn('w-4 h-4', refreshing && 'animate-spin')} />
-          Refresh
+          {t('refresh', 'Refresh')}
         </button>
       </div>
 
@@ -318,22 +320,22 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
         <div className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-neutral-800 rounded p-4">
-              <div className="text-xs text-neutral-400 tracking-wider mb-1">Ongoing</div>
+              <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('ongoing', 'Ongoing')}</div>
               <div className="text-2xl font-bold text-cyan-400 font-mono">{auctionList.length}</div>
-              <div className="text-xs text-neutral-500">auctions</div>
+              <div className="text-xs text-neutral-500">{t('auctionsCount', 'auctions')}</div>
             </div>
             <div className="bg-neutral-800 rounded p-4">
-              <div className="text-xs text-neutral-400 tracking-wider mb-1">Total Bids</div>
+              <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('totalBids', 'Total Bids')}</div>
               <div className="text-2xl font-bold text-white font-mono">{stats.totalBids}</div>
-              <div className="text-xs text-neutral-500">bids</div>
+              <div className="text-xs text-neutral-500">{t('bidsCount', 'bids')}</div>
             </div>
             <div className="bg-neutral-800 rounded p-4">
-              <div className="text-xs text-neutral-400 tracking-wider mb-1">Highest Bid</div>
+              <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('highestBid', 'Highest Bid')}</div>
               <div className="text-2xl font-bold text-cyan-400 font-mono">{stats.highestBid > 0 ? stats.highestBid.toLocaleString() : '--'}</div>
               <div className="text-xs text-neutral-500">MCC</div>
             </div>
             <div className="bg-neutral-800 rounded p-4">
-              <div className="text-xs text-neutral-400 tracking-wider mb-1">Total Locked</div>
+              <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('totalLocked', 'Total Locked')}</div>
               <div className="text-2xl font-bold text-cyan-400 font-mono">{stats.totalVolume > 0 ? stats.totalVolume.toLocaleString() : '--'}</div>
               <div className="text-xs text-neutral-500">MCC</div>
             </div>
@@ -347,19 +349,19 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <IconFlame className="w-4 h-4 text-cyan-400" />
-              <span className="text-sm font-medium text-neutral-300 tracking-wider">Active Auctions</span>
+              <span className="text-sm font-medium text-neutral-300 tracking-wider">{t('activeAuctions', 'Active Auctions')}</span>
               <span className="text-xs text-neutral-500">({auctionList.length})</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-neutral-500">
               <IconClock className="w-3 h-3" />
-              <span>Auto-refresh 30s</span>
+              <span>{t('autoRefresh', 'Auto-refresh 30s')}</span>
             </div>
           </div>
 
           {auctionList.length === 0 ? (
             <div className="text-center py-16">
               <IconGavel className="w-10 h-10 text-neutral-700 mx-auto mb-3" />
-              <div className="text-neutral-500 text-sm mb-2">No active auctions</div>
+              <div className="text-neutral-500 text-sm mb-2">{t('noActiveAuctions', 'No active auctions')}</div>
               <div className="text-neutral-500 text-xs max-w-md mx-auto">
                 Auctions are held for magistrate positions. When a territory opens for bidding, it will appear here.
               </div>
@@ -396,16 +398,16 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
                             </span>
                             {isHot && (
                               <Badge className={BADGE_VARIANTS.warning}>
-                                <IconFlame className="w-3 h-3" />Hot
+                                <IconFlame className="w-3 h-3" />{t('hot', 'Hot')}
                               </Badge>
                             )}
                           </div>
                           <div className="flex items-center gap-2 mt-0.5">
                             <Badge className={BADGE_VARIANTS.info}>{UNIT_LABELS[unitType] || 'Station'}</Badge>
                             <Badge className={BADGE_VARIANTS.default}>
-                              {auction.auction_type === 'first' ? 'First Auction' : auction.auction_type === 'second' ? 'Second Auction' : 'Auction'}
+                              {auction.auction_type === 'first' ? t('firstAuction', 'First Auction') : auction.auction_type === 'second' ? t('secondAuction', 'Second Auction') : 'Auction'}
                             </Badge>
-                            <Badge className={BADGE_VARIANTS.success}>Active</Badge>
+                            <Badge className={BADGE_VARIANTS.success}>{t('active', 'Active')}</Badge>
                           </div>
                         </div>
                       </div>
@@ -418,12 +420,12 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
                     {/* Price grid */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                       <div className="bg-neutral-800 border border-neutral-700 rounded p-3">
-                        <div className="text-xs text-neutral-400 tracking-wider mb-1">Starting Price</div>
+                        <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('startingPrice', 'Starting Price')}</div>
                         <div className="text-neutral-300 font-mono">{startingPrice.toLocaleString()}</div>
                         <div className="text-xs text-neutral-500">MCC</div>
                       </div>
                       <div className="bg-neutral-900 border border-neutral-700 rounded p-3">
-                        <div className="text-xs text-neutral-400 tracking-wider mb-1">Current Highest</div>
+                        <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('currentHighest', 'Current Highest')}</div>
                         <div className="text-xl font-bold text-cyan-400 font-mono">{currentPrice.toLocaleString()}</div>
                         <div className="flex items-center gap-1 text-xs">
                           <span className="text-neutral-500">MCC</span>
@@ -435,12 +437,12 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
                         </div>
                       </div>
                       <div className="bg-neutral-800 border border-neutral-700 rounded p-3">
-                        <div className="text-xs text-neutral-400 tracking-wider mb-1">Bid Count</div>
+                        <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('bidCount', 'Bid Count')}</div>
                         <div className="text-white font-bold font-mono">{auction.bid_count || 0}</div>
-                        <div className="text-xs text-neutral-500">bids</div>
+                        <div className="text-xs text-neutral-500">{t('bidsCount', 'bids')}</div>
                       </div>
                       <div className="bg-neutral-800 border border-neutral-700 rounded p-3">
-                        <div className="text-xs text-neutral-400 tracking-wider mb-1">Min Increment</div>
+                        <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('minIncrement', 'Min Increment')}</div>
                         <div className="text-neutral-300 font-mono">{bidIncrement.toLocaleString()}</div>
                         <div className="text-xs text-neutral-500">MCC ({'\u2265'}5%)</div>
                       </div>
@@ -449,9 +451,9 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
                     {/* Footer: rules + bid button */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4 text-xs text-neutral-500">
-                        <span className="flex items-center gap-1"><IconLock className="w-3 h-3" />50% deposit</span>
-                        <span className="flex items-center gap-1"><IconCrown className="w-3 h-3" />Winner = Magistrate</span>
-                        <span className="flex items-center gap-1"><IconTimer className="w-3 h-3" />24h no-bid ends</span>
+                        <span className="flex items-center gap-1"><IconLock className="w-3 h-3" />{t('deposit50', '50% Deposit')}</span>
+                        <span className="flex items-center gap-1"><IconCrown className="w-3 h-3" />{t('winnerMagistrate', 'Winner becomes Magistrate')}</span>
+                        <span className="flex items-center gap-1"><IconTimer className="w-3 h-3" />{t('noNewBid24h', 'Settles if no new bid in 24h')}</span>
                       </div>
 
                       {(auction.status === 'active' || !auction.status) && (
@@ -460,7 +462,7 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
                             onClick={() => openBidDialog(auction)}
                             className="flex items-center gap-2 px-4 py-2 bg-cyan-700 hover:bg-cyan-600 text-white rounded text-sm font-mono"
                           >
-                            <IconGavel className="w-4 h-4" />Place Bid
+                            <IconGavel className="w-4 h-4" />{t('placeBid', 'Place Bid')}
                           </button>
                           <button
                             onClick={() => openBidDialog(auction)}
@@ -486,26 +488,26 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
             <div className="bg-neutral-800 rounded p-3">
               <div className="flex items-center gap-2 mb-2">
                 <IconAward className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="text-xs text-neutral-400 tracking-wider">Auction Target</span>
+                <span className="text-xs text-neutral-400 tracking-wider">{t('auctionTarget', 'Auction Target')}</span>
               </div>
-              <div className="text-sm text-neutral-300 mb-1">Territory magistrate positions</div>
-              <div className="text-xs text-neutral-500">Station / Matrix / Sector / System levels</div>
+              <div className="text-sm text-neutral-300 mb-1">{t('auctionTargetDesc', 'Territory magistrate positions')}</div>
+              <div className="text-xs text-neutral-500">{t('auctionTargetDetail', 'Station / Matrix / Sector / System levels')}</div>
             </div>
             <div className="bg-neutral-800 rounded p-3">
               <div className="flex items-center gap-2 mb-2">
                 <IconTimer className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="text-xs text-neutral-400 tracking-wider">Bidding Rules</span>
+                <span className="text-xs text-neutral-400 tracking-wider">{t('biddingRules', 'Bidding Rules')}</span>
               </div>
-              <div className="text-sm text-neutral-300 mb-1">50% deposit, {'\u2265'}5% increment</div>
-              <div className="text-xs text-neutral-500">24h with no new bids ends the auction</div>
+              <div className="text-sm text-neutral-300 mb-1">{t('biddingRulesDesc', '50% deposit, ≥5% increment')}</div>
+              <div className="text-xs text-neutral-500">{t('biddingRulesDetail', '24h with no new bids ends the auction')}</div>
             </div>
             <div className="bg-neutral-800 rounded p-3">
               <div className="flex items-center gap-2 mb-2">
                 <IconUsers className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="text-xs text-neutral-400 tracking-wider">Participation</span>
+                <span className="text-xs text-neutral-400 tracking-wider">{t('participationReq', 'Participation')}</span>
               </div>
-              <div className="text-sm text-neutral-300 mb-1">Sufficient MCC balance required</div>
-              <div className="text-xs text-neutral-500">Miner level or above to participate</div>
+              <div className="text-sm text-neutral-300 mb-1">{t('participationReqDesc', 'Sufficient MCC balance required')}</div>
+              <div className="text-xs text-neutral-500">{t('participationReqDetail', 'Miner level or above to participate')}</div>
             </div>
           </div>
         </div>
@@ -521,9 +523,9 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
             >
               <div className="flex items-center gap-2">
                 <IconShield className="w-4 h-4 text-cyan-400" />
-                <span className="text-sm text-neutral-300 tracking-wider">My Bids</span>
-                <span className="text-xs text-neutral-500">{bidsList.length} bids</span>
-                {stats.myLeading > 0 && <Badge className={BADGE_VARIANTS.success}>{stats.myLeading} leading</Badge>}
+                <span className="text-sm text-neutral-300 tracking-wider">{t('myBids', 'My Bids')}</span>
+                <span className="text-xs text-neutral-500">{bidsList.length} {t('bidsCount', 'bids')}</span>
+                {stats.myLeading > 0 && <Badge className={BADGE_VARIANTS.success}>{stats.myLeading} {t('leading', 'leading')}</Badge>}
               </div>
               <div className="flex items-center gap-4">
                 {showMyBids
@@ -536,7 +538,7 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
             {showMyBids && (
               <div className="mt-4 space-y-2">
                 {bidsList.length === 0 ? (
-                  <div className="text-center py-8 text-neutral-500 text-sm">No bid records</div>
+                  <div className="text-center py-8 text-neutral-500 text-sm">{t('noBidRecords', 'No bid records')}</div>
                 ) : bidsList.map((bid: any, idx: number) => {
                   const si = BID_STATUS_MAP[bid.status] || { label: bid.status || 'active', variant: 'default' }
                   return (
@@ -568,8 +570,8 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
             >
               <div className="flex items-center gap-2">
                 <IconBarChart className="w-4 h-4 text-neutral-400" />
-                <span className="text-sm text-neutral-300 tracking-wider">Auction History</span>
-                <span className="text-xs text-neutral-500">{historyList.length} auctions</span>
+                <span className="text-sm text-neutral-300 tracking-wider">{t('auctionHistory', 'Auction History')}</span>
+                <span className="text-xs text-neutral-500">{historyList.length} {t('auctionsCount', 'auctions')}</span>
               </div>
               {showHistory
                 ? <IconChevronUp className="w-4 h-4 text-neutral-500" />
@@ -594,7 +596,7 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
                         <div className="text-neutral-500 text-xs">{a.bid_count || 0} bids</div>
                       </div>
                       <Badge className={a.status === 'cancelled' ? BADGE_VARIANTS.error : BADGE_VARIANTS.default}>
-                        {a.status === 'ended' ? 'Ended' : a.status === 'cancelled' ? 'Cancelled' : 'Sold'}
+                        {a.status === 'ended' ? t('ended', 'Ended') : a.status === 'cancelled' ? t('cancelled', 'Cancelled') : t('sold', 'Sold')}
                       </Badge>
                     </div>
                   </div>
@@ -611,7 +613,7 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
           {/* Dialog header */}
           <div>
             <h3 className="text-white font-mono font-bold flex items-center gap-2">
-              <IconGavel className="w-5 h-5 text-cyan-400" />Place Bid
+              <IconGavel className="w-5 h-5 text-cyan-400" />{t('bidDialog', 'Place Bid')}
             </h3>
             <p className="text-neutral-400 font-mono text-sm mt-1">
               {selectedAuction?.unit_name || `Territory #${selectedAuction?.unit_id || selectedAuction?.auction_id || selectedAuction?.id}`}
@@ -624,16 +626,16 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
               <div className="flex gap-2 flex-wrap">
                 <Badge className={BADGE_VARIANTS.info}>{UNIT_LABELS[selectedAuction.unit_type || 'station'] || 'Station'}</Badge>
                 <Badge className={BADGE_VARIANTS.default}>
-                  {selectedAuction.auction_type === 'first' ? 'First Auction' : selectedAuction.auction_type === 'second' ? 'Second Auction' : 'Auction'}
+                  {selectedAuction.auction_type === 'first' ? t('firstAuction', 'First Auction') : selectedAuction.auction_type === 'second' ? t('secondAuction', 'Second Auction') : 'Auction'}
                 </Badge>
                 <Badge className={BADGE_VARIANTS.warning}>
-                  <IconCrown className="w-3 h-3" />Winner = Magistrate
+                  <IconCrown className="w-3 h-3" />{t('winnerMagistrate', 'Winner = Magistrate')}
                 </Badge>
               </div>
 
               {/* Current highest */}
               <div className="bg-neutral-800 border border-neutral-700 rounded p-4">
-                <div className="text-xs text-neutral-400 tracking-wider mb-1">Current Highest</div>
+                <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('currentHighest', 'Current Highest')}</div>
                 <div className="text-3xl font-bold text-cyan-400 font-mono">
                   {(selectedAuction.current_price ?? selectedAuction.starting_price ?? 0).toLocaleString()}{' '}
                   <span className="text-base text-neutral-500">MCC</span>
@@ -645,7 +647,7 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
 
               {/* Min next bid info */}
               <div className="flex justify-between items-center p-3 bg-neutral-800 rounded border border-neutral-700 text-sm">
-                <span className="text-neutral-400">Min Next Bid</span>
+                <span className="text-neutral-400">{t('minIncrement', 'Min Next Bid')}</span>
                 <span className="text-white font-bold font-mono">
                   {((selectedAuction.current_price ?? selectedAuction.starting_price ?? 0) + (selectedAuction.bid_increment ?? 0)).toLocaleString()} MCC
                 </span>
@@ -654,14 +656,14 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
               {/* Amount input */}
               <div>
                 <div className="text-xs text-neutral-400 tracking-wider mb-1">
-                  Bid Amount (min {((selectedAuction.current_price ?? 0) + (selectedAuction.bid_increment ?? 0)).toLocaleString()} MCC)
+                  {t('bidAmountLabel', 'Bid Amount')} ({t('bidAmountMin', 'min {amount} MCC', { amount: ((selectedAuction.current_price ?? 0) + (selectedAuction.bid_increment ?? 0)).toLocaleString() })})
                 </div>
                 <input
                   type="number"
                   step={selectedAuction.bid_increment ?? 1}
                   value={bidAmount}
                   onChange={(e) => setBidAmount(e.target.value)}
-                  placeholder="Enter bid amount"
+                  placeholder={t('bidAmountLabel', 'Enter bid amount')}
                   className="w-full bg-neutral-800 border border-neutral-600 text-white placeholder-neutral-400 px-3 py-2.5 rounded text-sm font-mono focus:border-cyan-400 focus:outline-none"
                 />
               </div>
@@ -670,11 +672,11 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
               {bidAmount && !isNaN(parseFloat(bidAmount)) && parseFloat(bidAmount) > 0 && (
                 <div className="space-y-2 p-3 bg-neutral-800 rounded border border-neutral-700 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-neutral-400">Bid Amount:</span>
+                    <span className="text-neutral-400">{t('bidAmountLabel', 'Bid Amount')}:</span>
                     <span className="text-neutral-300 font-mono">{parseFloat(bidAmount).toLocaleString()} MCC</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-neutral-400">Deposit (50%):</span>
+                    <span className="text-neutral-400">{t('depositLabel', 'Deposit (50%)')}:</span>
                     <span className="text-cyan-400 font-mono">{(parseFloat(bidAmount) * 0.5).toLocaleString()} MCC</span>
                   </div>
                 </div>
@@ -692,14 +694,14 @@ export function MicrocosmAuctionPage({ basePath = '', onNavigate }: MicrocosmAuc
               onClick={() => setBidDialogOpen(false)}
               className="px-4 py-2 text-sm border border-neutral-700 rounded text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent"
             >
-              Cancel
+              {t('cancel', 'Cancel')}
             </button>
             <button
               onClick={handlePlaceBid}
               disabled={bidLoading || !bidAmount}
               className="px-4 py-2 text-sm bg-cyan-700 hover:bg-cyan-600 text-white rounded disabled:opacity-50 font-mono"
             >
-              {bidLoading ? 'Processing...' : 'Confirm Bid'}
+              {bidLoading ? 'Processing...' : t('confirmBid', 'Confirm Bid')}
             </button>
           </div>
         </div>

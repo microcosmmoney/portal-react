@@ -1,6 +1,7 @@
 'use client'
 
 import { usePlatformStats, useDashboardUserStats } from '@microcosmmoney/auth-react'
+import { useTranslations } from '../../i18n-context'
 
 /* Inline SVG icons (16x16, stroke-based) */
 const IconUsersTotal = ({ stroke = '#22d3ee' }: { stroke?: string }) => (
@@ -47,6 +48,7 @@ export interface MicrocosmEcosystemStatsProps {
 }
 
 export function MicrocosmEcosystemStats({ accentColor }: MicrocosmEcosystemStatsProps = {}) {
+  const t = useTranslations('mccDashboard')
   const { data: overview, loading: loadingOverview } = usePlatformStats()
   const { data: userLevels, loading: loadingUsers } = useDashboardUserStats()
 
@@ -54,10 +56,10 @@ export function MicrocosmEcosystemStats({ accentColor }: MicrocosmEcosystemStats
   const ac = accentColor || '#22d3ee'
 
   const stats = [
-    { label: 'total_users', value: (overview as any)?.total_users ?? (userLevels as any)?.total_users, icon: IconUsersTotal },
-    { label: '24h_active', value: (overview as any)?.active_users_24h, icon: IconActivity },
-    { label: 'miners', value: (userLevels as any)?.miners_and_above ?? (overview as any)?.miners_count, icon: IconHardHat },
-    { label: 'territories', value: (overview as any)?.total_territories, icon: IconMap },
+    { label: t('totalUsers', 'total_users'), value: (overview as any)?.total_users ?? (userLevels as any)?.total_users, icon: IconUsersTotal },
+    { label: t('active24h', '24h_active'), value: (overview as any)?.active_users_24h, icon: IconActivity },
+    { label: t('miners', 'miners'), value: (userLevels as any)?.miners_and_above ?? (overview as any)?.miners_count, icon: IconHardHat },
+    { label: t('territories', 'territories'), value: (overview as any)?.total_territories, icon: IconMap },
   ]
 
   const spinnerBorderColor = accentColor ? { borderColor: accentColor, borderTopColor: 'transparent' } : undefined
@@ -68,7 +70,7 @@ export function MicrocosmEcosystemStats({ accentColor }: MicrocosmEcosystemStats
       <div className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <IconGlobe stroke={ac} />
-          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">ECOSYSTEM</span>
+          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">{t('ecosystem', 'ECOSYSTEM')}</span>
         </div>
 
         {loading ? (

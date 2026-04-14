@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useMCCPrice } from '@microcosmmoney/auth-react'
 import { TerminalCard } from '../terminal'
+import { useTranslations } from '../../i18n-context'
 
 const POOL_ADDRESS = 'REDEh89TzpwCtoWQuuNPtxskrVoUDQgowR7e7sZpWj9'
 const USDT_VAULT = 'BnHA9jSm88wzQS4c2nCgTXch1Byzc3FWn2G7Wgrvazy3'
@@ -37,17 +38,20 @@ function formatNumber(num: number, decimals = 2): string {
 }
 
 export function MicrocosmReincarnationPage({
-  title = 'Reincarnation Pool',
-  subtitle = '2140 Protocol autonomous market making',
+  title,
+  subtitle,
 }: MicrocosmReincarnationPageProps = {}) {
+  const t = useTranslations('reincarnationDash')
+  const resolvedTitle = title ?? t('title', 'Reincarnation Pool')
+  const resolvedSubtitle = subtitle ?? t('subtitle', '2140 Protocol autonomous market making')
   const { data: priceData, loading } = useMCCPrice({ refetchInterval: 60_000 })
   const basePrice = priceData?.price ?? 0
 
   return (
     <div className="max-w-7xl mx-auto px-3 py-4 space-y-3 xs:px-4 xs:space-y-4 sm:px-6 sm:py-6 sm:space-y-6 font-mono">
       <div>
-        <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">{title}</h1>
-        <p className="text-xs sm:text-sm text-neutral-400 mt-1">{subtitle}</p>
+        <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">{resolvedTitle}</h1>
+        <p className="text-xs sm:text-sm text-neutral-400 mt-1">{resolvedSubtitle}</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -78,7 +82,7 @@ export function MicrocosmReincarnationPage({
         </TerminalCard>
       </div>
 
-      <TerminalCard title="Contract Addresses">
+      <TerminalCard title={t('contractAddresses', 'Contract Addresses')}>
         <div className="space-y-3">
           <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
             <div className="text-xs text-neutral-400 tracking-wider mb-1">Reincarnation Pool PDA</div>
@@ -99,14 +103,14 @@ export function MicrocosmReincarnationPage({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
-              <div className="text-xs text-neutral-400 tracking-wider mb-1">USDT Vault</div>
+              <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('usdtBalance', 'USDT Vault')}</div>
               <div className="flex items-center justify-between gap-2">
                 <code className="text-xs text-neutral-400 break-all">{USDT_VAULT}</code>
                 <CopyButton text={USDT_VAULT} />
               </div>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
-              <div className="text-xs text-neutral-400 tracking-wider mb-1">USDC Vault</div>
+              <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('usdcBalance', 'USDC Vault')}</div>
               <div className="flex items-center justify-between gap-2">
                 <code className="text-xs text-neutral-400 break-all">{USDC_VAULT}</code>
                 <CopyButton text={USDC_VAULT} />
@@ -116,13 +120,11 @@ export function MicrocosmReincarnationPage({
         </div>
       </TerminalCard>
 
-      <TerminalCard title="Mechanism">
+      <TerminalCard title={t('mechanism', 'Market Making Mechanism')}>
         <div className="text-sm space-y-2">
-          <div className="font-medium text-cyan-400 tracking-wider">Autonomous Market Making</div>
+          <div className="font-medium text-cyan-400 tracking-wider">{t('mechanism', 'Market Making Mechanism')}</div>
           <p className="text-neutral-400 leading-relaxed">
-            The Reincarnation Pool is a Solana PDA-owned autonomous market maker. Every epoch (1 hour), it reads
-            the CPMM spot price, updates an EMA-weighted oracle (weight 2140), and executes a permissionless
-            buyback via CPMM swap. Proceeds flow to the Mining Vault for the next cycle of community mining.
+            {t('mechanismDesc', 'The Reincarnation Pool is a Solana PDA-owned autonomous market maker. Every epoch (1 hour), it reads the CPMM spot price, updates an EMA-weighted oracle (weight 2140), and executes a permissionless buyback via CPMM swap. Proceeds flow to the Mining Vault for the next cycle of community mining.')}
           </p>
           <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
             <span className="px-2 py-1 rounded bg-white/10 text-white">Raydium CPMM</span>

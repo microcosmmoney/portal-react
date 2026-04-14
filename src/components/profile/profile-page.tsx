@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react'
 import { useMicrocosmApi, useMicrocosmContext, useAuth } from '@microcosmmoney/auth-react'
 import { TerminalCard } from '../terminal'
+import { useTranslations } from '../../i18n-context'
 import { MicrocosmEmailChangeCard } from './email-change-card'
 import { MicrocosmTwoFactorSettings } from './two-factor-settings'
 
@@ -53,6 +54,7 @@ export interface MicrocosmProfilePageProps {
 export function MicrocosmProfilePage({
   walletSection,
 }: MicrocosmProfilePageProps = {}) {
+  const t = useTranslations('profile')
   const api = useMicrocosmApi()
   const { getAccessToken } = useMicrocosmContext()
   const authState = useAuth()
@@ -112,11 +114,11 @@ export function MicrocosmProfilePage({
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) {
-      setError('Please select an image file')
+      setError(t('selectImageFile', 'Please select an image file'))
       return
     }
     if (file.size > 2 * 1024 * 1024) {
-      setError('Image must be under 2MB')
+      setError(t('imageTooLarge', 'Image must not exceed 2MB'))
       return
     }
     setUploadingAvatar(true)
@@ -154,11 +156,11 @@ export function MicrocosmProfilePage({
     return (
       <div className="max-w-7xl mx-auto px-3 py-4 space-y-3 xs:px-4 xs:space-y-4 sm:px-6 sm:py-6 sm:space-y-6 font-mono">
         <div>
-          <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">Profile</h1>
-          <p className="text-xs sm:text-sm text-neutral-400">Your account information</p>
+          <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">{t('title', 'Profile')}</h1>
+          <p className="text-xs sm:text-sm text-neutral-400">{t('subtitle', 'View and manage your personal information')}</p>
         </div>
         <div className="flex items-center justify-center py-20">
-          <span className="text-neutral-400">Loading profile...</span>
+          <span className="text-neutral-400">{t('loadingProfile', 'Loading profile...')}</span>
         </div>
       </div>
     )
@@ -171,8 +173,8 @@ export function MicrocosmProfilePage({
   return (
     <div className="max-w-7xl mx-auto px-3 py-4 space-y-3 xs:px-4 xs:space-y-4 sm:px-6 sm:py-6 sm:space-y-6 font-mono">
       <div>
-        <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">Profile</h1>
-        <p className="text-xs sm:text-sm text-neutral-400">Your account information</p>
+        <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">{t('title', 'Profile')}</h1>
+        <p className="text-xs sm:text-sm text-neutral-400">{t('subtitle', 'View and manage your personal information')}</p>
       </div>
 
       {error && (
@@ -198,7 +200,7 @@ export function MicrocosmProfilePage({
               disabled={uploadingAvatar}
               className="absolute inset-0 bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs disabled:opacity-30"
             >
-              {uploadingAvatar ? '...' : 'edit'}
+              {uploadingAvatar ? '...' : t('edit', 'edit')}
             </button>
             <input
               ref={fileInputRef}
@@ -216,7 +218,7 @@ export function MicrocosmProfilePage({
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   className="w-full bg-neutral-800 border border-neutral-600 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-400"
-                  placeholder="Display name"
+                  placeholder={t('displayName', 'Display name')}
                 />
                 <div className="flex gap-2">
                   <button
@@ -224,7 +226,7 @@ export function MicrocosmProfilePage({
                     disabled={saving}
                     className="px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white rounded text-sm disabled:opacity-50"
                   >
-                    {saving ? 'Saving...' : 'Save'}
+                    {saving ? t('saving', 'Saving...') : t('save', 'Save')}
                   </button>
                   <button
                     onClick={() => {
@@ -234,7 +236,7 @@ export function MicrocosmProfilePage({
                     disabled={saving}
                     className="px-3 py-1.5 border border-neutral-700 text-neutral-400 hover:bg-neutral-800 rounded text-sm"
                   >
-                    Cancel
+                    {t('cancel', 'Cancel')}
                   </button>
                 </div>
               </div>
@@ -246,21 +248,21 @@ export function MicrocosmProfilePage({
                     onClick={() => setEditing(true)}
                     className="text-xs text-neutral-500 hover:text-cyan-400"
                   >
-                    [edit]
+                    [{t('edit', 'edit')}]
                   </button>
                 </div>
-                <div className="text-sm text-neutral-400 mt-1">{profile?.email || '(no email)'}</div>
+                <div className="text-sm text-neutral-400 mt-1">{profile?.email || t('noEmail', '(no email)')}</div>
                 <div className="flex gap-2 mt-2">
                   <span className="px-2 py-0.5 bg-neutral-800 text-neutral-300 rounded text-xs border border-neutral-700">
-                    {profile?.role || 'user'}
+                    {profile?.role || t('normalUser', 'user')}
                   </span>
                   {profile?.email_verified ? (
                     <span className="px-2 py-0.5 bg-green-900/30 text-green-400 rounded text-xs border border-green-800">
-                      verified
+                      {t('verified', 'verified')}
                     </span>
                   ) : (
                     <span className="px-2 py-0.5 bg-red-900/30 text-red-400 rounded text-xs border border-red-800">
-                      unverified
+                      {t('unverified', 'unverified')}
                     </span>
                   )}
                 </div>
@@ -275,31 +277,31 @@ export function MicrocosmProfilePage({
             <div className="text-xs text-white font-mono break-all">{profile?.uid || userInfo?.uid || '-'}</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-lg p-4 blockchain-sub-card">
-            <div className="text-xs text-neutral-400 tracking-wider mb-1">Short ID</div>
+            <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('shortId', 'Short ID')}</div>
             <div className="text-sm text-white font-mono">{profile?.short_id || '-'}</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-lg p-4 blockchain-sub-card">
-            <div className="text-xs text-neutral-400 tracking-wider mb-1">Created</div>
+            <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('created', 'Created')}</div>
             <div className="text-sm text-white">{formatDate(profile?.created_at)}</div>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-lg p-4 blockchain-sub-card">
-            <div className="text-xs text-neutral-400 tracking-wider mb-1">Last Login</div>
+            <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('lastLogin', 'Last Login')}</div>
             <div className="text-sm text-white">{formatDate(profile?.last_login_at)}</div>
           </div>
         </div>
       </TerminalCard>
 
       {levelData && (
-        <TerminalCard title="Level Status">
+        <TerminalCard title={t('levelStatus', 'Level Status')}>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-neutral-800 rounded">
               <div>
-                <div className="text-xs text-neutral-400 tracking-wider mb-1">CURRENT LEVEL</div>
+                <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('currentLevel', 'CURRENT LEVEL')}</div>
                 <div className={`text-xl font-bold ${lvlInfo.color}`}>{lvlInfo.label}</div>
                 <div className="text-xs text-neutral-500 mt-1">{lvlInfo.description}</div>
               </div>
               <div className="text-right">
-                <div className="text-xs text-neutral-400 tracking-wider mb-1">HOLDINGS</div>
+                <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('holdings', 'HOLDINGS')}</div>
                 <div className="text-xs text-white font-mono">
                   S:{levelData.holdings?.station ?? 0} M:{levelData.holdings?.matrix ?? 0} Se:
                   {levelData.holdings?.sector ?? 0} Sy:{levelData.holdings?.system ?? 0}
@@ -309,7 +311,7 @@ export function MicrocosmProfilePage({
             {levelData.next_level_requirement && (
               <div className="p-4 bg-neutral-800 rounded">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-neutral-400 tracking-wider">PROGRESS</span>
+                  <span className="text-xs text-neutral-400 tracking-wider">{t('progress', 'PROGRESS')}</span>
                   <span className="text-white text-sm font-mono">
                     {levelData.progress_percent ?? 0}%
                   </span>
@@ -334,15 +336,15 @@ export function MicrocosmProfilePage({
         </TerminalCard>
       )}
 
-      <TerminalCard title="Email Verification">
+      <TerminalCard title={t('emailVerification', 'Email Verification')}>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-neutral-400 tracking-wider mb-1">STATUS</div>
+              <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('status', 'STATUS')}</div>
               {profile?.email_verified ? (
-                <div className="text-green-400 text-sm">Verified</div>
+                <div className="text-green-400 text-sm">{t('statusVerified', 'Verified')}</div>
               ) : (
-                <div className="text-red-400 text-sm">Unverified</div>
+                <div className="text-red-400 text-sm">{t('statusUnverified', 'Unverified')}</div>
               )}
             </div>
             {!profile?.email_verified && (
@@ -352,7 +354,7 @@ export function MicrocosmProfilePage({
                   setResendMessage(null)
                   try {
                     await api.post('/users/me/resend-verification', {})
-                    setResendMessage('Verification email sent — check your inbox')
+                    setResendMessage(t('verificationSent', 'Verification email sent — check your inbox'))
                   } catch (e) {
                     setResendMessage(e instanceof Error ? e.message : 'Failed to send')
                   } finally {
@@ -362,7 +364,7 @@ export function MicrocosmProfilePage({
                 disabled={resendingVerification}
                 className="px-3 py-1.5 border border-cyan-800 text-cyan-400 hover:bg-cyan-950 rounded text-xs disabled:opacity-50"
               >
-                {resendingVerification ? 'Sending...' : 'Resend Email'}
+                {resendingVerification ? t('sending', 'Sending...') : t('resendEmail', 'Resend Email')}
               </button>
             )}
           </div>
@@ -384,13 +386,13 @@ export function MicrocosmProfilePage({
 
       <TerminalCard>
         <div className="text-neutral-400 text-sm mb-3">
-          <span className="text-cyan-400">!</span> Security
+          <span className="text-cyan-400">!</span> {t('securityTitle', 'Security')}
         </div>
         <div className="space-y-1 text-sm text-neutral-400">
-          <p>- Keep your account credentials secure</p>
-          <p>- Change password periodically via main portal</p>
-          <p>- Report suspicious activity immediately</p>
-          <p>- Verify your email to receive important notifications</p>
+          <p>- {t('securityTip1', 'Keep your account credentials secure')}</p>
+          <p>- {t('securityTip2', 'Change password periodically via main portal')}</p>
+          <p>- {t('securityTip3', 'Report suspicious activity immediately')}</p>
+          <p>- {t('securityTip4', 'Verify your email to receive important notifications')}</p>
         </div>
       </TerminalCard>
     </div>

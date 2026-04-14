@@ -1,6 +1,7 @@
 'use client'
 
 import { useLevelProgress, useTechBonusDetail, useMiningStats } from '@microcosmmoney/auth-react'
+import { useTranslations } from '../../i18n-context'
 
 const RANK_LABELS: Record<string, string> = {
   Miner: 'Miner \u77ff\u5de5',
@@ -71,6 +72,7 @@ export interface MicrocosmMiningWeightProps {
 }
 
 export function MicrocosmMiningWeight({ accentColor }: MicrocosmMiningWeightProps = {}) {
+  const t = useTranslations('mccDashboard')
   const { data, loading: loadingLevel } = useLevelProgress()
   const { data: techBonus, loading: loadingTech } = useTechBonusDetail()
   const { data: miningStats, loading: loadingMining } = useMiningStats()
@@ -94,7 +96,7 @@ export function MicrocosmMiningWeight({ accentColor }: MicrocosmMiningWeightProp
       <div className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <IconPickaxe stroke="#5EEAD4" />
-          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">MINING_WEIGHT</span>
+          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">{t('miningWeight', 'MINING_WEIGHT')}</span>
         </div>
 
         {loading ? (
@@ -107,37 +109,37 @@ export function MicrocosmMiningWeight({ accentColor }: MicrocosmMiningWeightProp
               <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
                 <div className="flex items-center gap-1.5 mb-1">
                   <IconShield stroke="#5EEAD4" />
-                  <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">level</span>
+                  <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">{t('level', 'level')}</span>
                 </div>
                 <div
                   className={`text-sm font-bold font-mono ${accentColor ? '' : (RANK_COLORS[rank ?? ''] ?? 'text-neutral-500')}`}
                   style={accentColor ? { color: accentColor } : undefined}
                 >
-                  {rank ? RANK_LABELS[rank] ?? rank : 'N/A'}
+                  {rank ? RANK_LABELS[rank] ?? rank : t('na', 'N/A')}
                 </div>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
                 <div className="flex items-center gap-1.5 mb-1">
                   <IconTree stroke="#5EEAD4" />
-                  <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">tech_bonus</span>
+                  <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">{t('techBonus', 'tech_bonus')}</span>
                 </div>
                 <div className="text-sm font-bold font-mono text-white">{discountPct}</div>
-                <div className="text-[10px] text-neutral-500 font-mono">output boost</div>
+                <div className="text-[10px] text-neutral-500 font-mono">{t('outputBoost', 'output boost')}</div>
               </div>
               <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
                 <div className="flex items-center gap-1.5 mb-1">
                   <IconCalendar stroke="#5EEAD4" />
-                  <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">mining_days</span>
+                  <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">{t('miningDays', 'mining_days')}</span>
                 </div>
                 <div className="text-sm font-bold font-mono text-white">{miningDays}</div>
-                <div className="text-[10px] text-neutral-500 font-mono">cumulative</div>
+                <div className="text-[10px] text-neutral-500 font-mono">{t('cumulative', 'cumulative')}</div>
               </div>
             </div>
 
             <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
-              <div className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase mb-3">companion_yield</div>
+              <div className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase mb-3">{t('companionYield', 'companion_yield')}</div>
               <p className="text-[10px] text-neutral-500 font-mono mb-3">
-                Each mining produces companion yield, auto-injected into territory ecosystem
+                {t('companionYieldDesc', 'Each mining produces companion yield, auto-injected into territory ecosystem')}
               </p>
 
               <div className="space-y-2">

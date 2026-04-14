@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useMCD, useMCDRewards, useMCDTransactions, useWallets } from '@microcosmmoney/auth-react'
+import { useTranslations } from '../../i18n-context'
 
 /* ── Inline SVG Icons (lucide style, 24x24 default) ── */
 
@@ -221,6 +222,7 @@ export interface MicrocosmMCDPageProps {
 }
 
 export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPageProps) {
+  const t = useTranslations('mcdDash')
   const { balance: mcdData, loading: mcdLoading, refresh: refreshMCD } = useMCD(60_000)
   const { data: rewards, loading: rewardsLoading, refresh: refreshRewards } = useMCDRewards()
   const { data: transactions, loading: txLoading, refresh: refreshTx } = useMCDTransactions()
@@ -264,7 +266,7 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
       <div className="flex items-center justify-center h-[60vh]">
         <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-8 text-center">
           <IconWallet className="w-12 h-12 mx-auto mb-4 text-neutral-500" />
-          <p className="text-neutral-400">Please log in to view your MCD balance</p>
+          <p className="text-neutral-400">{t('loginRequired', 'Please log in to view your MCD balance')}</p>
         </div>
       </div>
     )
@@ -275,9 +277,9 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-wider">MCD Points</h1>
+          <h1 className="text-2xl font-bold text-white tracking-wider">{t('title', 'MCD Credits')}</h1>
           <p className="text-sm text-neutral-400 mt-1">
-            Microcosm Dollar — ecosystem points
+            {t('subtitle', 'Microcosm Dollar - Ecosystem consumption credits')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -286,14 +288,14 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
             className="flex items-center px-3 py-1.5 text-sm border border-neutral-700 rounded text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent transition-colors"
           >
             <IconWallet className="w-4 h-4 mr-2" />
-            Manage Wallet
+            {t('manageWallet', 'Manage Wallet')}
           </button>
           <button
             onClick={() => setShowHelp(!showHelp)}
             className="flex items-center px-3 py-1.5 text-sm border border-neutral-700 rounded text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent transition-colors"
           >
             <IconHelpCircle className="w-4 h-4 mr-2" />
-            Help
+            {t('helpGuide', 'Help Guide')}
           </button>
           <button
             onClick={handleRefresh}
@@ -301,7 +303,7 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
             className="flex items-center px-3 py-1.5 text-sm border border-neutral-700 rounded text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent transition-colors disabled:opacity-50"
           >
             <IconRefresh className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            {t('refresh', 'Refresh')}
           </button>
         </div>
       </div>
@@ -309,12 +311,12 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
       {/* ── Help Panel (toggleable) ── */}
       {showHelp && (
         <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-6 hover:border-cyan-400/50 transition-colors">
-          <div className="text-white font-bold tracking-wider mb-4">How MCD Works</div>
+          <div className="text-white font-bold tracking-wider mb-4">{t('mcdGuideTitle', 'MCD Credits Guide')}</div>
           <div className="space-y-4 text-sm">
             <div className="bg-neutral-800 rounded p-3">
               <h4 className="font-medium text-white mb-2 flex items-center gap-2">
                 <IconGift className="w-4 h-4 text-white" />
-                How to Get MCD
+                {t('howToGetMcd', 'How to Earn MCD')}
               </h4>
               <ul className="list-disc list-inside text-neutral-400 space-y-1">
                 <li>Daily distribution from territory vault (1% of vault balance)</li>
@@ -325,7 +327,7 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
             <div className="bg-neutral-800 rounded p-3">
               <h4 className="font-medium text-white mb-2 flex items-center gap-2">
                 <IconCoins className="w-4 h-4 text-white" />
-                MCD Usage
+                {t('mcdUsage', 'MCD Usage')}
               </h4>
               <ul className="list-disc list-inside text-neutral-400 space-y-1">
                 <li>Spend on ecosystem services (Double Helix, xSocial, etc.)</li>
@@ -336,7 +338,7 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
             <div className="bg-neutral-800 rounded p-3">
               <h4 className="font-medium text-white mb-2 flex items-center gap-2">
                 <IconHistory className="w-4 h-4 text-white" />
-                Notes
+                {t('notes', 'Notes')}
               </h4>
               <ul className="list-disc list-inside text-neutral-400 space-y-1">
                 <li>MCD is an internal ecosystem token, not tradeable on exchanges</li>
@@ -382,14 +384,14 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <IconCoins className="w-5 h-5 text-white" />
-            <span className="text-sm text-neutral-400 tracking-wider">On-chain MCD Balance</span>
+            <span className="text-sm text-neutral-400 tracking-wider">{t('onChainBalance', 'On-chain MCD Balance (Helius RPC)')}</span>
           </div>
           {walletList.length > 1 && (
             <button
               onClick={() => setWalletsExpanded(!walletsExpanded)}
               className="flex items-center text-sm text-neutral-400 hover:text-cyan-400 transition-colors"
             >
-              {walletList.length} wallets
+              {walletList.length} {t('walletsCount', 'wallets')}
               {walletsExpanded
                 ? <IconChevronUp className="w-4 h-4 ml-1" />
                 : <IconChevronDown className="w-4 h-4 ml-1" />
@@ -401,17 +403,17 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
         {walletsLoading ? (
           <div className="flex items-center gap-2">
             <Spinner />
-            <span className="text-neutral-500 text-sm">Loading on-chain balances...</span>
+            <span className="text-neutral-500 text-sm">{t('loadingOnChain', 'Loading on-chain balance...')}</span>
           </div>
         ) : walletList.length === 0 ? (
           <div className="text-center py-4">
-            <p className="text-neutral-500 mb-3">No wallet connected</p>
+            <p className="text-neutral-500 mb-3">{t('noWalletBound', 'No Solana wallet bound yet')}</p>
             <button
               onClick={() => handleNav('/mcc/wallet')}
               className="flex items-center mx-auto px-3 py-1.5 text-sm border border-neutral-700 rounded text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent transition-colors"
             >
               <IconWallet className="w-4 h-4 mr-2" />
-              Connect Wallet
+              {t('connectWallet', 'Connect Wallet')}
             </button>
           </div>
         ) : (
@@ -422,7 +424,7 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
                 {walletList[0].wallet_address.slice(0, 4)}...{walletList[0].wallet_address.slice(-4)}
                 {walletList[0].is_primary && (
                   <span className="inline-block text-[10px] border border-cyan-400/30 text-cyan-400 px-1.5 py-0 ml-2 rounded">
-                    Primary
+                    {t('primaryWallet', 'Primary')}
                   </span>
                 )}
               </div>
@@ -439,7 +441,7 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
                       </span>
                       {w.is_primary && (
                         <span className="inline-block text-[10px] border border-cyan-400/30 text-cyan-400 px-1.5 py-0 rounded">
-                          Primary
+                          {t('primaryWallet', 'Primary')}
                         </span>
                       )}
                     </div>
@@ -457,15 +459,15 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
         <div className="p-6">
           <div className="flex items-center gap-2 mb-1">
             <IconTrendingUp className="w-5 h-5 text-white" />
-            <span className="text-sm font-medium text-neutral-300 tracking-wider">MCD Minting</span>
+            <span className="text-sm font-medium text-neutral-300 tracking-wider">{t('mcdMinting', 'MCD Minting')}</span>
           </div>
-          <p className="text-neutral-400 text-sm mb-4">Use MCD to mint MCC tokens</p>
+          <p className="text-neutral-400 text-sm mb-4">{t('mintMccWithMcd', 'Consume MCD to mint MCC Token')}</p>
           <button
             onClick={() => handleNav('/mcc/mining')}
             className="w-full flex items-center justify-center gap-2 h-10 rounded-md bg-cyan-700 hover:bg-cyan-600 transition-all text-white text-sm font-medium cursor-pointer"
           >
             <IconCoins className="w-4 h-4" />
-            Use MCD to Mint MCC
+            {t('useMcdToMintMcc', 'Mint MCC with MCD')}
           </button>
           <div className="mt-3 p-3 bg-neutral-800 rounded">
             <div className="flex items-start gap-2 text-xs text-cyan-400/70">
@@ -484,9 +486,9 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
         <div className="p-6">
           <div className="flex items-center gap-2 mb-1">
             <IconGift className="w-5 h-5 text-white" />
-            <span className="text-sm font-medium text-neutral-300 tracking-wider">Ecosystem Services</span>
+            <span className="text-sm font-medium text-neutral-300 tracking-wider">{t('ecoServices', 'Ecosystem Services')}</span>
           </div>
-          <p className="text-neutral-400 text-sm mb-4">Spend MCD across the Microcosm ecosystem</p>
+          <p className="text-neutral-400 text-sm mb-4">{t('ecoServicesDesc', 'Use MCD to access ecosystem project services')}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {ECOSYSTEM_SERVICES.map((p) => (
               <a
@@ -527,7 +529,7 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
           }`}
         >
           <IconGift className="w-4 h-4 mr-2" />
-          Daily Distribution
+          {t('dailyDistribution', 'Daily Distribution')}
         </button>
         <button
           onClick={() => setActiveTab('history')}
@@ -538,7 +540,7 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
           }`}
         >
           <IconHistory className="w-4 h-4 mr-2" />
-          Transaction History
+          {t('transactionHistory', 'Transaction History')}
         </button>
       </div>
 
@@ -548,9 +550,9 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
           <div className="p-6">
             <div className="flex items-center gap-2 mb-1">
               <IconCalendar className="w-5 h-5 text-white" />
-              <span className="text-sm font-medium text-neutral-300 tracking-wider">Daily Distribution Records</span>
+              <span className="text-sm font-medium text-neutral-300 tracking-wider">{t('dailyDistributionRecords', 'Daily Distribution Records')}</span>
             </div>
-            <p className="text-neutral-400 text-sm mb-4">Daily MCD distribution from territory vaults</p>
+            <p className="text-neutral-400 text-sm mb-4">{t('dailyDistributionDesc', 'MCD records auto-distributed daily from Station vault')}</p>
 
             {rewardsLoading ? (
               <div className="space-y-3">
@@ -561,18 +563,18 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
             ) : rewardsList.length === 0 ? (
               <div className="text-center py-12 text-neutral-500">
                 <IconGift className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No distribution records</p>
-                <p className="text-sm mt-2">Distribution happens daily at 00:15 UTC for eligible miners</p>
+                <p>{t('noDailyRecords', 'No daily distribution records')}</p>
+                <p className="text-sm mt-2">{t('noDailyRecordsHint', 'Daily MCD distribution begins after joining a Station')}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-neutral-800">
-                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">Date</th>
-                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">Territory</th>
-                      <th className="text-right py-3 text-xs font-medium text-neutral-400 tracking-wider">Amount</th>
-                      <th className="text-right py-3 text-xs font-medium text-neutral-400 tracking-wider">Claimed</th>
+                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">{t('distributionDate', 'Distribution Date')}</th>
+                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">{t('territoryId', 'Territory')}</th>
+                      <th className="text-right py-3 text-xs font-medium text-neutral-400 tracking-wider">{t('amountLabel', 'Amount')}</th>
+                      <th className="text-right py-3 text-xs font-medium text-neutral-400 tracking-wider">{t('claimTime', 'Claim Time')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -608,9 +610,9 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
           <div className="p-6">
             <div className="flex items-center gap-2 mb-1">
               <IconHistory className="w-5 h-5 text-white" />
-              <span className="text-sm font-medium text-neutral-300 tracking-wider">Transaction History</span>
+              <span className="text-sm font-medium text-neutral-300 tracking-wider">{t('transactionHistory', 'Transaction History')}</span>
             </div>
-            <p className="text-neutral-400 text-sm mb-4">All MCD transactions for your account</p>
+            <p className="text-neutral-400 text-sm mb-4">{t('transactionHistoryDesc', 'Complete record of all MCD-related transactions')}</p>
 
             {txLoading ? (
               <div className="space-y-3">
@@ -621,19 +623,19 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
             ) : txList.length === 0 ? (
               <div className="text-center py-12 text-neutral-500">
                 <IconHistory className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No transactions yet</p>
+                <p>{t('noTransactions', 'No transaction records')}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-neutral-800">
-                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">Time</th>
-                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">Type</th>
-                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">From</th>
+                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">{t('timeLabel', 'Time')}</th>
+                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">{t('typeLabel', 'Type')}</th>
+                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">{t('fromLabel', 'From')}</th>
                       <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider w-8"></th>
-                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">To</th>
-                      <th className="text-right py-3 text-xs font-medium text-neutral-400 tracking-wider">Amount</th>
+                      <th className="text-left py-3 text-xs font-medium text-neutral-400 tracking-wider">{t('toLabel', 'To')}</th>
+                      <th className="text-right py-3 text-xs font-medium text-neutral-400 tracking-wider">{t('amountLabel', 'Amount')}</th>
                     </tr>
                   </thead>
                   <tbody>

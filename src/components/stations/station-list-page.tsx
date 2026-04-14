@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useMicrocosmApi, useMicrocosmContext } from '@microcosmmoney/auth-react'
 import { TerminalCard } from '../terminal'
+import { useTranslations } from '../../i18n-context'
 
 const API_BASE = 'https://api.microcosm.money/v1'
 
@@ -72,6 +73,7 @@ export interface MicrocosmStationListPageProps {
 }
 
 export function MicrocosmStationListPage({ currentUid, isAdmin = false }: MicrocosmStationListPageProps = {}) {
+  const t = useTranslations('stationList')
   const api = useMicrocosmApi()
   const { getAccessToken } = useMicrocosmContext()
   const [units, setUnits] = useState<Unit[]>([])
@@ -153,8 +155,8 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (!file.type.startsWith('image/')) { setError('Please select an image file'); return }
-    if (file.size > 2 * 1024 * 1024) { setError('Image must be under 2MB'); return }
+    if (!file.type.startsWith('image/')) { setError(t('selectImageFile', 'Please select an image file')); return }
+    if (file.size > 2 * 1024 * 1024) { setError(t('imageTooLarge', 'Image must not exceed 2MB')); return }
     cropToSquare(file, 512)
       .then(cropped => {
         setImageFile(cropped)
@@ -162,7 +164,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
         reader.onload = (ev) => setImagePreview(ev.target?.result as string)
         reader.readAsDataURL(cropped)
       })
-      .catch(() => setError('Image processing failed'))
+      .catch(() => setError(t('imageProcessError', 'Image processing failed')))
   }
 
   const uploadImage = async (unitId: string): Promise<boolean> => {
@@ -230,8 +232,8 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
   return (
     <div className="max-w-7xl mx-auto px-3 py-4 space-y-3 xs:px-4 xs:space-y-4 sm:px-6 sm:py-6 sm:space-y-6 font-mono">
       <div>
-        <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">Station List</h1>
-        <p className="text-xs sm:text-sm text-neutral-400">All territories (Station / Matrix / Sector / System)</p>
+        <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">{t('title', 'Territory Management')}</h1>
+        <p className="text-xs sm:text-sm text-neutral-400">{t('subtitle', 'Manage territories, view KPI and vault balances')}</p>
       </div>
 
       {error && (
@@ -272,7 +274,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
                   filter === f ? 'bg-cyan-700 text-white' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white'
                 }`}
               >
-                {f === 'all' ? 'All' : UNIT_LABELS[f as UnitType]}
+                {f === 'all' ? t('all', 'All') : t(`unitTypeLabels.${f}`, UNIT_LABELS[f as UnitType])}
               </button>
             ))}
           </div>
@@ -280,7 +282,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by name / location / short_id..."
+            placeholder={t('searchPlaceholder', 'Search territory name, path, location...')}
             className="flex-1 bg-neutral-800 border border-neutral-600 text-white rounded px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-400"
           />
         </div>
@@ -288,11 +290,11 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <span className="text-neutral-400">Loading units...</span>
+          <span className="text-neutral-400">{t('loading', 'Loading units...')}</span>
         </div>
       ) : filteredUnits.length === 0 ? (
         <TerminalCard>
-          <div className="text-center py-8 text-neutral-500">No units match your filter</div>
+          <div className="text-center py-8 text-neutral-500">{t('noTerritories', 'no territories found')}</div>
         </TerminalCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -304,7 +306,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
                   <div>
                     <div className="text-white font-semibold">{unit.unit_name}</div>
                     <div className="text-xs text-neutral-500">
-                      {UNIT_LABELS[unit.unit_type]} · {MAGISTRATE_TITLES[unit.unit_type]}
+                      {t(`unitTypeLabels.${unit.unit_type}`, UNIT_LABELS[unit.unit_type])} · {MAGISTRATE_TITLES[unit.unit_type]}
                     </div>
                     {unit.short_id && (
                       <div className="text-xs font-mono text-cyan-400 mt-1">{unit.short_id}</div>
@@ -315,7 +317,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
                       onClick={() => openEditDialog(unit)}
                       className="text-xs px-2 py-1 border border-neutral-700 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded"
                     >
-                      Edit
+                      {t('edit', 'Edit')}
                     </button>
                   )}
                 </div>
@@ -325,11 +327,11 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
                 {metrics && (
                   <div className="grid grid-cols-2 gap-2 pt-3 border-t border-neutral-700">
                     <div>
-                      <div className="text-xs text-neutral-500">Members</div>
+                      <div className="text-xs text-neutral-500">{t('members', 'Members')}</div>
                       <div className="text-sm text-white">{metrics.member_count}/{metrics.max_capacity}</div>
                     </div>
                     <div>
-                      <div className="text-xs text-neutral-500">Occupancy</div>
+                      <div className="text-xs text-neutral-500">{t('occupancy', 'Occupancy')}</div>
                       <div className="text-sm text-cyan-400">{(metrics.occupancy_rate * 100).toFixed(0)}%</div>
                     </div>
                     <div className="col-span-2">
@@ -341,7 +343,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
                   </div>
                 )}
                 {unit.image_status === 'pending' && (
-                  <div className="mt-2 text-xs text-yellow-400">Image pending review</div>
+                  <div className="mt-2 text-xs text-yellow-400">{t('reviewPending', 'Under review')}</div>
                 )}
               </TerminalCard>
             )
@@ -352,10 +354,10 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
       {editingUnit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setEditingUnit(null)}>
           <div className="bg-neutral-900 border border-neutral-700 rounded-lg w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <h3 className="text-white font-medium">Edit {editingUnit.unit_name}</h3>
+            <h3 className="text-white font-medium">{t('editTerritory', 'Edit Territory')}: {editingUnit.unit_name}</h3>
 
             <div>
-              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">Name</label>
+              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">{t('name', 'Name')}</label>
               <input
                 type="text"
                 value={editFormData.unit_name}
@@ -365,7 +367,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
             </div>
 
             <div>
-              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">Description</label>
+              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">{t('description', 'Description')}</label>
               <textarea
                 value={editFormData.description}
                 onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
@@ -375,7 +377,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
             </div>
 
             <div>
-              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">Image</label>
+              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">{t('image', 'Image')}</label>
               <div className="flex items-start gap-3">
                 {(imagePreview || editingUnit.image_url) ? (
                   <img
@@ -385,7 +387,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
                   />
                 ) : (
                   <div className="w-24 h-24 rounded bg-neutral-800 border border-neutral-700 flex items-center justify-center text-xs text-neutral-500">
-                    No image
+                    {t('noImage', 'No image')}
                   </div>
                 )}
                 <div className="flex-1 space-y-2">
@@ -401,7 +403,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
                     disabled={uploadingImage}
                     className="w-full px-3 py-1.5 border border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white rounded text-sm"
                   >
-                    {imageFile ? 'Change' : 'Select image'}
+                    {imageFile ? t('change', 'Change') : t('clickToUpload', 'Click to upload')}
                   </button>
                   {imageFile && (
                     <div className="text-xs text-neutral-500">
@@ -424,25 +426,25 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
                 </div>
               </div>
               <p className="text-xs text-neutral-500 mt-2">
-                Max 2MB. Auto-cropped to square (512×512). JPG/PNG/WebP.
+                {t('imageHint', 'Max 2MB. Auto-cropped to square (512×512). JPG/PNG/WebP.')}
               </p>
             </div>
 
             {isAdmin && editingUnit.image_url && editingUnit.image_status === 'pending' && (
               <div className="pt-3 border-t border-neutral-700 space-y-2">
-                <div className="text-xs text-cyan-400 tracking-wider">ADMIN REVIEW</div>
+                <div className="text-xs text-cyan-400 tracking-wider">{t('adminReview', 'ADMIN REVIEW')}</div>
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleImageReview(editingUnit.unit_id, 'approved')}
                     className="flex-1 px-3 py-1.5 bg-green-900/30 text-green-400 hover:bg-green-900/50 border border-green-800 rounded text-sm"
                   >
-                    Approve
+                    {t('approve', 'Approve')}
                   </button>
                   <button
                     onClick={() => handleImageReview(editingUnit.unit_id, 'rejected')}
                     className="flex-1 px-3 py-1.5 bg-red-900/30 text-red-400 hover:bg-red-900/50 border border-red-800 rounded text-sm"
                   >
-                    Reject
+                    {t('reject', 'Reject')}
                   </button>
                 </div>
               </div>
@@ -457,14 +459,14 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
                 }}
                 className="flex-1 px-3 py-2 border border-neutral-700 text-neutral-400 hover:bg-neutral-800 rounded text-sm"
               >
-                Cancel
+                {t('cancel', 'Cancel')}
               </button>
               <button
                 onClick={handleEdit}
                 disabled={submitting || uploadingImage || !editFormData.unit_name.trim()}
                 className="flex-1 px-3 py-2 bg-cyan-700 hover:bg-cyan-600 text-white rounded text-sm disabled:opacity-50"
               >
-                {uploadingImage ? 'Uploading...' : submitting ? 'Saving...' : 'Save'}
+                {uploadingImage ? t('uploading', 'Uploading...') : submitting ? t('saving', 'Saving...') : t('save', 'Save')}
               </button>
             </div>
           </div>

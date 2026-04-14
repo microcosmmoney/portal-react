@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useMicrocosmApi } from '@microcosmmoney/auth-react'
 import { TerminalCard } from '../terminal'
+import { useTranslations } from '../../i18n-context'
 
 type ManagerLevel = 'station' | 'matrix' | 'sector' | 'system'
 type DateRange = '7d' | '30d' | '90d' | 'all'
@@ -27,6 +28,7 @@ export interface MicrocosmManagerIncomePageProps {
 }
 
 export function MicrocosmManagerIncomePage({}: MicrocosmManagerIncomePageProps = {}) {
+  const t = useTranslations('managerIncome')
   const api = useMicrocosmApi()
   const [income, setIncome] = useState<ManagerIncomeSummary | null>(null)
   const [loading, setLoading] = useState(true)
@@ -79,11 +81,11 @@ export function MicrocosmManagerIncomePage({}: MicrocosmManagerIncomePageProps =
     return (
       <div className="max-w-7xl mx-auto px-3 py-4 space-y-3 xs:px-4 xs:space-y-4 sm:px-6 sm:py-6 sm:space-y-6 font-mono">
         <div>
-          <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">Manager Income</h1>
-          <p className="text-xs sm:text-sm text-neutral-400">Magistrate reward summary</p>
+          <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">{t('title', 'Manager Income')}</h1>
+          <p className="text-xs sm:text-sm text-neutral-400">{t('subtitle', 'View your MCC minting share income as a multi-level manager')}</p>
         </div>
         <div className="flex items-center justify-center py-20">
-          <span className="text-neutral-400">Loading...</span>
+          <span className="text-neutral-400">{t('loading', 'Loading income data...')}</span>
         </div>
       </div>
     )
@@ -93,43 +95,43 @@ export function MicrocosmManagerIncomePage({}: MicrocosmManagerIncomePageProps =
     <div className="max-w-7xl mx-auto px-3 py-4 space-y-3 xs:px-4 xs:space-y-4 sm:px-6 sm:py-6 sm:space-y-6 font-mono">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">Manager Income</h1>
-          <p className="text-xs sm:text-sm text-neutral-400">Magistrate reward summary (Companion Yield)</p>
+          <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">{t('title', 'Manager Income')}</h1>
+          <p className="text-xs sm:text-sm text-neutral-400">{t('subtitle', 'View your MCC minting share income as a multi-level manager')}</p>
         </div>
         <button
           onClick={handleRefresh}
           disabled={refreshing}
           className="px-3 py-1.5 text-xs border border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white rounded transition-colors disabled:opacity-50"
         >
-          {refreshing ? 'Refreshing...' : 'Refresh'}
+          {refreshing ? t('refreshing', 'Refreshing...') : t('refresh', 'Refresh')}
         </button>
       </div>
 
-      <TerminalCard title="Distribution Ratio (Companion Yield per Mining Event)">
+      <TerminalCard title={t('distributionRatio', 'Distribution Ratio (Companion Yield per Mining Event)')}>
         <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
           <div className="text-center p-3 bg-neutral-800 rounded border border-neutral-700">
             <div className="text-lg font-bold text-white">16%</div>
-            <div className="text-xs text-neutral-500">Commander</div>
+            <div className="text-xs text-neutral-500">{t('commander', 'Commander')}</div>
           </div>
           <div className="text-center p-3 bg-neutral-800 rounded border border-neutral-700">
             <div className="text-lg font-bold text-cyan-400">12%</div>
-            <div className="text-xs text-neutral-500">Pioneer</div>
+            <div className="text-xs text-neutral-500">{t('pioneer', 'Pioneer')}</div>
           </div>
           <div className="text-center p-3 bg-neutral-800 rounded border border-neutral-700">
             <div className="text-lg font-bold text-cyan-400">8%</div>
-            <div className="text-xs text-neutral-500">Warden</div>
+            <div className="text-xs text-neutral-500">{t('warden', 'Warden')}</div>
           </div>
           <div className="text-center p-3 bg-neutral-800 rounded border border-neutral-700">
             <div className="text-lg font-bold text-cyan-400">4%</div>
-            <div className="text-xs text-neutral-500">Admiral</div>
+            <div className="text-xs text-neutral-500">{t('admiral', 'Admiral')}</div>
           </div>
           <div className="text-center p-3 bg-neutral-800 rounded border border-neutral-700">
             <div className="text-lg font-bold text-cyan-400">30%</div>
-            <div className="text-xs text-neutral-500">LP Reserve</div>
+            <div className="text-xs text-neutral-500">{t('lpReserve', 'LP Reserve')}</div>
           </div>
           <div className="text-center p-3 bg-neutral-800 rounded border border-neutral-700">
             <div className="text-lg font-bold text-cyan-400">30%</div>
-            <div className="text-xs text-neutral-500">Vault MCD</div>
+            <div className="text-xs text-neutral-500">{t('vaultMcd', 'Vault MCD')}</div>
           </div>
         </div>
       </TerminalCard>
@@ -145,13 +147,13 @@ export function MicrocosmManagerIncomePage({}: MicrocosmManagerIncomePageProps =
                   dateRange === range ? 'bg-cyan-700 text-white' : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white'
                 }`}
               >
-                {range === '7d' ? '7 days' : range === '30d' ? '30 days' : range === '90d' ? '90 days' : 'All'}
+                {range === '7d' ? t('days7', '7 Days') : range === '30d' ? t('days30', '30 Days') : range === '90d' ? t('days90', '90 Days') : t('allTime', 'All Time')}
               </button>
             ))}
           </div>
           <div className="flex gap-2 items-end flex-1">
             <div>
-              <label className="text-neutral-400 text-xs tracking-wider block mb-1">Start</label>
+              <label className="text-neutral-400 text-xs tracking-wider block mb-1">{t('startDate', 'Start Date')}</label>
               <input
                 type="date"
                 value={startDate}
@@ -160,7 +162,7 @@ export function MicrocosmManagerIncomePage({}: MicrocosmManagerIncomePageProps =
               />
             </div>
             <div>
-              <label className="text-neutral-400 text-xs tracking-wider block mb-1">End</label>
+              <label className="text-neutral-400 text-xs tracking-wider block mb-1">{t('endDate', 'End Date')}</label>
               <input
                 type="date"
                 value={endDate}
@@ -172,7 +174,7 @@ export function MicrocosmManagerIncomePage({}: MicrocosmManagerIncomePageProps =
               onClick={() => loadData()}
               className="px-3 py-1.5 text-xs border border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white rounded transition-colors h-8"
             >
-              Query
+              {t('query', 'Query')}
             </button>
           </div>
         </div>
@@ -181,7 +183,7 @@ export function MicrocosmManagerIncomePage({}: MicrocosmManagerIncomePageProps =
       <TerminalCard>
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1">TOTAL MANAGER INCOME</div>
+            <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1">{t('totalIncome', 'Total Income')}</div>
             <div className="text-4xl font-bold text-white">
               {totalIncome.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               <span className="text-lg text-neutral-500 ml-2">MCC</span>
@@ -207,12 +209,12 @@ export function MicrocosmManagerIncomePage({}: MicrocosmManagerIncomePageProps =
                     incomeAmount > 0 ? 'bg-white/20 text-white' : 'bg-neutral-800 text-neutral-500'
                   }`}
                 >
-                  {incomeAmount > 0 ? 'Active' : 'None'}
+                  {incomeAmount > 0 ? t('hasIncome', 'Has Income') : t('noIncome', 'None')}
                 </span>
               </div>
               <div className="mb-4">
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-neutral-400">Cumulative</span>
+                  <span className="text-neutral-400">{t('cumulativeIncome', 'Cumulative Income')}</span>
                   <span className="text-white">{incomeAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} MCC</span>
                 </div>
                 <div className="bg-neutral-800 rounded-full h-2">
@@ -222,13 +224,13 @@ export function MicrocosmManagerIncomePage({}: MicrocosmManagerIncomePageProps =
               <div className="grid grid-cols-2 gap-4 pt-3 border-t border-neutral-700">
                 <div className="text-center">
                   <div className="text-xl font-bold text-white">{recordCount}</div>
-                  <div className="text-xs text-neutral-500">Records</div>
+                  <div className="text-xs text-neutral-500">{t('outputRecords', 'Output Records')}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-xl font-bold text-white">
                     {recordCount > 0 ? (incomeAmount / recordCount).toFixed(2) : '0.00'}
                   </div>
-                  <div className="text-xs text-neutral-500">Avg/record</div>
+                  <div className="text-xs text-neutral-500">{t('avgPerRecord', 'Average Per Record')}</div>
                 </div>
               </div>
             </TerminalCard>
