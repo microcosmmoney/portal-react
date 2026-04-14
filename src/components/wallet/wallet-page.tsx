@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useMCC, useMCD, useWallets, useMCCLocks, useMarketData, useMultiWalletBalance } from '@microcosmmoney/auth-react'
+import { TOKEN_BY_SYMBOL } from '../../config/mainstream-tokens'
 
 /* ── helpers ── */
 const fmt = (n: number, d = 2) =>
@@ -172,7 +173,18 @@ function LockPeriodCard({ lock, hideBalance }: { lock: any; hideBalance: boolean
 }
 
 /* ── token icon ── */
-function TokenIcon({ symbol, color }: { symbol: string; color: string }) {
+function TokenIcon({ symbol, color, logoURI }: { symbol: string; color: string; logoURI?: string }) {
+  const [err, setErr] = useState(false)
+  if (logoURI && !err) {
+    return (
+      <img
+        src={logoURI}
+        alt={symbol}
+        className="w-10 h-10 rounded-full object-cover bg-neutral-800"
+        onError={() => setErr(true)}
+      />
+    )
+  }
   return (
     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${color}`}>
       {symbol.slice(0, 2)}
@@ -185,6 +197,7 @@ interface AssetHolding {
   symbol: string
   name: string
   color: string
+  logoURI?: string
   balance: number
   usdValue: number
   price: number
@@ -245,7 +258,7 @@ function AssetList({
             className={`gap-4 py-3 px-4 items-center hover:bg-neutral-700 transition-colors rounded grid ${gridCols}`}
           >
             <div className="flex items-center gap-3">
-              <TokenIcon symbol={h.symbol} color={h.color} />
+              <TokenIcon symbol={h.symbol} color={h.color} logoURI={h.logoURI} />
               <div>
                 <div className="text-white font-medium text-sm">{h.symbol}</div>
                 <div className="text-xs text-neutral-500">{h.name}</div>
@@ -309,18 +322,29 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
   const resolvePath = (p: string) => (basePath ? `${basePath.replace(/\/$/, '')}${p}` : p)
 
   /* ── build on-chain asset holdings from multiBalance ── */
-  const TOKEN_META: Record<string, { name: string; color: string; priceKey?: string }> = {
-    SOL: { name: 'Solana', color: 'bg-purple-600' },
-    MCC: { name: 'Microcosm Coin', color: 'bg-cyan-600' },
-    USDC: { name: 'USD Coin', color: 'bg-blue-600' },
-    USDT: { name: 'Tether', color: 'bg-green-600' },
-  }
-
   const TOKEN_PRICES: Record<string, number> = {
-    SOL: 0, // we don't have SOL price from market data, show 0
+    SOL: 0,
     MCC: price,
+    MCD: 0,
     USDC: 1,
     USDT: 1,
+  }
+
+  const TRACKED_SYMBOLS: [string, (p: any) => number][] = [
+    ['SOL', (p) => Number(p?.sol_balance ?? p?.sol?.balance ?? 0)],
+    ['MCC', (p) => Number(p?.mcc_balance ?? 0)],
+    ['MCD', (p) => Number(p?.mcd_balance ?? 0)],
+    ['USDC', (p) => Number(p?.usdc_balance ?? 0)],
+    ['USDT', (p) => Number(p?.usdt_balance ?? 0)],
+  ]
+
+  const lookupMeta = (sym: string) => {
+    const cfg = TOKEN_BY_SYMBOL.get(sym)
+    return {
+      name: cfg?.name ?? sym,
+      color: cfg?.color ?? 'bg-neutral-600',
+      logoURI: cfg?.logoURI,
+    }
   }
 
   function buildHoldings(walletAddr?: string): AssetHolding[] {
@@ -333,23 +357,18 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
 
     for (const wb of sources) {
       const p = wb.portfolio || {}
-      const entries: [string, number][] = [
-        ['SOL', p.sol_balance ?? 0],
-        ['MCC', p.mcc_balance ?? 0],
-        ['USDC', p.usdc_balance ?? 0],
-        ['USDT', p.usdt_balance ?? 0],
-      ]
-      for (const [sym, bal] of entries) {
+      for (const [sym, get] of TRACKED_SYMBOLS) {
+        const bal = get(p)
         if (bal <= 0) continue
-        const meta = TOKEN_META[sym] || { name: sym, color: 'bg-neutral-600' }
+        const meta = lookupMeta(sym)
         const tp = TOKEN_PRICES[sym] ?? 0
-        const usdVal = bal * tp
         items.push({
           symbol: sym,
           name: meta.name,
           color: meta.color,
+          logoURI: meta.logoURI,
           balance: bal,
-          usdValue: usdVal,
+          usdValue: bal * tp,
           price: tp,
           wallet: wb.wallet_address,
           walletShort: `${wb.wallet_address.slice(0, 4)}...${wb.wallet_address.slice(-4)}`,
@@ -367,21 +386,21 @@ export function MicrocosmWalletPage({ basePath = '', onNavigate }: MicrocosmWall
     const agg: Record<string, number> = {}
     for (const wb of multiBalance) {
       const p = wb.portfolio || {}
-      agg['SOL'] = (agg['SOL'] || 0) + (p.sol_balance ?? 0)
-      agg['MCC'] = (agg['MCC'] || 0) + (p.mcc_balance ?? 0)
-      agg['USDC'] = (agg['USDC'] || 0) + (p.usdc_balance ?? 0)
-      agg['USDT'] = (agg['USDT'] || 0) + (p.usdt_balance ?? 0)
+      for (const [sym, get] of TRACKED_SYMBOLS) {
+        agg[sym] = (agg[sym] || 0) + get(p)
+      }
     }
 
     const items: AssetHolding[] = []
     for (const [sym, bal] of Object.entries(agg)) {
       if (bal <= 0) continue
-      const meta = TOKEN_META[sym] || { name: sym, color: 'bg-neutral-600' }
+      const meta = lookupMeta(sym)
       const tp = TOKEN_PRICES[sym] ?? 0
       items.push({
         symbol: sym,
         name: meta.name,
         color: meta.color,
+        logoURI: meta.logoURI,
         balance: bal,
         usdValue: bal * tp,
         price: tp,
