@@ -51,7 +51,7 @@ export function MicrocosmPriceChart({ accentColor }: MicrocosmPriceChartProps = 
   }
 
   return (
-    <div className="bg-neutral-900 border border-neutral-700 rounded-lg overflow-hidden hover:border-cyan-400/50 transition-colors">
+    <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl overflow-hidden blockchain-card">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex gap-1 bg-black p-0.5 rounded">

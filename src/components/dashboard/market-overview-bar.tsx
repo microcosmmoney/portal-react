@@ -20,7 +20,7 @@ export function MicrocosmMarketBar({ accentColor }: MicrocosmMarketBarProps = {}
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 animate-pulse">
+          <div key={i} className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl blockchain-card p-4 animate-pulse">
             <div className="h-3 bg-neutral-800 rounded w-16 mb-2" />
             <div className="h-6 bg-neutral-800 rounded w-24" />
           </div>
@@ -57,9 +57,9 @@ export function MicrocosmMarketBar({ accentColor }: MicrocosmMarketBarProps = {}
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:border-cyan-400/50 transition-colors"
+          className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl blockchain-card p-4"
         >
-          <div className="text-neutral-400 text-[10px] font-mono mb-1 tracking-wider">
+          <div className="text-[#5EEAD4] text-[10px] font-mono mb-1 tracking-widest uppercase">
             {stat.label}
           </div>
           <div className={`text-xl font-bold font-mono ${stat.color}`} style={stat.colorStyle}>

@@ -15,7 +15,7 @@ export function TerminalCard({
   className?: string
 }) {
   return (
-    <div className={cn("bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden", className)}>
+    <div className={cn("backdrop-blur-md bg-white/5 border border-white/10 rounded-xl blockchain-card overflow-hidden", className)}>
       {(title || filename) && (
         <div className="flex items-center gap-2 px-4 py-2 bg-zinc-800/50 border-b border-zinc-700">
           <div className="w-2 h-2 rounded-full bg-red-500" />

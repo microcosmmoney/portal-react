@@ -36,10 +36,10 @@ export function MicrocosmMyMining({ detailsPath, onNavigate, accentColor }: Micr
   const spinnerClass = accentColor ? 'inline-block w-5 h-5 border-2 rounded-full animate-spin' : 'inline-block w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin'
 
   return (
-    <div className="bg-neutral-900 border border-neutral-700 rounded-lg h-full hover:border-cyan-400/50 transition-colors">
+    <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl blockchain-card h-full">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-neutral-400 text-xs font-mono tracking-wider">MY_MINING</span>
+          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">MY_MINING</span>
           {detailsPath && (
             <button
               onClick={handleDetailsClick}
@@ -62,8 +62,8 @@ export function MicrocosmMyMining({ detailsPath, onNavigate, accentColor }: Micr
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {items.map((s) => (
-              <div key={s.label} className="bg-neutral-800 rounded p-3">
-                <span className="text-[10px] text-neutral-400 font-mono tracking-wider">{s.label}</span>
+              <div key={s.label} className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+                <span className="text-[10px] text-[#5EEAD4] font-mono tracking-widest uppercase">{s.label}</span>
                 <div className="text-xl font-bold font-mono text-white">{s.value}</div>
               </div>
             ))}

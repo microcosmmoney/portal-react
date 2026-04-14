@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useMiningStats, useMiningRecords, useMCCStats, useMarketData, useMCC, useWallets, useMiningFlow } from '@microcosmmoney/auth-react'
+import { useMiningStats, useMiningRecords, useMCCStats, useMarketData, useMCCPrice, useEcosystemOperations, useMCC, useWallets, useMiningFlow } from '@microcosmmoney/auth-react'
 
 /* ─── Inline SVG Icons (lucide style, 24x24 viewBox) ─── */
 
@@ -118,10 +118,16 @@ export interface MicrocosmMiningPageProps {
 
 export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMiningPageProps) {
   const { data: stats, loading: statsLoading } = useMiningStats()
-  const { data: recordsData, loading: recordsLoading, refresh: refreshRecords } = useMiningRecords({ limit: 20 })
+  const [recordsPage, setRecordsPage] = useState(1)
+  const RECORDS_PAGE_SIZE = 10
+  const { data: recordsData, loading: recordsLoading, refresh: refreshRecords } = useMiningRecords({ page: recordsPage, pageSize: RECORDS_PAGE_SIZE })
   const records: any[] = Array.isArray(recordsData) ? recordsData : (recordsData as any)?.records ?? []
+  const recordsTotal: number = (recordsData as any)?.total ?? records.length
+  const recordsTotalPages: number = Math.max(1, Math.ceil(recordsTotal / RECORDS_PAGE_SIZE))
   const { data: mccStats, loading: mccStatsLoading } = useMCCStats()
   const { data: marketData } = useMarketData()
+  const { data: mccPriceData } = useMCCPrice()
+  const { data: ecosystemOps } = useEcosystemOperations()
   const { balance: mccData } = useMCC(60_000)
   const { data: wallets, loading: walletsLoading } = useWallets()
   const { startMining, loading: miningLoading } = useMiningFlow() as any
@@ -130,15 +136,39 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
   const [walletsExpanded, setWalletsExpanded] = useState(false)
 
   const price = marketData?.price_usd ?? 0
-  const miningPrice = price > 0 ? price * 2 : 0
+  const basePrice = (mccPriceData as any)?.base_price ?? (mccPriceData as any)?.price_usd ?? (mccPriceData as any)?.price ?? 0
+  const miningPrice = basePrice > 0 ? basePrice * 4 : 0
+
+  const epoch = (ecosystemOps as any)?.epoch
+  const currentEpochNum = epoch?.current_epoch ?? 0
+  const epochYield = epoch?.epoch_yield ?? 0
+  const miningVaultMcc = epoch?.mining_vault_mcc ?? 0
+
+  const fmtCompact = (n: number) => {
+    if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
+    return n.toFixed(0)
+  }
   const s = mccStats as any
   const totalMinted = s?.circulating_supply ?? 0
   const currentPhase = s?.current_phase ?? 0
   const miningRate = s?.current_mining_rate ?? 0
   const nextHalving = s?.next_halving_at ?? 100_000_000
-  const mccBalance = mccData?.balance ?? 0
+  const displayPhase = currentPhase + 1
+  const halvingRatio = 2 ** (displayPhase - 1)
+  const halvingProgress = nextHalving > 0 ? ((totalMinted % 100_000_000) / 100_000_000) * 100 : 0
+  const mccBalance = (mccData as any)?.balance ?? 0
+  const balanceWallets: any[] = Array.isArray((mccData as any)?.wallets) ? (mccData as any).wallets : []
+  const balanceByAddress = new Map<string, number>(
+    balanceWallets.map((b: any) => [b.wallet_address, Number(b.balance ?? 0)])
+  )
 
-  const walletList: any[] = Array.isArray(wallets) ? wallets : []
+  const metaWallets: any[] = Array.isArray(wallets) ? wallets : []
+  const walletList: any[] = (metaWallets.length > 0 ? metaWallets : balanceWallets).map((w: any) => ({
+    ...w,
+    mcc_balance: balanceByAddress.get(w.wallet_address) ?? Number(w.balance ?? w.mcc_balance ?? 0),
+  }))
   const primaryWallet = walletList.find((w: any) => w.is_primary)
   const primaryAddress = primaryWallet?.wallet_address ?? null
   const totalBalance = walletList.length > 0 ? walletList.reduce((sum: number, w: any) => sum + (w.mcc_balance ?? 0), 0) : mccBalance
@@ -189,7 +219,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
       </div>
 
       {/* ── Mining Price + Action Card ── */}
-      <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-6 hover:border-cyan-400/50 transition-colors">
+      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 blockchain-card">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6">
           <div className="space-y-3">
             {/* Badges */}
@@ -200,13 +230,13 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
 
             {/* Mining Price */}
             <div>
-              <div className="text-xs text-neutral-400 tracking-wider mb-1">MINING_PRICE</div>
+              <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1">MINING_PRICE</div>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-cyan-400 font-mono">
                   1 MCC = {miningPrice > 0 ? fmt(miningPrice, 4) : '--'} USD
                 </span>
                 <span className="text-xs bg-cyan-400/20 text-cyan-400 px-1.5 py-0.5 rounded">
-                  market x 2
+                  base × 4
                 </span>
               </div>
             </div>
@@ -237,67 +267,53 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
 
         {/* ── Stats Grid ── */}
         <div className="border-t border-neutral-700 pt-4 mb-4">
-          <div className="text-xs text-neutral-400 tracking-wider uppercase mb-3">MINING STATISTICS</div>
+          <div className="text-xs text-[#5EEAD4] tracking-widest uppercase uppercase mb-3">MINING STATISTICS</div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <div className="bg-neutral-800 rounded p-3">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
             <div className="flex items-center gap-2 mb-2">
               <IconTrendingUp />
-              <span className="text-xs text-neutral-400 tracking-wider">phase</span>
+              <span className="text-xs text-[#5EEAD4] tracking-widest uppercase">CURRENT EPOCH</span>
             </div>
-            <div className="text-2xl font-bold text-white font-mono">Phase {currentPhase}</div>
-            <div className="text-xs text-neutral-500 mt-1">Halving every 100M</div>
+            <div className="text-2xl font-bold text-cyan-400 font-mono">#{currentEpochNum}</div>
+            <div className="text-xs text-neutral-500 mt-1">{fmtCompact(epochYield)} MCC / epoch</div>
           </div>
 
-          <div className="bg-neutral-800 rounded p-3">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
             <div className="flex items-center gap-2 mb-2">
               <IconCoins />
-              <span className="text-xs text-neutral-400 tracking-wider">total_minted</span>
+              <span className="text-xs text-[#5EEAD4] tracking-widest uppercase">HALVING PHASE {displayPhase}</span>
             </div>
-            <div className="text-2xl font-bold text-white font-mono">{fmt(totalMinted)}</div>
-            <div className="text-xs text-neutral-500 mt-1">MCC minted to date</div>
+            <div className="text-2xl font-bold text-white font-mono">{halvingRatio}:1</div>
+            <div className="text-xs text-neutral-500 mt-1 tabular-nums">{fmtCompact(totalMinted)} / {fmtCompact(nextHalving)} MCC</div>
+            <div className="mt-2 h-1.5 bg-neutral-900 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-cyan-400 rounded-full transition-all"
+                style={{ width: `${Math.min(halvingProgress, 100)}%` }}
+              />
+            </div>
           </div>
 
-          <div className="bg-neutral-800 rounded p-3">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs text-neutral-400 tracking-wider">mining_rate</span>
+              <span className="text-xs text-[#5EEAD4] tracking-widest uppercase">mining_rate</span>
             </div>
             <div className="text-2xl font-bold text-cyan-400 font-mono">{miningRate > 0 ? `${miningRate}:1` : '--'}</div>
             <div className="text-xs text-neutral-500 mt-1">USD to MCC ratio</div>
           </div>
 
-          <div className="bg-neutral-800 rounded p-3">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs text-neutral-400 tracking-wider">next_halving</span>
+              <span className="text-xs text-[#5EEAD4] tracking-widest uppercase">MINING VAULT</span>
             </div>
-            <div className="text-2xl font-bold text-white font-mono">
-              {nextHalving > totalMinted ? fmt(nextHalving - totalMinted, 0) : 'N/A'}
-            </div>
-            <div className="text-xs text-neutral-500 mt-1">MCC until next halving</div>
-          </div>
-        </div>
-
-        {/* ── Halving Progress Bar ── */}
-        <div className="space-y-1">
-          <div className="flex justify-between items-center text-xs font-mono">
-            <span className="text-neutral-500">
-              Remaining: {fmt(100_000_000 - (totalMinted % 100_000_000), 0)} MCC until next halving
-            </span>
-            <span className="text-white">
-              {((totalMinted % 100_000_000) / 100_000_000 * 100).toFixed(1)}%
-            </span>
-          </div>
-          <div className="bg-neutral-800 rounded-full h-2 overflow-hidden">
-            <div
-              className="h-2 rounded-full bg-cyan-400 transition-all"
-              style={{ width: `${((totalMinted % 100_000_000) / 100_000_000) * 100}%` }}
-            />
+            <div className="text-2xl font-bold text-white font-mono">{fmtCompact(miningVaultMcc)}</div>
+            <div className="text-xs text-neutral-500 mt-1">MCC available to mine</div>
           </div>
         </div>
       </div>
 
       {/* ── On-Chain Balance Card ── */}
-      <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-6 hover:border-cyan-400/50 transition-colors">
+      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 blockchain-card">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <IconWallet className="text-white" />
@@ -321,8 +337,8 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
           </div>
         ) : walletList.length === 0 ? (
           /* Fallback: show aggregate balance from useMCC */
-          <div className="bg-neutral-800 rounded p-3">
-            <div className="text-xs text-neutral-400 tracking-wider mb-1 font-mono">total_balance</div>
+          <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+            <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1 font-mono">total_balance</div>
             <div className="text-2xl font-bold font-mono text-white">{fmt(mccBalance, 3)} MCC</div>
             {primaryAddress && (
               <div className="text-neutral-500 text-xs mt-1 font-mono">{primaryAddress.slice(0, 8)}...{primaryAddress.slice(-4)}</div>
@@ -331,15 +347,15 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div className="bg-neutral-800 rounded p-3">
-                <div className="text-xs text-neutral-400 tracking-wider mb-1 font-mono">total_on_chain</div>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+                <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1 font-mono">total_on_chain</div>
                 <div className="text-2xl font-bold font-mono text-white">
                   {fmt(totalBalance)} MCC
                 </div>
                 <div className="text-neutral-500 text-xs mt-1">{walletList.length} wallet{walletList.length !== 1 ? 's' : ''} total</div>
               </div>
-              <div className="bg-neutral-800 rounded p-3">
-                <div className="text-xs text-neutral-400 tracking-wider mb-1 font-mono">primary_wallet</div>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+                <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1 font-mono">primary_wallet</div>
                 <div className="text-2xl font-bold font-mono text-white">
                   {primaryWallet ? fmt(primaryWallet.mcc_balance ?? 0) : '--'}
                 </div>
@@ -399,7 +415,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
       </div>
 
       {/* ── Mining Records (TABLE) ── */}
-      <div className="bg-neutral-900 border border-neutral-700 rounded-lg hover:border-cyan-400/50 transition-colors">
+      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl blockchain-card">
         <div className="p-6">
           <button
             onClick={() => setShowRecords(!showRecords)}
@@ -408,9 +424,9 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
             <div className="flex items-center gap-3">
               <IconHistory />
               <span className="text-sm text-neutral-300 tracking-wider font-medium">Mining Records</span>
-              {records.length > 0 && (
+              {recordsTotal > 0 && (
                 <span className="text-xs bg-neutral-500/20 text-neutral-300 px-1.5 py-0.5 rounded">
-                  {records.length} records
+                  {recordsTotal} records
                 </span>
               )}
             </div>
@@ -444,24 +460,25 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
                     </thead>
                     <tbody>
                       {records.map((r: any, i: number) => (
-                        <tr key={r.id ?? i} className="border-b border-neutral-800 hover:bg-neutral-800/50">
+                        <tr key={r.tx_signature ?? `${recordsPage}-${i}`} className="border-b border-neutral-800 hover:bg-neutral-800/50">
                           <td className="py-3 text-neutral-300 font-mono text-xs">
-                            {formatDateTime(r.created_at || r.timestamp)}
+                            {formatDateTime(r.mined_at ?? r.created_at ?? r.timestamp)}
                           </td>
                           <td className="py-3 text-right text-white font-mono">
-                            {fmt(r.payment_amount ?? r.stablecoin_amount ?? r.usdc_amount ?? r.paid ?? 0)} {r.payment_type || 'USDC'}
+                            {fmt(r.paid_amount ?? r.payment_amount ?? r.stablecoin_amount ?? 0)} {r.stablecoin ?? r.payment_type ?? 'USDC'}
                           </td>
                           <td className="py-3 text-right text-cyan-400 font-mono">
                             +{fmt(r.mcc_amount ?? r.minted ?? 0)} MCC
                           </td>
                           <td className="py-3 text-right">
-                            <span className={`text-xs px-1.5 py-0.5 rounded ${
-                              (r.status === 'completed' || r.status === 'confirmed')
-                                ? 'bg-white/20 text-white'
-                                : 'bg-neutral-700 text-neutral-400'
-                            }`}>
-                              {r.status || 'confirmed'}
-                            </span>
+                            <a
+                              href={r.tx_signature ? `https://solscan.io/tx/${r.tx_signature}` : undefined}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs px-1.5 py-0.5 rounded bg-white/20 text-white hover:bg-cyan-400/30 hover:text-cyan-200 transition-colors"
+                            >
+                              confirmed
+                            </a>
                           </td>
                         </tr>
                       ))}
@@ -473,6 +490,30 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
                   No mining records yet
                 </div>
               )}
+
+              {recordsTotal > RECORDS_PAGE_SIZE && (
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-800 text-xs">
+                  <span className="text-neutral-500 font-mono">
+                    Page {recordsPage} / {recordsTotalPages} · {recordsTotal} total
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setRecordsPage(p => Math.max(1, p - 1))}
+                      disabled={recordsPage <= 1 || recordsLoading}
+                      className="px-3 py-1 border border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white rounded disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      ‹ Prev
+                    </button>
+                    <button
+                      onClick={() => setRecordsPage(p => Math.min(recordsTotalPages, p + 1))}
+                      disabled={recordsPage >= recordsTotalPages || recordsLoading}
+                      className="px-3 py-1 border border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-white rounded disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next ›
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -480,17 +521,17 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
 
       {/* ── Pool Status (if available from mccStats) ── */}
       {s?.pool_mcc_bought != null && (
-        <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-6 hover:border-cyan-400/50 transition-colors">
-          <div className="text-xs text-neutral-400 tracking-wider uppercase mb-3">POOL STATUS</div>
+        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 blockchain-card">
+          <div className="text-xs text-[#5EEAD4] tracking-widest uppercase uppercase mb-3">POOL STATUS</div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="bg-neutral-800 rounded p-3">
-              <div className="text-[10px] text-neutral-400 tracking-wider font-mono">total_market_made</div>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+              <div className="text-[10px] text-[#5EEAD4] tracking-widest uppercase font-mono">total_market_made</div>
               <div className="text-lg font-bold text-white font-mono">{fmt(s.pool_mcc_bought ?? 0)}</div>
               <div className="text-xs text-neutral-500 mt-1">MCC bought via CPMM</div>
             </div>
             {s?.pool_usdc_balance != null && (
-              <div className="bg-neutral-800 rounded p-3">
-                <div className="text-[10px] text-neutral-400 tracking-wider font-mono">stablecoin_pool</div>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+                <div className="text-[10px] text-[#5EEAD4] tracking-widest uppercase font-mono">stablecoin_pool</div>
                 <div className="text-lg font-bold text-white font-mono">
                   ${fmt((s.pool_usdc_balance ?? 0) + (s.pool_usdt_balance ?? 0))}
                 </div>
@@ -500,8 +541,8 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
               </div>
             )}
             {s?.pool_tvl != null && (
-              <div className="bg-neutral-800 rounded p-3">
-                <div className="text-[10px] text-neutral-400 tracking-wider font-mono">tvl</div>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+                <div className="text-[10px] text-[#5EEAD4] tracking-widest uppercase font-mono">tvl</div>
                 <div className="text-lg font-bold text-white font-mono">${fmt(s.pool_tvl ?? 0)}</div>
                 <div className="text-xs text-neutral-500 mt-1">Total value locked</div>
               </div>
@@ -512,23 +553,23 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
 
       {/* ── My Mining Stats ── */}
       {stats && (
-        <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-6 hover:border-cyan-400/50 transition-colors">
-          <div className="text-xs text-neutral-400 tracking-wider uppercase mb-4 font-mono">MY_MINING_STATS</div>
+        <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 blockchain-card">
+          <div className="text-xs text-[#5EEAD4] tracking-widest uppercase uppercase mb-4 font-mono">MY_MINING_STATS</div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="bg-neutral-800 rounded p-3">
-              <div className="text-[10px] text-neutral-400 tracking-wider font-mono">total_mined</div>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+              <div className="text-[10px] text-[#5EEAD4] tracking-widest uppercase font-mono">total_mined</div>
               <div className="text-lg font-bold text-white font-mono">{fmt(stats.total_mined ?? 0)} MCC</div>
             </div>
-            <div className="bg-neutral-800 rounded p-3">
-              <div className="text-[10px] text-neutral-400 tracking-wider font-mono">total_paid</div>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+              <div className="text-[10px] text-[#5EEAD4] tracking-widest uppercase font-mono">total_paid</div>
               <div className="text-lg font-bold text-white font-mono">{fmt(stats.total_paid ?? 0)} USDC</div>
             </div>
-            <div className="bg-neutral-800 rounded p-3">
-              <div className="text-[10px] text-neutral-400 tracking-wider font-mono">mining_count</div>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+              <div className="text-[10px] text-[#5EEAD4] tracking-widest uppercase font-mono">mining_count</div>
               <div className="text-lg font-bold text-white font-mono">{stats.mining_count ?? 0}</div>
             </div>
-            <div className="bg-neutral-800 rounded p-3">
-              <div className="text-[10px] text-neutral-400 tracking-wider font-mono">active_days</div>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+              <div className="text-[10px] text-[#5EEAD4] tracking-widest uppercase font-mono">active_days</div>
               <div className="text-lg font-bold text-white font-mono">{stats.active_days_30d ?? 0}</div>
             </div>
           </div>
@@ -536,7 +577,7 @@ export function MicrocosmMiningPage({ basePath = '', onNavigate }: MicrocosmMini
       )}
 
       {/* ── Security Note ── */}
-      <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-6 hover:border-cyan-400/50 transition-colors">
+      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-6 blockchain-card">
         <div className="flex items-start gap-2 text-neutral-400 text-sm">
           <IconShield className="w-4 h-4 text-white mt-0.5 flex-shrink-0" />
           <span>All transactions are executed on-chain via X402 protocol. Your private keys never leave your wallet. Microcosm uses non-custodial minting with atomic on-chain verification.</span>

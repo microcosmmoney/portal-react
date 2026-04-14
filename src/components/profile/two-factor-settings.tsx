@@ -105,7 +105,7 @@ export function MicrocosmTwoFactorSettings({}: MicrocosmTwoFactorSettingsProps =
 
       {step === 'idle' && status?.enabled && (
         <div className="space-y-3">
-          <div className="bg-neutral-800 rounded p-3">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
             <div className="text-xs text-neutral-400 mb-1">STATUS</div>
             <div className="text-green-400 text-sm">
               Active {status.created_at ? `since ${new Date(status.created_at).toLocaleDateString()}` : ''}
@@ -134,7 +134,7 @@ export function MicrocosmTwoFactorSettings({}: MicrocosmTwoFactorSettingsProps =
               />
             </div>
           )}
-          <div className="bg-neutral-800 rounded p-3">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-neutral-400">MANUAL KEY</span>
               <button
@@ -187,7 +187,7 @@ export function MicrocosmTwoFactorSettings({}: MicrocosmTwoFactorSettingsProps =
               These codes can be used to access your account if you lose your authenticator. Each code can only be used once. Store them safely.
             </p>
           </div>
-          <div className="bg-neutral-800 rounded p-4 font-mono text-sm space-y-1">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-4 blockchain-sub-card font-mono text-sm space-y-1">
             {backupCodes.map((code, i) => (
               <div key={i} className="text-cyan-400">{code}</div>
             ))}

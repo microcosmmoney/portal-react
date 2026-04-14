@@ -166,19 +166,19 @@ export function MicrocosmRewardsPage({}: MicrocosmRewardsPageProps = {}) {
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <TerminalCard>
-            <div className="text-xs text-neutral-400 tracking-wider mb-1">MCC RECEIVED</div>
+            <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1">MCC RECEIVED</div>
             <div className="text-2xl font-bold text-white">{Number(stats.total_received || 0).toFixed(2)}</div>
           </TerminalCard>
           <TerminalCard>
-            <div className="text-xs text-neutral-400 tracking-wider mb-1">MCC SENT</div>
+            <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1">MCC SENT</div>
             <div className="text-2xl font-bold text-cyan-400">{Number(stats.total_sent || 0).toFixed(2)}</div>
           </TerminalCard>
           <TerminalCard>
-            <div className="text-xs text-neutral-400 tracking-wider mb-1">RECEIVE COUNT</div>
+            <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1">RECEIVE COUNT</div>
             <div className="text-2xl font-bold text-white">{stats.receive_count}</div>
           </TerminalCard>
           <TerminalCard>
-            <div className="text-xs text-neutral-400 tracking-wider mb-1">SEND COUNT</div>
+            <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1">SEND COUNT</div>
             <div className="text-2xl font-bold text-white">{stats.send_count}</div>
           </TerminalCard>
         </div>
@@ -294,7 +294,7 @@ export function MicrocosmRewardsPage({}: MicrocosmRewardsPageProps = {}) {
           <div className="bg-neutral-900 border border-neutral-700 rounded-lg w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
             <h3 className="text-white font-medium">Send Single Reward</h3>
             <div>
-              <label className="text-xs text-neutral-400 tracking-wider block mb-1">Recipient UID</label>
+              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">Recipient UID</label>
               <input
                 type="text"
                 value={singleReward.recipient_id}
@@ -304,7 +304,7 @@ export function MicrocosmRewardsPage({}: MicrocosmRewardsPageProps = {}) {
               />
             </div>
             <div>
-              <label className="text-xs text-neutral-400 tracking-wider block mb-1">Amount (MCC)</label>
+              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">Amount (MCC)</label>
               <input
                 type="number"
                 min={1}
@@ -316,7 +316,7 @@ export function MicrocosmRewardsPage({}: MicrocosmRewardsPageProps = {}) {
               />
             </div>
             <div>
-              <label className="text-xs text-neutral-400 tracking-wider block mb-1">Reason</label>
+              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">Reason</label>
               <textarea
                 value={singleReward.reason}
                 onChange={(e) => setSingleReward({ ...singleReward, reason: e.target.value })}

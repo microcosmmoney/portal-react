@@ -112,7 +112,7 @@ export function MicrocosmQuickActions({ basePath = '', onNavigate, accentColor }
               target="_blank"
               rel="noopener noreferrer"
             >
-              <div className={`bg-neutral-900 border ${ex.color} rounded-lg p-4 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-colors`} style={ex.colorStyle}>
+              <div className={`backdrop-blur-md bg-white/5 border ${ex.color} rounded-xl p-4 flex items-center gap-3 cursor-pointer active:scale-[0.98] blockchain-card`} style={ex.colorStyle}>
                 <Icon stroke={iconStroke} />
                 <span className="font-mono text-sm font-bold tracking-wider">{ex.label}</span>
               </div>

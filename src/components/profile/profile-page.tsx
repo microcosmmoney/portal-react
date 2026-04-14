@@ -270,19 +270,19 @@ export function MicrocosmProfilePage({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-neutral-800 rounded p-4">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-4 blockchain-sub-card">
             <div className="text-xs text-neutral-400 tracking-wider mb-1">UID</div>
             <div className="text-xs text-white font-mono break-all">{profile?.uid || userInfo?.uid || '-'}</div>
           </div>
-          <div className="bg-neutral-800 rounded p-4">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-4 blockchain-sub-card">
             <div className="text-xs text-neutral-400 tracking-wider mb-1">Short ID</div>
             <div className="text-sm text-white font-mono">{profile?.short_id || '-'}</div>
           </div>
-          <div className="bg-neutral-800 rounded p-4">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-4 blockchain-sub-card">
             <div className="text-xs text-neutral-400 tracking-wider mb-1">Created</div>
             <div className="text-sm text-white">{formatDate(profile?.created_at)}</div>
           </div>
-          <div className="bg-neutral-800 rounded p-4">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-4 blockchain-sub-card">
             <div className="text-xs text-neutral-400 tracking-wider mb-1">Last Login</div>
             <div className="text-sm text-white">{formatDate(profile?.last_login_at)}</div>
           </div>

@@ -90,11 +90,11 @@ export function MicrocosmMiningWeight({ accentColor }: MicrocosmMiningWeightProp
   const spinnerClass = accentColor ? 'inline-block w-5 h-5 border-2 rounded-full animate-spin' : 'inline-block w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin'
 
   return (
-    <div className="bg-neutral-900 border border-neutral-700 rounded-lg h-full hover:border-cyan-400/50 transition-colors">
+    <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl blockchain-card h-full">
       <div className="p-6">
         <div className="flex items-center gap-2 mb-4">
-          <IconPickaxe stroke={ac} />
-          <span className="text-neutral-400 text-xs font-mono tracking-wider">MINING_WEIGHT</span>
+          <IconPickaxe stroke="#5EEAD4" />
+          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">MINING_WEIGHT</span>
         </div>
 
         {loading ? (
@@ -104,10 +104,10 @@ export function MicrocosmMiningWeight({ accentColor }: MicrocosmMiningWeightProp
         ) : (
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-neutral-800 rounded p-3">
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <IconShield stroke={ac} />
-                  <span className="text-neutral-400 text-xs font-mono tracking-wider">level</span>
+                  <IconShield stroke="#5EEAD4" />
+                  <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">level</span>
                 </div>
                 <div
                   className={`text-sm font-bold font-mono ${accentColor ? '' : (RANK_COLORS[rank ?? ''] ?? 'text-neutral-500')}`}
@@ -116,26 +116,26 @@ export function MicrocosmMiningWeight({ accentColor }: MicrocosmMiningWeightProp
                   {rank ? RANK_LABELS[rank] ?? rank : 'N/A'}
                 </div>
               </div>
-              <div className="bg-neutral-800 rounded p-3">
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <IconTree stroke={ac} />
-                  <span className="text-neutral-400 text-xs font-mono tracking-wider">tech_bonus</span>
+                  <IconTree stroke="#5EEAD4" />
+                  <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">tech_bonus</span>
                 </div>
                 <div className="text-sm font-bold font-mono text-white">{discountPct}</div>
                 <div className="text-[10px] text-neutral-500 font-mono">output boost</div>
               </div>
-              <div className="bg-neutral-800 rounded p-3">
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <IconCalendar stroke={ac} />
-                  <span className="text-neutral-400 text-xs font-mono tracking-wider">mining_days</span>
+                  <IconCalendar stroke="#5EEAD4" />
+                  <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">mining_days</span>
                 </div>
                 <div className="text-sm font-bold font-mono text-white">{miningDays}</div>
                 <div className="text-[10px] text-neutral-500 font-mono">cumulative</div>
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded p-3">
-              <div className="text-neutral-400 text-xs font-mono tracking-wider mb-3">companion_yield</div>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+              <div className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase mb-3">companion_yield</div>
               <p className="text-[10px] text-neutral-500 font-mono mb-3">
                 Each mining produces companion yield, auto-injected into territory ecosystem
               </p>

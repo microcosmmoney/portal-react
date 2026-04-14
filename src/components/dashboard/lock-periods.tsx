@@ -30,14 +30,14 @@ export function MicrocosmLockPeriods({ accentColor }: MicrocosmLockPeriodsProps 
   if (activeLocks.length === 0) return null
 
   return (
-    <div className="bg-neutral-900 border border-neutral-700 rounded-lg hover:border-cyan-400/50 transition-colors">
+    <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl blockchain-card">
       <div className="p-6">
         <div className="space-y-3">
           {activeLocks.map((lock: any) => (
-            <div key={lock.lock_id} className="bg-neutral-800 rounded p-4">
+            <div key={lock.lock_id} className="bg-white/5 border border-white/10 rounded-lg p-4 blockchain-sub-card">
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <div className="text-neutral-400 text-xs font-mono tracking-wider">{lock.reason}</div>
+                  <div className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">{lock.reason}</div>
                   <div
                     className={accentColor ? 'text-xl font-bold font-mono mt-1' : 'text-xl font-bold font-mono text-cyan-400 mt-1'}
                     style={accentColor ? { color: accentColor } : undefined}

@@ -241,21 +241,21 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <TerminalCard>
-            <div className="text-xs text-neutral-400 tracking-wider mb-1">TOTAL STATIONS</div>
+            <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1">TOTAL STATIONS</div>
             <div className="text-2xl font-bold text-white">{summary.total_stations ?? 0}</div>
           </TerminalCard>
           <TerminalCard>
-            <div className="text-xs text-neutral-400 tracking-wider mb-1">TOTAL MEMBERS</div>
+            <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1">TOTAL MEMBERS</div>
             <div className="text-2xl font-bold text-cyan-400">{summary.total_members ?? 0}</div>
           </TerminalCard>
           <TerminalCard>
-            <div className="text-xs text-neutral-400 tracking-wider mb-1">VAULT MCD</div>
+            <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1">VAULT MCD</div>
             <div className="text-2xl font-bold text-cyan-400">
               {(summary.total_vault_mcd ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
             </div>
           </TerminalCard>
           <TerminalCard>
-            <div className="text-xs text-neutral-400 tracking-wider mb-1">AVG KPI</div>
+            <div className="text-xs text-[#5EEAD4] tracking-widest uppercase mb-1">AVG KPI</div>
             <div className="text-2xl font-bold text-white">{(summary.avg_kpi_score ?? 0).toFixed(1)}</div>
           </TerminalCard>
         </div>
@@ -355,7 +355,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
             <h3 className="text-white font-medium">Edit {editingUnit.unit_name}</h3>
 
             <div>
-              <label className="text-xs text-neutral-400 tracking-wider block mb-1">Name</label>
+              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">Name</label>
               <input
                 type="text"
                 value={editFormData.unit_name}
@@ -365,7 +365,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
             </div>
 
             <div>
-              <label className="text-xs text-neutral-400 tracking-wider block mb-1">Description</label>
+              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">Description</label>
               <textarea
                 value={editFormData.description}
                 onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
@@ -375,7 +375,7 @@ export function MicrocosmStationListPage({ currentUid, isAdmin = false }: Microc
             </div>
 
             <div>
-              <label className="text-xs text-neutral-400 tracking-wider block mb-1">Image</label>
+              <label className="text-xs text-[#5EEAD4] tracking-widest uppercase block mb-1">Image</label>
               <div className="flex items-start gap-3">
                 {(imagePreview || editingUnit.image_url) ? (
                   <img

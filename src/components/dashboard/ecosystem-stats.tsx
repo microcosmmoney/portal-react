@@ -64,11 +64,11 @@ export function MicrocosmEcosystemStats({ accentColor }: MicrocosmEcosystemStats
   const spinnerClass = accentColor ? 'inline-block w-5 h-5 border-2 rounded-full animate-spin' : 'inline-block w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin'
 
   return (
-    <div className="bg-neutral-900 border border-neutral-700 rounded-lg h-full hover:border-cyan-400/50 transition-colors">
+    <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl blockchain-card h-full">
       <div className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <IconGlobe stroke={ac} />
-          <span className="text-neutral-400 text-xs font-mono tracking-wider">ECOSYSTEM</span>
+          <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">ECOSYSTEM</span>
         </div>
 
         {loading ? (
@@ -80,10 +80,10 @@ export function MicrocosmEcosystemStats({ accentColor }: MicrocosmEcosystemStats
             {stats.map((s) => {
               const Icon = s.icon
               return (
-                <div key={s.label} className="bg-neutral-800 rounded p-3">
+                <div key={s.label} className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Icon stroke={ac} />
-                    <span className="text-[10px] text-neutral-400 font-mono tracking-wider">{s.label}</span>
+                    <span className="text-[10px] text-[#5EEAD4] font-mono tracking-widest uppercase">{s.label}</span>
                   </div>
                   <div className="text-xl font-bold font-mono text-white">
                     {s.value != null ? s.value.toLocaleString() : '--'}

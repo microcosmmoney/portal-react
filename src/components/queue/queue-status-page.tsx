@@ -172,7 +172,7 @@ export function MicrocosmQueueStatusPage({ isAdmin = false }: MicrocosmQueueStat
         <div className="p-4 bg-neutral-800 rounded mb-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-neutral-400 tracking-wider">CURRENT LEVEL</div>
+              <div className="text-xs text-[#5EEAD4] tracking-widest uppercase">CURRENT LEVEL</div>
               <div className="text-lg font-bold text-cyan-300">{levelLabel}</div>
             </div>
             <span className="px-3 py-1 bg-cyan-900/30 text-cyan-300 rounded border border-cyan-700 text-xs">

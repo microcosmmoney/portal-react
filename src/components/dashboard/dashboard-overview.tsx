@@ -22,7 +22,7 @@ class SafeRender extends Component<{ children: ReactNode }, { hasError: boolean 
 /** Skeleton placeholder matching card dimensions */
 function CardSkeleton({ height = 'h-48' }: { height?: string }) {
   return (
-    <div className={`bg-neutral-900 border border-neutral-700 rounded-lg ${height} animate-pulse`}>
+    <div className={`backdrop-blur-md bg-white/5 border border-white/10 rounded-xl ${height} animate-pulse blockchain-card`}>
       <div className="p-6 space-y-3">
         <div className="h-3 bg-neutral-800 rounded w-24" />
         <div className="h-6 bg-neutral-800 rounded w-40" />

@@ -50,17 +50,17 @@ export function MicrocosmAssetsSummary({ basePath = '', onNavigate, accentColor 
     <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
       {/* MCC Balance */}
       <div
-        className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:border-cyan-400/50 transition-colors cursor-pointer h-full"
+        className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-4 blockchain-card cursor-pointer h-full"
         onClick={() => onNavigate?.(resolvePath('/mcc/wallet'))}
         role="button" tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && onNavigate?.(resolvePath('/mcc/wallet'))}
       >
         <div className="flex items-center gap-1.5 mb-2">
-          <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="blockchain-icon w-3.5 h-3.5 text-[#5EEAD4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
-          <span className="text-neutral-400 text-[10px] font-mono tracking-wider">MCC_BALANCE</span>
+          <span className="text-[#5EEAD4] text-[10px] font-mono tracking-widest uppercase">MCC_BALANCE</span>
         </div>
         <div className={accentColor ? 'text-2xl font-bold font-mono' : 'text-2xl font-bold font-mono text-cyan-400'} style={accentColor ? { color: accentColor } : undefined}>
           {mccLoading
@@ -77,16 +77,16 @@ export function MicrocosmAssetsSummary({ basePath = '', onNavigate, accentColor 
 
       {/* MCD Balance */}
       <div
-        className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:border-cyan-400/50 transition-colors cursor-pointer h-full"
+        className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-4 blockchain-card cursor-pointer h-full"
         onClick={() => onNavigate?.(resolvePath('/mcc/mcd'))}
         role="button" tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && onNavigate?.(resolvePath('/mcc/mcd'))}
       >
         <div className="flex items-center gap-1.5 mb-2">
-          <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="blockchain-icon w-3.5 h-3.5 text-[#5EEAD4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
           </svg>
-          <span className="text-neutral-400 text-[10px] font-mono tracking-wider">MCD_BALANCE</span>
+          <span className="text-[#5EEAD4] text-[10px] font-mono tracking-widest uppercase">MCD_BALANCE</span>
         </div>
         <div className="text-2xl font-bold font-mono text-white">
           {mcdLoading
@@ -100,12 +100,12 @@ export function MicrocosmAssetsSummary({ basePath = '', onNavigate, accentColor 
       </div>
 
       {/* Locked */}
-      <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:border-cyan-400/50 transition-colors">
+      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-4 blockchain-card">
         <div className="flex items-center gap-1.5 mb-2">
-          <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="blockchain-icon w-3.5 h-3.5 text-[#5EEAD4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          <span className="text-neutral-400 text-[10px] font-mono tracking-wider">LOCKED</span>
+          <span className="text-[#5EEAD4] text-[10px] font-mono tracking-widest uppercase">LOCKED</span>
         </div>
         <div className="text-2xl font-bold font-mono text-white">{fmt(lockedAmount, 0)}</div>
         <div className="text-[10px] text-neutral-500 font-mono mt-1">
@@ -114,19 +114,19 @@ export function MicrocosmAssetsSummary({ basePath = '', onNavigate, accentColor 
       </div>
 
       {/* Wallets */}
-      <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:border-cyan-400/50 transition-colors">
+      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-4 blockchain-card">
         <div className="flex items-center gap-1.5 mb-2">
-          <svg className="w-3.5 h-3.5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="blockchain-icon w-3.5 h-3.5 text-[#5EEAD4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
           </svg>
-          <span className="text-neutral-400 text-[10px] font-mono tracking-wider">WALLETS</span>
+          <span className="text-[#5EEAD4] text-[10px] font-mono tracking-widest uppercase">WALLETS</span>
         </div>
         <div className="text-2xl font-bold font-mono text-white">{walletCount}</div>
       </div>
 
       {/* Rank */}
-      <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:border-cyan-400/50 transition-colors">
-        <div className="text-neutral-400 text-[10px] font-mono tracking-wider mb-2">RANK</div>
+      <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl p-4 blockchain-card">
+        <div className="text-[#5EEAD4] text-[10px] font-mono tracking-widest uppercase mb-2">RANK</div>
         <div className={`text-lg font-bold font-mono ${rankColor ?? ''}`} style={rankStyle}>
           {rank || 'N/A'}
         </div>

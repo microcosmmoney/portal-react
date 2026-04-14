@@ -80,7 +80,7 @@ export function MicrocosmReincarnationPage({
 
       <TerminalCard title="Contract Addresses">
         <div className="space-y-3">
-          <div className="bg-neutral-800 rounded p-3">
+          <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
             <div className="text-xs text-neutral-400 tracking-wider mb-1">Reincarnation Pool PDA</div>
             <div className="flex items-center justify-between gap-2">
               <code className="text-sm text-cyan-400 break-all">{POOL_ADDRESS}</code>
@@ -98,14 +98,14 @@ export function MicrocosmReincarnationPage({
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="bg-neutral-800 rounded p-3">
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
               <div className="text-xs text-neutral-400 tracking-wider mb-1">USDT Vault</div>
               <div className="flex items-center justify-between gap-2">
                 <code className="text-xs text-neutral-400 break-all">{USDT_VAULT}</code>
                 <CopyButton text={USDT_VAULT} />
               </div>
             </div>
-            <div className="bg-neutral-800 rounded p-3">
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
               <div className="text-xs text-neutral-400 tracking-wider mb-1">USDC Vault</div>
               <div className="flex items-center justify-between gap-2">
                 <code className="text-xs text-neutral-400 break-all">{USDC_VAULT}</code>

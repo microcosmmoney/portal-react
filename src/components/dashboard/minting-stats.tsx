@@ -1,6 +1,6 @@
 'use client'
 
-import { useMCCStats, useMarketData } from '@microcosmmoney/auth-react'
+import { useMCCStats, useMCCPrice } from '@microcosmmoney/auth-react'
 
 export interface MicrocosmMintingStatsProps {
   accentColor?: string
@@ -8,14 +8,15 @@ export interface MicrocosmMintingStatsProps {
 
 export function MicrocosmMintingStats({ accentColor }: MicrocosmMintingStatsProps = {}) {
   const { data: mccStats, loading } = useMCCStats()
-  const { data: marketData } = useMarketData()
+  const { data: mccPriceData } = useMCCPrice()
 
   const s = mccStats as any
   const totalMinted = s?.circulating_supply ?? 0
   const currentStage = s?.current_phase ?? 0
   const miningRate = s?.current_mining_rate ?? 0
   const nextHalving = s?.next_halving_at ?? 100_000_000
-  const price = marketData?.price_usd ?? 0
+  const basePrice = (mccPriceData as any)?.base_price ?? (mccPriceData as any)?.price_usd ?? (mccPriceData as any)?.price ?? 0
+  const miningPrice = basePrice > 0 ? basePrice * 4 : 0
 
   const fmt = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
@@ -23,7 +24,7 @@ export function MicrocosmMintingStats({ accentColor }: MicrocosmMintingStatsProp
   const spinnerClass = accentColor ? 'inline-block w-5 h-5 border-2 rounded-full animate-spin' : 'inline-block w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin'
 
   return (
-    <div className="bg-neutral-900 border border-neutral-700 rounded-lg h-full hover:border-cyan-400/50 transition-colors">
+    <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-xl blockchain-card h-full">
       <div className="p-6">
         {loading ? (
           <div className="flex items-center justify-center py-8">
@@ -33,25 +34,25 @@ export function MicrocosmMintingStats({ accentColor }: MicrocosmMintingStatsProp
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
               <span className={accentColor ? '' : 'text-cyan-400'} style={accentColor ? { color: accentColor } : undefined}>⚡</span>
-              <span className="text-neutral-400 text-xs font-mono tracking-wider">MINTING_STATS</span>
+              <span className="text-[#5EEAD4] text-xs font-mono tracking-widest uppercase">MINTING_STATS</span>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-neutral-800 rounded p-3">
-                <div className="text-xs text-neutral-400 font-mono tracking-wider mb-1">total_minted</div>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+                <div className="text-xs text-[#5EEAD4] font-mono tracking-widest uppercase mb-1">total_minted</div>
                 <div className="text-xl font-bold font-mono text-white">
                   {totalMinted > 0 ? fmt(totalMinted) : '0'} MCC
                 </div>
               </div>
-              <div className="bg-neutral-800 rounded p-3">
-                <div className="text-xs text-neutral-400 font-mono tracking-wider mb-1">mining_price</div>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
+                <div className="text-xs text-[#5EEAD4] font-mono tracking-widest uppercase mb-1">mining_price</div>
                 <div className={accentColor ? 'text-xl font-bold font-mono' : 'text-xl font-bold font-mono text-cyan-400'} style={accentColor ? { color: accentColor } : undefined}>
-                  ${price > 0 ? (price * 2).toFixed(4) : '--'}
+                  ${miningPrice > 0 ? miningPrice.toFixed(4) : '--'}
                 </div>
-                <div className="text-[10px] text-neutral-500 font-mono">market × 2</div>
+                <div className="text-[10px] text-neutral-500 font-mono">base × 4</div>
               </div>
             </div>
 
-            <div className="bg-neutral-800 rounded p-3">
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 blockchain-sub-card">
               <div className="flex justify-between items-center mb-2 text-sm font-mono">
                 <span className="text-neutral-400">next_halving</span>
                 <span className="text-white">
