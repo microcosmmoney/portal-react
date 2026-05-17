@@ -23,9 +23,6 @@ import { FormattedDateTime } from "../ui/time-remaining"
 import { useTranslations } from 'next-intl'
 import { useMCCPrice } from "../../contexts/MCCPriceContext"
 import { PriceChart } from "../data/charts/PriceChart"
-import { useTechBonusDetail } from "@microcosmmoney/auth-react"
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "../ui/tooltip"
-import { HelpCircle } from "lucide-react"
 
 interface X402MiningRecord {
   id: number
@@ -68,8 +65,6 @@ export default function MCCMiningPage() {
   const t = useTranslations('miningDash')
   const router = useRouter()
   const ticker = useMCCPrice()
-  const techBonusDetail = useTechBonusDetail()
-  const totalBonus = Number((techBonusDetail.data as any)?.total_bonus ?? 0)
   const [userDetails, setUserDetails] = useState<{ uid: string; unit_level?: number; source_project_id?: string } | null>(null)
   const [showMiningModal, setShowMiningModal] = useState(false)
   const [ratioInfo, setRatioInfo] = useState<MiningRatioInfo | null>(null)
@@ -224,6 +219,19 @@ export default function MCCMiningPage() {
     loadPoolData()
   }
 
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const handler = () => {
+      loadRatioInfo()
+      loadX402History()
+      loadWalletBalances()
+      loadPoolData()
+      refreshPDABalance()
+    }
+    window.addEventListener("microcosm:mining-completed", handler)
+    return () => window.removeEventListener("microcosm:mining-completed", handler)
+  }, [refreshPDABalance])
+
   const isLoading = !userDetails || ratioLoading
 
   if (isLoading) {
@@ -317,19 +325,9 @@ export default function MCCMiningPage() {
                     <span className="text-xl sm:text-3xl font-bold text-white font-mono">
                       1 MCC ≈ {formatNumber((ticker.basePrice ?? ratioInfo?.usdc_per_mcc ?? 0) * 4, 4)} USD
                     </span>
-                    <TooltipProvider delayDuration={100}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge className="bg-cyan-400/20 text-cyan-400 border-transparent text-[10px] sm:text-sm cursor-help inline-flex items-center gap-1">
-                            +{totalBonus}% {t('techBonus')}
-                            <HelpCircle className="w-3 h-3" />
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-xs text-xs leading-relaxed">
-                          {t('techBonusTooltip')}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <Badge className="bg-cyan-400/20 text-cyan-400 border-transparent text-[10px] sm:text-sm">
+                      {t('techBonus')}
+                    </Badge>
                   </div>
                 </div>
               )}
@@ -673,6 +671,9 @@ export default function MCCMiningPage() {
           loadRatioInfo()
           loadX402History()
           refreshPDABalance()
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("microcosm:mining-completed"))
+          }
         }}
       />
     </div>

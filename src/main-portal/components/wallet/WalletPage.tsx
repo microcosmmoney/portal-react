@@ -2,20 +2,20 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Link } from '../../i18n/navigation'
+import { Link } from '@/i18n/navigation'
 import {
   Wallet, Lock, TrendingUp, RefreshCw, Info, Gift,
   CreditCard, Eye, EyeOff, ExternalLink, Loader2, AlertTriangle
 } from 'lucide-react'
-import { Card, CardContent } from '../ui/card'
-import { Badge } from '../ui/badge'
-import { Button } from '../ui/button'
-import { useAuth } from '../../hooks/useAuth'
-import { useWallet } from '../../contexts/WalletContext'
-import { useWalletTokenBalances, type TokenHolding, type WalletTokenData } from '../../hooks/useWalletTokenBalances'
-import { cn } from '../../lib/utils'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { useAuth } from '@/hooks/useAuth'
+import { useWallet } from '@/contexts/WalletContext'
+import { useWalletTokenBalances, type TokenHolding, type WalletTokenData } from '@/hooks/useWalletTokenBalances'
+import { cn } from '@/lib/utils'
 import MCCHistory from './MCCHistory'
-import { FormattedDateTime, FormattedDate, LockDaysHoursRemaining, useLockProgressValue } from '../ui/time-remaining'
+import { FormattedDateTime, FormattedDate, LockDaysHoursRemaining, useLockProgressValue } from '@/components/ui/time-remaining'
 import { useTranslations } from 'next-intl'
 
 interface WalletInfo {
@@ -214,6 +214,18 @@ export default function WalletPage() {
     refreshMCD()
     tokenBalances.refresh()
   }
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const handler = () => {
+      refreshBalance()
+      refreshMinting()
+      refreshMCD()
+      tokenBalances.refresh()
+    }
+    window.addEventListener("microcosm:mining-completed", handler)
+    return () => window.removeEventListener("microcosm:mining-completed", handler)
+  }, [refreshBalance, refreshMinting, refreshMCD, tokenBalances])
 
   // \u591a\u94b1\u5305\u65f6 "all" tab \u7528 flat \u5217\u8868\uff08\u5e26\u94b1\u5305\u6807\u8bc6\uff09\uff0c\u5355\u94b1\u5305 tab \u7528 holdings
   const isAllTab = activeTab === 'all'

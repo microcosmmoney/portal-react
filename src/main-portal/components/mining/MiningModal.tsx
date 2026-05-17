@@ -49,6 +49,23 @@ const COIN_INFO: Record<StablecoinType, { symbol: string; name: string; icon: st
 
 const STATUS_POLL_INTERVAL_MS = 1500
 const STATUS_POLL_TIMEOUT_MS = 30 * 60 * 1000
+const MINING_COMPLETED_EVENT = "microcosm:mining-completed"
+
+const STATUS_ORDER: Record<string, number> = {
+  created: 0,
+  submitted: 1,
+  distributing: 2,
+  completed: 3,
+  failed: 99,
+  expired: 99,
+}
+
+interface EpochInfo {
+  current_epoch: number
+  epoch_minted: number
+  epoch_yield: number
+  mining_vault_mcc: number
+}
 
 export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }: MiningModalProps) {
   const t = useTranslations("miningModal")
@@ -73,8 +90,57 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
   const pollStartTsRef = useRef<number>(0)
   const referencePollAbortRef = useRef<boolean>(false)
   const referencePubkeyRef = useRef<PublicKey | null>(null)
-  const successFiredRef = useRef<boolean>(false)
+  const completedEventFiredRef = useRef<boolean>(false)
+  const [epochInfo, setEpochInfo] = useState<EpochInfo | null>(null)
+  const [epochCountdownSec, setEpochCountdownSec] = useState<number>(0)
   const isMobile = typeof window !== "undefined" ? isMobileDevice() : false
+
+  const upgradeStatus = useCallback((newStatus: BackendStatus) => {
+    setBackendStatus(prev => {
+      const prevRank = STATUS_ORDER[prev] ?? 0
+      const newRank = STATUS_ORDER[newStatus] ?? 0
+      if (newStatus === "failed" || newStatus === "expired") return newStatus
+      return newRank >= prevRank ? newStatus : prev
+    })
+  }, [])
+
+  const fireMiningCompletedEvent = useCallback((detail: Record<string, unknown>) => {
+    if (completedEventFiredRef.current) return
+    completedEventFiredRef.current = true
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent(MINING_COMPLETED_EVENT, { detail }))
+    }
+  }, [])
+
+  const loadEpochInfo = useCallback(async () => {
+    try {
+      const r = await fetch("/api/stats/custody-vaults", { cache: "no-store" })
+      const j = await r.json()
+      const ep = j?.data?.epoch
+      if (ep && typeof ep.current_epoch === "number") {
+        setEpochInfo(ep)
+      }
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    if (!isOpen) return
+    loadEpochInfo()
+    const id = window.setInterval(loadEpochInfo, 60000)
+    return () => window.clearInterval(id)
+  }, [isOpen, loadEpochInfo])
+
+  useEffect(() => {
+    const tick = () => {
+      const nowMs = Date.now()
+      const elapsedMs = nowMs % (3600 * 1000)
+      const remainSec = Math.max(0, Math.floor((3600 * 1000 - elapsedMs) / 1000))
+      setEpochCountdownSec(remainSec)
+    }
+    tick()
+    const id = window.setInterval(tick, 1000)
+    return () => window.clearInterval(id)
+  }, [])
 
   const loadStablecoinBalance = useCallback(async () => {
     if (!publicKey || !connected) { setStablecoinBalance(null); return }
@@ -110,14 +176,14 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
           if (sigs.length > 0 && !sigs[0].err) {
             const sig = sigs[0].signature
             setTxSignature(prev => prev || sig)
-            setBackendStatus(prev => (prev === "created" ? "submitted" : prev))
+            upgradeStatus("submitted")
             break
           }
         } catch {}
         await new Promise(r => setTimeout(r, 1500))
       }
     } catch {}
-  }, [])
+  }, [upgradeStatus])
 
   const startStatusPolling = useCallback((requestId: string) => {
     stopStatusPolling()
@@ -144,21 +210,23 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
           mcc_distributed?: { user: number; lp_reserve: number; magistrate: number; station_mcd: number }
           error?: string
         }
-        setBackendStatus(data.status)
-        if (data.payment_tx_signature) setTxSignature(data.payment_tx_signature)
+        upgradeStatus(data.status)
+        if (data.payment_tx_signature) setTxSignature(prev => prev || data.payment_tx_signature!)
 
         if (data.status === "completed") {
           stopStatusPolling()
+          const mccDist = data.mcc_distributed || { user: 0, lp_reserve: 0, magistrate: 0, station_mcd: 0 }
           setConfirmationResult({
             onchain_tx_signature: data.onchain_tx_signature || "",
-            mcc_distributed: data.mcc_distributed || { user: 0, lp_reserve: 0, magistrate: 0, station_mcd: 0 },
+            mcc_distributed: mccDist,
             status: "completed",
           })
           setStep("success")
-          if (onSuccess && !successFiredRef.current) {
-            successFiredRef.current = true
-            onSuccess()
-          }
+          fireMiningCompletedEvent({
+            onchain_tx_signature: data.onchain_tx_signature || "",
+            mcc_distributed: mccDist,
+            payment_tx_signature: data.payment_tx_signature,
+          })
         } else if (data.status === "failed") {
           stopStatusPolling()
           setError(data.error || t("errorMintRequest"))
@@ -174,7 +242,7 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
 
     tick()
     pollIntervalRef.current = window.setInterval(tick, STATUS_POLL_INTERVAL_MS)
-  }, [stopStatusPolling, t])
+  }, [stopStatusPolling, upgradeStatus, fireMiningCompletedEvent, t])
 
   const handleSubmit = async () => {
     if (!userDetails || !mccAmount || parseFloat(mccAmount) <= 0) { setError(t("errorInvalidAmount")); return }
@@ -254,12 +322,14 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
         stablecoin_type: stablecoin,
       })
       if (!confirmResponse.success || !confirmResponse.data) throw new Error(confirmResponse.error || t("errorConfirmPayment"))
-      setConfirmationResult(confirmResponse.data as unknown as ConfirmationResult)
+      const result = confirmResponse.data as unknown as ConfirmationResult
+      setConfirmationResult(result)
       setStep("success")
-      if (onSuccess && !successFiredRef.current) {
-        successFiredRef.current = true
-        onSuccess()
-      }
+      fireMiningCompletedEvent({
+        onchain_tx_signature: result.onchain_tx_signature || "",
+        mcc_distributed: result.mcc_distributed,
+        payment_tx_signature: signature,
+      })
     } catch (err: unknown) { setError(err instanceof Error ? err.message : t("errorMiningFailed")); setStep("error"); throw err }
     finally { setLoading(false) }
   }
@@ -278,11 +348,8 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
     setSolanaPayUrl("")
     setBackendStatus("created")
     referencePubkeyRef.current = null
-    if (onSuccess && !successFiredRef.current) {
-      successFiredRef.current = true
-      onSuccess()
-    }
-    successFiredRef.current = false
+    completedEventFiredRef.current = false
+    if (onSuccess) onSuccess()
     onClose()
   }, [stopStatusPolling, onClose, onSuccess])
 
@@ -367,6 +434,32 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
 
           {step === "input" && (
             <div className="space-y-4">
+              {epochInfo && (
+                <div className="p-3 rounded bg-amber-500/10 border border-amber-500/40">
+                  <div className="grid grid-cols-4 gap-3 text-sm">
+                    <div>
+                      <div className="text-[10px] text-amber-300/80 tracking-wider mb-1">{t("epochCurrent")}</div>
+                      <div className="text-amber-200 font-bold font-mono text-base">#{epochInfo.current_epoch}</div>
+                      <div className="text-[10px] text-neutral-500 mt-1 font-mono">{epochInfo.epoch_yield.toFixed(2)} MCC / epoch</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-amber-300/80 tracking-wider mb-1">{t("epochMinted")}</div>
+                      <div className="text-white font-bold font-mono text-base">{epochInfo.epoch_minted.toFixed(2)}</div>
+                      <div className="text-[10px] text-neutral-500 mt-1 font-mono">MCC</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-amber-300/80 tracking-wider mb-1">{t("epochRemaining")}</div>
+                      <div className="text-emerald-300 font-bold font-mono text-base">{Math.max(0, epochInfo.epoch_yield - epochInfo.epoch_minted).toFixed(2)}</div>
+                      <div className="text-[10px] text-neutral-500 mt-1 font-mono">MCC</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-amber-300/80 tracking-wider mb-1">{t("epochCountdown")}</div>
+                      <div className="text-cyan-300 font-bold font-mono text-base tabular-nums">{Math.floor(epochCountdownSec/60).toString().padStart(2,"0")}:{(epochCountdownSec%60).toString().padStart(2,"0")}</div>
+                      <div className="text-[10px] text-neutral-500 mt-1 font-mono">{t("epochNext")}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
               {ratioInfo && (
                 <div className="p-3 rounded bg-neutral-800 border border-neutral-700">
                   <div className="grid grid-cols-3 gap-4 text-sm">
