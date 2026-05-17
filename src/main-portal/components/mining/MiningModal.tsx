@@ -71,6 +71,9 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
   const [pollElapsedSec, setPollElapsedSec] = useState(0)
   const pollIntervalRef = useRef<number | null>(null)
   const pollStartTsRef = useRef<number>(0)
+  const referencePollAbortRef = useRef<boolean>(false)
+  const referencePubkeyRef = useRef<PublicKey | null>(null)
+  const successFiredRef = useRef<boolean>(false)
   const isMobile = typeof window !== "undefined" ? isMobileDevice() : false
 
   const loadStablecoinBalance = useCallback(async () => {
@@ -92,9 +95,29 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
       clearInterval(pollIntervalRef.current)
       pollIntervalRef.current = null
     }
+    referencePollAbortRef.current = true
   }, [])
 
   useEffect(() => () => { stopStatusPolling() }, [stopStatusPolling])
+
+  const startReferenceWatch = useCallback(async (reference: PublicKey) => {
+    referencePollAbortRef.current = false
+    try {
+      const connection = new Connection(SOLANA_RPC, "confirmed")
+      while (!referencePollAbortRef.current) {
+        try {
+          const sigs = await connection.getSignaturesForAddress(reference, { limit: 1 }, "confirmed")
+          if (sigs.length > 0 && !sigs[0].err) {
+            const sig = sigs[0].signature
+            setTxSignature(prev => prev || sig)
+            setBackendStatus(prev => (prev === "created" ? "submitted" : prev))
+            break
+          }
+        } catch {}
+        await new Promise(r => setTimeout(r, 1500))
+      }
+    } catch {}
+  }, [])
 
   const startStatusPolling = useCallback((requestId: string) => {
     stopStatusPolling()
@@ -132,6 +155,10 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
             status: "completed",
           })
           setStep("success")
+          if (onSuccess && !successFiredRef.current) {
+            successFiredRef.current = true
+            onSuccess()
+          }
         } else if (data.status === "failed") {
           stopStatusPolling()
           setError(data.error || t("errorMintRequest"))
@@ -174,9 +201,11 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
       })
       setSolanaPayUrl(payUrl)
       setBackendStatus("created")
+      referencePubkeyRef.current = reference
       if (isMobile) {
         setStep("qrPayment")
         startStatusPolling(response.data.request_id)
+        startReferenceWatch(reference)
       } else {
         setStep("paymentMethod")
       }
@@ -188,6 +217,7 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
     if (!miningRequest) return
     setStep("qrPayment")
     startStatusPolling(miningRequest.request_id)
+    if (referencePubkeyRef.current) startReferenceWatch(referencePubkeyRef.current)
   }
 
   const handleSelectBrowserPayment = async () => {
@@ -226,6 +256,10 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
       if (!confirmResponse.success || !confirmResponse.data) throw new Error(confirmResponse.error || t("errorConfirmPayment"))
       setConfirmationResult(confirmResponse.data as unknown as ConfirmationResult)
       setStep("success")
+      if (onSuccess && !successFiredRef.current) {
+        successFiredRef.current = true
+        onSuccess()
+      }
     } catch (err: unknown) { setError(err instanceof Error ? err.message : t("errorMiningFailed")); setStep("error"); throw err }
     finally { setLoading(false) }
   }
@@ -243,7 +277,12 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
     setConfirmationResult(null)
     setSolanaPayUrl("")
     setBackendStatus("created")
-    if (onSuccess) onSuccess()
+    referencePubkeyRef.current = null
+    if (onSuccess && !successFiredRef.current) {
+      successFiredRef.current = true
+      onSuccess()
+    }
+    successFiredRef.current = false
     onClose()
   }, [stopStatusPolling, onClose, onSuccess])
 
