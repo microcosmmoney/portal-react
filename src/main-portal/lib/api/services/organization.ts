@@ -3,9 +3,8 @@ import type {
   APIResponse, Unit, Member, Auction, Bid, PlaceBidRequest, AuctionHistoryParams,
   MiningWeight, TechBonusDetail, StationKPI, UserRank,
   LevelProgress, UserLevelStatus, LevelSystemConfig,
-  UserQueueStatus, AdminQueueStatus, QueueProcessResult,
-  ExpansionCheckResult, ExpansionTriggerResult,
-  ManagerIncomeSummary, StationIncomeSummary, TeamCustodySummary
+  UserQueueStatus,
+  ManagerIncomeSummary, StationIncomeSummary
 } from '../../types/api'
 
 export const getUnits = async (unitType?: string): Promise<APIResponse<Unit[]>> => {
@@ -119,14 +118,6 @@ export async function joinStationQueue(preferredTerritoryId?: string): Promise<A
 
 export async function getQueueStatus(): Promise<UserQueueStatus> { return fetchApi('/organization-service/station/queue/status') }
 export async function cancelQueue(): Promise<APIResponse<{ message: string }>> { return fetchApi('/organization-service/station/queue', { method: 'DELETE' }) }
-export async function getAdminQueueStatus(): Promise<AdminQueueStatus> { return fetchApi('/organization-service/station/queue/admin') }
-
-export async function processQueue(batchSize = 50): Promise<QueueProcessResult> {
-  return fetchApi('/organization-service/station/queue/process', { method: 'POST', body: JSON.stringify({ batch_size: batchSize }) })
-}
-
-export async function checkExpansionNeeded(): Promise<ExpansionCheckResult> { return fetchApi('/organization-service/station/expansion/check') }
-export async function triggerExpansion(): Promise<ExpansionTriggerResult> { return fetchApi('/organization-service/station/expansion/trigger', { method: 'POST' }) }
 
 export async function getStationIncome(stationId: string, startDate?: string, endDate?: string): Promise<StationIncomeSummary> {
   const p = new URLSearchParams()
@@ -144,4 +135,3 @@ export async function getManagerIncome(startDate?: string, endDate?: string): Pr
   return fetchApi(`/organization-service/manager/income${qs ? `?${qs}` : ''}`)
 }
 
-export async function getTeamCustodySummary(): Promise<TeamCustodySummary> { return fetchApi('/organization-service/team-custody/summary') }

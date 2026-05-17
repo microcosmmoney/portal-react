@@ -33,13 +33,9 @@ import {
   leaveStation,
   joinStationQueue,
   getQueueStatus,
-  cancelQueue,
-  getAdminQueueStatus,
-  processQueue,
-  checkExpansionNeeded,
-  triggerExpansion
+  cancelQueue
 } from '../../lib/api-service';
-import type { UserQueueStatus, AdminQueueStatus, ExpansionCheckResult } from '../../lib/types/api';
+import type { UserQueueStatus } from '../../lib/types/api';
 import {
   Users,
   Clock,
@@ -67,10 +63,8 @@ import { useTranslations } from 'next-intl';
 
 export default function QueueStatusPage() {
   const t = useTranslations('queueStatus');
-  const { isAdmin, user } = useAuth();
+  const { user } = useAuth();
   const [userQueue, setUserQueue] = useState<UserQueueStatus | null>(null);
-  const [adminQueue, setAdminQueue] = useState<AdminQueueStatus | null>(null);
-  const [expansionCheck, setExpansionCheck] = useState<ExpansionCheckResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -78,12 +72,9 @@ export default function QueueStatusPage() {
   const [showJoinDialog, setShowJoinDialog] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [showProcessDialog, setShowProcessDialog] = useState(false);
-  const [showExpansionDialog, setShowExpansionDialog] = useState(false);
 
   const [preferredStation, setPreferredStation] = useState('');
   const [leaveReason, setLeaveReason] = useState('');
-  const [batchSize, setBatchSize] = useState(50);
 
   const USER_LEVEL_INFO: Record<string, { label: string; labelEn: string; icon: React.ReactNode; color: string; bgColor: string }> = {
     miner: { label: t('miner'), labelEn: 'Miner', icon: <Gem className="w-5 h-5" />, color: 'text-cyan-300', bgColor: 'bg-cyan-900/30' },
@@ -115,25 +106,6 @@ export default function QueueStatusPage() {
         console.warn('[QueueStatus] Failed to fetch user queue status:', e);
       }
 
-      if (isAdmin()) {
-        try {
-          const adminRes = await getAdminQueueStatus();
-          if (adminRes.success) {
-            setAdminQueue(adminRes);
-          }
-        } catch (e) {
-          console.warn('[QueueStatus] Failed to fetch admin queue status:', e);
-        }
-
-        try {
-          const expansionRes = await checkExpansionNeeded();
-          if (expansionRes.success) {
-            setExpansionCheck(expansionRes);
-          }
-        } catch (e) {
-          console.warn('[QueueStatus] Failed to fetch expansion check:', e);
-        }
-      }
     } catch (error) {
       console.error('[QueueStatus] Failed to load data:', error);
     } finally {
@@ -218,42 +190,6 @@ export default function QueueStatusPage() {
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('cancelFailed'));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleProcessQueue = async () => {
-    try {
-      setSubmitting(true);
-      const result = await processQueue(batchSize);
-      if (result.success) {
-        toast.success(t('processComplete', { assigned: result.assigned, processed: result.processed }));
-        setShowProcessDialog(false);
-        loadData();
-      } else {
-        toast.error(t('processFailed'));
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('processFailed'));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleTriggerExpansion = async () => {
-    try {
-      setSubmitting(true);
-      const result = await triggerExpansion();
-      if (result.success) {
-        toast.success(result.message || t('expansionSuccess', { territory: result.new_territory_id ?? '' }));
-        setShowExpansionDialog(false);
-        loadData();
-      } else {
-        toast.error(result.error || t('expansionFailed'));
-      }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('expansionFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -445,131 +381,8 @@ export default function QueueStatusPage() {
       </Card>
 
       {}
-      {isAdmin() && adminQueue && (
-        <Card className="bg-black border-neutral-800 dash-card">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              {t('queueManagement')}
-            </CardTitle>
-            <CardDescription className="text-neutral-400">
-              {t('queueManagementDesc')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-neutral-950 rounded-lg p-4 border border-neutral-800 text-center">
-                <p className="text-3xl font-bold text-white font-mono">{adminQueue.pending_count}</p>
-                <p className="text-sm text-neutral-400">{t('pending')}</p>
-              </div>
-              <div className="bg-neutral-950 rounded-lg p-4 border border-neutral-800 text-center">
-                <p className="text-3xl font-bold text-white font-mono">{adminQueue.processing_count}</p>
-                <p className="text-sm text-neutral-400">{t('processing')}</p>
-              </div>
-              <div className="bg-neutral-950 rounded-lg p-4 border border-neutral-800 text-center">
-                <p className="text-3xl font-bold text-white font-mono">{adminQueue.total_in_queue}</p>
-                <p className="text-sm text-neutral-400">{t('totalInQueue')}</p>
-              </div>
-              <div className="bg-neutral-950 rounded-lg p-4 border border-neutral-800 text-center">
-                <p className="text-sm font-semibold text-white">
-                  {adminQueue.oldest_pending
-                    ? new Date(adminQueue.oldest_pending).toLocaleString()
-                    : '-'}
-                </p>
-                <p className="text-sm text-neutral-400">{t('oldestPending')}</p>
-              </div>
-            </div>
-
-            <Button
-              onClick={() => setShowProcessDialog(true)}
-              disabled={adminQueue.pending_count === 0}
-              className="w-full bg-cyan-900/50 hover:bg-cyan-900/70 text-cyan-300 border border-cyan-800"
-            >
-              <Play className="w-4 h-4 mr-2" />
-              {t('processQueue')}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
 
       {}
-      {isAdmin() && expansionCheck && (
-        <Card className="bg-black border-neutral-800 dash-card">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Plus className="w-5 h-5" />
-              {t('expansionTitle')}
-            </CardTitle>
-            <CardDescription className="text-neutral-400">
-              {t('expansionDesc')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-neutral-950 rounded-lg p-4 border border-neutral-800 text-center">
-                <p className="text-3xl font-bold text-white font-mono">
-                  {expansionCheck.current_stats.total_stations}
-                </p>
-                <p className="text-sm text-neutral-400">{t('totalTerritories')}</p>
-              </div>
-              <div className="bg-neutral-950 rounded-lg p-4 border border-neutral-800 text-center">
-                <p className="text-3xl font-bold text-white font-mono">
-                  {expansionCheck.current_stats.full_stations}
-                </p>
-                <p className="text-sm text-neutral-400">{t('fullTerritories')}</p>
-              </div>
-              <div className="bg-neutral-950 rounded-lg p-4 border border-neutral-800 text-center">
-                <p className="text-3xl font-bold text-white font-mono">
-                  {(expansionCheck.current_stats.avg_occupancy * 100).toFixed(1)}%
-                </p>
-                <p className="text-sm text-neutral-400">{t('avgOccupancy')}</p>
-              </div>
-              <div className="bg-neutral-950 rounded-lg p-4 border border-neutral-800 text-center">
-                <p className="text-3xl font-bold text-white font-mono">
-                  {expansionCheck.current_stats.pending_queue}
-                </p>
-                <p className="text-sm text-neutral-400">{t('queueWaiting')}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 bg-neutral-950 rounded-lg border border-neutral-800 mb-4">
-              <div className="flex items-center gap-3">
-                {expansionCheck.needs_expansion ? (
-                  <>
-                    <AlertTriangle className="w-6 h-6 text-cyan-300" />
-                    <div>
-                      <p className="text-white font-semibold">{t('needsExpansion')}</p>
-                      <p className="text-sm text-neutral-400">{expansionCheck.reason}</p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-6 h-6 text-white" />
-                    <div>
-                      <p className="text-white font-semibold">{t('capacitySufficient')}</p>
-                      <p className="text-sm text-neutral-400">{t('noExpansionNeeded')}</p>
-                    </div>
-                  </>
-                )}
-              </div>
-              <Badge className={expansionCheck.needs_expansion
-                ? 'bg-cyan-400/20 text-cyan-300 border-cyan-400/30'
-                : 'bg-white/20 text-white border-neutral-700'
-              }>
-                {expansionCheck.needs_expansion ? t('suggestExpansion') : t('normal')}
-              </Badge>
-            </div>
-
-            <Button
-              onClick={() => setShowExpansionDialog(true)}
-              className="w-full bg-cyan-400/20 hover:bg-cyan-400/30 text-cyan-300 border border-cyan-400/30"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {t('triggerExpansion')}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
 
       {}
       <Dialog open={showJoinDialog} onOpenChange={setShowJoinDialog}>
@@ -689,76 +502,8 @@ export default function QueueStatusPage() {
       </AlertDialog>
 
       {}
-      <Dialog open={showProcessDialog} onOpenChange={setShowProcessDialog}>
-        <DialogContent className="bg-neutral-900 border-neutral-800">
-          <DialogHeader>
-            <DialogTitle className="text-white">{t('processDialogTitle')}</DialogTitle>
-            <DialogDescription className="text-neutral-400">
-              {t('processDialogDesc')}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label className="text-neutral-300">{t('batchSize')}</Label>
-              <Input
-                type="number"
-                value={batchSize}
-                onChange={(e) => setBatchSize(parseInt(e.target.value) || 50)}
-                min={1}
-                max={200}
-                className="bg-neutral-800 border-neutral-700 text-white mt-1"
-              />
-              <p className="text-xs text-neutral-500 mt-1">
-                {t('batchSizeHint')}
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowProcessDialog(false)}
-              disabled={submitting}
-              className="bg-neutral-800 hover:bg-neutral-700 text-white border-neutral-700"
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              onClick={handleProcessQueue}
-              disabled={submitting}
-              className="bg-cyan-900/50 hover:bg-cyan-900/70 text-cyan-300 border border-cyan-800"
-            >
-              {submitting ? t('submitting') : t('startProcessing')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {}
-      <AlertDialog open={showExpansionDialog} onOpenChange={setShowExpansionDialog}>
-        <AlertDialogContent className="bg-neutral-900 border-neutral-800">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">{t('expansionDialogTitle')}</AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-400">
-              {t('expansionDialogDesc')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              disabled={submitting}
-              className="bg-neutral-800 hover:bg-neutral-700 text-white border-neutral-700"
-            >
-              {t('cancel')}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleTriggerExpansion}
-              disabled={submitting}
-              className="bg-cyan-400/20 hover:bg-cyan-400/30 text-cyan-300 border border-cyan-400/30"
-            >
-              {submitting ? t('submitting') : t('confirmExpansion')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

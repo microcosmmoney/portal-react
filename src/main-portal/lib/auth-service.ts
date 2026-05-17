@@ -1,5 +1,5 @@
 // AI-generated · AI-managed · AI-maintained
-// Native Auth — Argon2id + Session Token (Firebase \u5df2\u4e8e 2026-03-16 \u6e05\u7406)
+// Native Auth \u2014 Argon2id + Session Token (Firebase \u5df2\u4e8e 2026-03-16 \u6e05\u7406)
 
 const SESSION_TOKEN_KEY = 'mc_session_token';
 const NATIVE_UID_KEY = 'mc_native_uid';
@@ -75,7 +75,7 @@ export const signInWithEmail = async (email: string, password: string): Promise<
   const data = await response.json();
   if (!data.success) {
     if (data.error === 'password_not_set') {
-      throw new Error('\u7cfb\u7edf\u5df2\u5347\u7ea7，\u8bf7\u901a\u8fc7\u90ae\u4ef6\u91cd\u7f6e\u5bc6\u7801\u540e\u767b\u5f55。');
+      throw new Error('\u7cfb\u7edf\u5df2\u5347\u7ea7\uff0c\u8bf7\u901a\u8fc7\u90ae\u4ef6\u91cd\u7f6e\u5bc6\u7801\u540e\u767b\u5f55\u3002');
     }
     throw new Error(data.error || '\u767b\u5f55\u5931\u8d25');
   }
@@ -203,7 +203,7 @@ export const handleAuthFailure = async (status: number) => {
   if (status !== 401 && status !== 403) return;
   if (isForceLoggingOut) return;
   isForceLoggingOut = true;
-  console.warn(`[Auth] \u670d\u52a1\u7aef\u8fd4\u56de ${status}，\u5f3a\u5236\u767b\u51fa`);
+  console.warn(`[Auth] \u670d\u52a1\u7aef\u8fd4\u56de ${status}\uff0c\u5f3a\u5236\u767b\u51fa`);
   clearSessionToken();
   clearAuthFlag();
   window.location.href = `${getLocalePrefix()}/login`;

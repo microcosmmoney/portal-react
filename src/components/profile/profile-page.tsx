@@ -354,7 +354,7 @@ export function MicrocosmProfilePage({
                   setResendMessage(null)
                   try {
                     await api.post('/users/me/resend-verification', {})
-                    setResendMessage(t('verificationSent', 'Verification email sent — check your inbox'))
+                    setResendMessage(t('verificationSent', 'Verification email sent \u2014 check your inbox'))
                   } catch (e) {
                     setResendMessage(e instanceof Error ? e.message : 'Failed to send')
                   } finally {

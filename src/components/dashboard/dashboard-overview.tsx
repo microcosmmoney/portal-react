@@ -139,10 +139,10 @@ export function MicrocosmDashboardOverview({
           \u6570\u636e\u6bcf 4 \u5c0f\u65f6\u66f4\u65b0 · \u5373\u65f6\u6570\u636e\u8bf7\u76f4\u63a5\u67e5\u8be2\u94fe\u4e0a
         </div>
         <div className={accentColor ? 'text-xs font-mono' : 'text-xs text-cyan-400/60 font-mono'} style={accentColor ? { color: `rgba(${hexToRgb(accentColor)},0.6)` } : undefined}>
-          \u30c7\u30fc\u30bf\u306f4\u6642\u9593\u3054\u3068\u306b\u66f4\u65b0 · \u30ea\u30a2\u30eb\u30bf\u30a4\u30e0\u30c7\u30fc\u30bf\u306f\u30aa\u30f3\u30c1\u30a7\u30fc\u30f3\u3067\u78ba\u8a8d
+          データは4\u6642\u9593ごとに\u66f4\u65b0 · リアルタイムデータはオンチェーンで\u78ba\u8a8d
         </div>
         <div className={accentColor ? 'text-xs font-mono' : 'text-xs text-cyan-400/60 font-mono'} style={accentColor ? { color: `rgba(${hexToRgb(accentColor)},0.6)` } : undefined}>
-          \ub370\uc774\ud130\ub294 4\uc2dc\uac04\ub9c8\ub2e4 \uac31\uc2e0 · \uc2e4\uc2dc\uac04 \ub370\uc774\ud130\ub294 \uc628\uccb4\uc778\uc5d0\uc11c \ud655\uc778
+          데이터는 4시간마다 갱신 · 실시간 데이터는 온체인에서 확인
         </div>
       </div>
     </div>

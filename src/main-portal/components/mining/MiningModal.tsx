@@ -2,15 +2,15 @@
 
 import * as React from "react"
 import { useState, useCallback, useEffect, useRef } from "react"
-import { X, Loader2, CheckCircle2, AlertCircle, ExternalLink, ChevronDown, Smartphone, Monitor, Shield, QrCode } from "lucide-react"
+import { X, Loader2, CheckCircle2, AlertCircle, ExternalLink, ChevronDown, Smartphone, Monitor, Shield, QrCode, AlertTriangle } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 import { TerminalCard, TerminalBadge } from "../ui/terminal"
-import { createMiningRequest, confirmMiningPayment, buildMiningTransaction, getMiningRatio, getPublicMiningPreflight, checkMiningWallet } from "../../lib/api"
+import { createMiningRequest, confirmMiningPayment, getMiningRatio, getPublicMiningPreflight, checkMiningWallet, getMiningRequestStatus } from "../../lib/api"
 import type { MiningRequestResponse, MiningRatioInfo } from "../../lib/types/api"
 import { useWallet as useSolanaWallet } from "@solana/wallet-adapter-react"
-import { PublicKey, Transaction, TransactionInstruction, Connection } from "@solana/web3.js"
+import { PublicKey, Transaction, Connection } from "@solana/web3.js"
 import { getAssociatedTokenAddressSync } from "@solana/spl-token"
-import { createSolanaPayUrl, createPaymentReference, findTransactionByReference, extractSenderFromTransaction, isMobileDevice } from "../../lib/solana/solana-pay"
+import { isMobileDevice } from "../../lib/solana/solana-pay"
 import { useTranslations } from "next-intl"
 
 interface MiningModalProps {
@@ -21,16 +21,17 @@ interface MiningModalProps {
 }
 
 interface ConfirmationResult {
-  tx_id: number
+  tx_id?: number
   onchain_tx_signature: string
-  user_level: number
+  user_level?: number
   mcc_distributed: { user: number; lp_reserve: number; magistrate: number; station_mcd: number }
-  distribution_details: { user_percent: number; companion_lp_percent: number; companion_magistrate_percent: number; station_mcd_percent: number }
+  distribution_details?: { user_percent: number; companion_lp_percent: number; companion_magistrate_percent: number; station_mcd_percent: number }
   status: string
 }
 
 type StablecoinType = 'usdc' | 'usdt'
 type Step = "input" | "paymentMethod" | "qrPayment" | "payment" | "confirming" | "success" | "error"
+type BackendStatus = "created" | "submitted" | "distributing" | "completed" | "failed" | "expired"
 
 const STABLECOIN_MINTS: Record<StablecoinType, PublicKey> = {
   usdc: new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
@@ -40,12 +41,14 @@ const STABLECOIN_VAULTS: Record<StablecoinType, PublicKey> = {
   usdc: new PublicKey("5L8vPTvGH14keLq4R6CGGvSFksZFjb7bRPXarCwZbmUA"),
   usdt: new PublicKey("BnHA9jSm88wzQS4c2nCgTXch1Byzc3FWn2G7Wgrvazy3"),
 }
-const POOL_PDA_WALLET = new PublicKey("GSBWtaX9WcBh8jUcmbXtQ1afQPHKSUKvsTxkqpJU3G9S")
-const SOLANA_RPC = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com"
+const SOLANA_RPC = process.env.NEXT_PUBLIC_HELIUS_RPC_URL || process.env.NEXT_PUBLIC_SOLANA_RPC_URL || ""
 const COIN_INFO: Record<StablecoinType, { symbol: string; name: string; icon: string }> = {
   usdc: { symbol: 'USDC', name: 'USD Coin', icon: '💵' },
   usdt: { symbol: 'USDT', name: 'Tether', icon: '💴' },
 }
+
+const STATUS_POLL_INTERVAL_MS = 1500
+const STATUS_POLL_TIMEOUT_MS = 30 * 60 * 1000
 
 export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }: MiningModalProps) {
   const t = useTranslations("miningModal")
@@ -63,10 +66,11 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
   const [stablecoinBalance, setStablecoinBalance] = useState<number | null>(null)
   const [loadingBalance, setLoadingBalance] = useState(false)
   const [solanaPayUrl, setSolanaPayUrl] = useState("")
-  const [paymentReference, setPaymentReference] = useState<PublicKey | null>(null)
-  const [qrMonitoring, setQrMonitoring] = useState(false)
-  const monitorAbortRef = useRef(false)
-  const [qrPayerAddress, setQrPayerAddress] = useState("")
+  const [backendStatus, setBackendStatus] = useState<BackendStatus>("created")
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false)
+  const [pollElapsedSec, setPollElapsedSec] = useState(0)
+  const pollIntervalRef = useRef<number | null>(null)
+  const pollStartTsRef = useRef<number>(0)
   const isMobile = typeof window !== "undefined" ? isMobileDevice() : false
 
   const loadStablecoinBalance = useCallback(async () => {
@@ -82,58 +86,99 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
 
   useEffect(() => { if (isOpen) { getMiningRatio().then(r => { if (r.success && r.data) setRatioInfo(r.data) }).catch(() => {}); loadStablecoinBalance() } }, [isOpen, loadStablecoinBalance])
   useEffect(() => { if (isOpen && connected) loadStablecoinBalance() }, [stablecoin, isOpen, connected, loadStablecoinBalance])
-  useEffect(() => () => { monitorAbortRef.current = true }, [])
 
-  const confirmPayment = async (request: MiningRequestResponse, signature: string) => {
-    setLoading(true)
-    try {
-      const response = await confirmMiningPayment({ request_id: request.request_id, tx_signature: signature, mcc_amount: request.mcc_amount, usdc_amount: request.usdc_amount_with_discount, stablecoin_type: stablecoin })
-      if (!response.success || !response.data) throw new Error(response.error || t("errorConfirmPayment"))
-      setConfirmationResult(response.data as unknown as ConfirmationResult)
-      setStep("success")
-    } catch (err: unknown) { setError(err instanceof Error ? err.message : t("errorConfirmPayment")); setStep("error") }
-    finally { setLoading(false) }
-  }
+  const stopStatusPolling = useCallback(() => {
+    if (pollIntervalRef.current !== null) {
+      clearInterval(pollIntervalRef.current)
+      pollIntervalRef.current = null
+    }
+  }, [])
 
-  const startQrMonitoring = async (reference: PublicKey, request: MiningRequestResponse) => {
-    setQrMonitoring(true); monitorAbortRef.current = false
-    try {
-      const connection = new Connection(SOLANA_RPC, "confirmed")
-      const signature = await findTransactionByReference(connection, reference, { interval: 2500, timeout: 300000, commitment: "confirmed" })
-      if (monitorAbortRef.current) return
-      if (signature) {
-        setTxSignature(signature)
-        const senderAddress = await extractSenderFromTransaction(connection, signature)
-        if (!senderAddress) { setError(t("errorExtractPayer")); setStep("error"); return }
-        setQrPayerAddress(senderAddress)
-        if (userDetails?.uid) {
-          try { const wc = await checkMiningWallet(senderAddress); if (!wc.success) { setError(t("errorWalletBoundToOther")); setStep("error"); return } }
-          catch {}
+  useEffect(() => () => { stopStatusPolling() }, [stopStatusPolling])
+
+  const startStatusPolling = useCallback((requestId: string) => {
+    stopStatusPolling()
+    pollStartTsRef.current = Date.now()
+    setPollElapsedSec(0)
+
+    const tick = async () => {
+      const elapsed = Date.now() - pollStartTsRef.current
+      setPollElapsedSec(Math.floor(elapsed / 1000))
+
+      if (elapsed > STATUS_POLL_TIMEOUT_MS) {
+        stopStatusPolling()
+        return
+      }
+
+      try {
+        const response = await getMiningRequestStatus(requestId)
+        if (!response.success || !response.data) return
+
+        const data = response.data as {
+          status: BackendStatus
+          payment_tx_signature?: string
+          onchain_tx_signature?: string
+          mcc_distributed?: { user: number; lp_reserve: number; magistrate: number; station_mcd: number }
+          error?: string
         }
-        setStep("confirming"); await confirmPayment(request, signature)
-      } else { setError(t("errorPaymentTimeout")); setStep("error") }
-    } catch (err: unknown) { if (!monitorAbortRef.current) { setError(err instanceof Error ? err.message : t("errorMonitorFailed")); setStep("error") } }
-    finally { setQrMonitoring(false) }
-  }
+        setBackendStatus(data.status)
+        if (data.payment_tx_signature) setTxSignature(data.payment_tx_signature)
+
+        if (data.status === "completed") {
+          stopStatusPolling()
+          setConfirmationResult({
+            onchain_tx_signature: data.onchain_tx_signature || "",
+            mcc_distributed: data.mcc_distributed || { user: 0, lp_reserve: 0, magistrate: 0, station_mcd: 0 },
+            status: "completed",
+          })
+          setStep("success")
+        } else if (data.status === "failed") {
+          stopStatusPolling()
+          setError(data.error || t("errorMintRequest"))
+          setStep("error")
+        } else if (data.status === "expired") {
+          stopStatusPolling()
+          setError(t("errorPaymentTimeout"))
+          setStep("error")
+        }
+      } catch {
+      }
+    }
+
+    tick()
+    pollIntervalRef.current = window.setInterval(tick, STATUS_POLL_INTERVAL_MS)
+  }, [stopStatusPolling, t])
 
   const handleSubmit = async () => {
     if (!userDetails || !mccAmount || parseFloat(mccAmount) <= 0) { setError(t("errorInvalidAmount")); return }
     setLoading(true); setError("")
     try {
       try { const pf = await getPublicMiningPreflight(); if (pf.success && pf.data && !pf.data.ready) { setError(pf.data.reason || "Mining system is temporarily unavailable. Please try again later."); setStep("error"); setLoading(false); return } } catch {}
-      const { reference } = createPaymentReference(); setPaymentReference(reference)
-      const response = await createMiningRequest({ mcc_amount: parseFloat(mccAmount) * 1_000_000_000, stablecoin_type: stablecoin, reference: reference.toBase58() })
+
+      const refKeypair = (await import("@solana/web3.js")).Keypair.generate()
+      const reference = refKeypair.publicKey.toBase58()
+
+      const response = await createMiningRequest({ mcc_amount: parseFloat(mccAmount) * 1_000_000_000, stablecoin_type: stablecoin, reference })
       if (!response.success || !response.data) throw new Error(response.error || t("errorCreateRequest"))
       setMiningRequest(response.data)
-      const vault = STABLECOIN_VAULTS[stablecoin], mint = STABLECOIN_MINTS[stablecoin]
-      const url = createSolanaPayUrl({ recipient: vault, amount: response.data.usdc_amount_with_discount / 1_000_000, splToken: mint, reference, label: "Microcosm Mining", message: `Mine ${mccAmount} MCC` })
-      setSolanaPayUrl(url)
-      if (isMobile) { setStep("qrPayment"); startQrMonitoring(reference, response.data) } else { setStep("paymentMethod") }
+      const payUrl = (response.data as MiningRequestResponse & { solana_pay_url?: string }).solana_pay_url || ""
+      setSolanaPayUrl(payUrl)
+      setBackendStatus("created")
+      if (isMobile) {
+        setStep("qrPayment")
+        startStatusPolling(response.data.request_id)
+      } else {
+        setStep("paymentMethod")
+      }
     } catch (err: unknown) { setError(err instanceof Error ? err.message : t("errorMintRequest")); setStep("error") }
     finally { setLoading(false) }
   }
 
-  const handleSelectQrPayment = () => { if (!miningRequest || !paymentReference) return; setStep("qrPayment"); startQrMonitoring(paymentReference, miningRequest) }
+  const handleSelectQrPayment = () => {
+    if (!miningRequest) return
+    setStep("qrPayment")
+    startStatusPolling(miningRequest.request_id)
+  }
 
   const handleSelectBrowserPayment = async () => {
     if (!connected || !publicKey) { setError(t("errorConnectWallet")); return }
@@ -156,19 +201,48 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
       const transferIx = createTransferCheckedInstruction(userAta, mint, vault, publicKey, request.usdc_amount_with_discount, 6)
       const connection = new Connection(SOLANA_RPC, "confirmed")
       const transaction = new Transaction().add(transferIx)
-      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash()
+      const { blockhash } = await connection.getLatestBlockhash()
       transaction.recentBlockhash = blockhash; transaction.feePayer = publicKey
       const signature = await sendTransaction(transaction, connection)
       setTxSignature(signature); setStep("confirming")
-      await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, 'confirmed')
-      await confirmPayment(request, signature)
+
+      const confirmResponse = await confirmMiningPayment({
+        request_id: request.request_id,
+        tx_signature: signature,
+        mcc_amount: request.mcc_amount,
+        usdc_amount: request.usdc_amount_with_discount,
+        stablecoin_type: stablecoin,
+      })
+      if (!confirmResponse.success || !confirmResponse.data) throw new Error(confirmResponse.error || t("errorConfirmPayment"))
+      setConfirmationResult(confirmResponse.data as unknown as ConfirmationResult)
+      setStep("success")
     } catch (err: unknown) { setError(err instanceof Error ? err.message : t("errorMiningFailed")); setStep("error"); throw err }
     finally { setLoading(false) }
   }
 
+  const isMiningInProgress = step === "qrPayment" && (backendStatus === "submitted" || backendStatus === "distributing")
+
+  const performClose = useCallback(() => {
+    stopStatusPolling()
+    setShowCloseConfirm(false)
+    setStep("input")
+    setMccAmount("")
+    setMiningRequest(null)
+    setTxSignature("")
+    setError("")
+    setConfirmationResult(null)
+    setSolanaPayUrl("")
+    setBackendStatus("created")
+    if (onSuccess) onSuccess()
+    onClose()
+  }, [stopStatusPolling, onClose, onSuccess])
+
   const handleClose = () => {
-    monitorAbortRef.current = true; setStep("input"); setMccAmount(""); setMiningRequest(null); setTxSignature(""); setError(""); setConfirmationResult(null); setSolanaPayUrl(""); setPaymentReference(null); setQrMonitoring(false); setQrPayerAddress("")
-    if (onSuccess) onSuccess(); onClose()
+    if (isMiningInProgress) {
+      setShowCloseConfirm(true)
+      return
+    }
+    performClose()
   }
 
   if (!isOpen) return null
@@ -188,6 +262,30 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
     </a>
   )
 
+  const statusLabel = () => {
+    switch (backendStatus) {
+      case "created": return t("waitingQrScan")
+      case "submitted": return t("paymentReceivedConfirming")
+      case "distributing": return t("distributingMcc")
+      case "completed": return t("mintSuccess")
+      case "failed": return t("mintFailed")
+      case "expired": return t("errorPaymentTimeout")
+      default: return ""
+    }
+  }
+
+  const statusProgress = () => {
+    switch (backendStatus) {
+      case "created": return 25
+      case "submitted": return 55
+      case "distributing": return 80
+      case "completed": return 100
+      case "failed":
+      case "expired": return 0
+      default: return 10
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-end 2xs:items-center justify-center bg-black/50 backdrop-blur-sm font-mono">
       <div className="relative w-full max-w-2xl mx-0 2xs:mx-3 xs:mx-4 max-h-[95vh] 2xs:max-h-[90vh] overflow-y-auto rounded-t-2xl 2xs:rounded-xl">
@@ -199,6 +297,24 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
             </div>
             <button onClick={handleClose} disabled={loading} className="text-neutral-400 hover:text-white transition-colors p-1 min-w-[44px] min-h-[44px] flex items-center justify-center"><X className="w-5 h-5" /></button>
           </div>
+
+          {showCloseConfirm && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+              <div className="bg-neutral-900 border-2 border-red-500/60 rounded-xl p-5 max-w-md w-full space-y-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="text-white font-bold text-lg mb-2">{t("closeWarningTitle")}</h3>
+                    <p className="text-neutral-300 text-sm leading-relaxed">{t("closeWarningBody")}</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => setShowCloseConfirm(false)} className="flex-1 px-4 py-3 bg-cyan-700 hover:bg-cyan-600 text-white rounded transition-colors font-bold">{t("closeWarningStay")}</button>
+                  <button onClick={performClose} className="flex-1 px-4 py-3 border border-red-500/60 text-red-400 hover:bg-red-500/10 rounded transition-colors">{t("closeWarningLeave")}</button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {step === "input" && (
             <div className="space-y-4">
@@ -282,24 +398,23 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
               <OrderSummary />
               <div className="p-3 rounded bg-cyan-500/10 border border-cyan-500/30 text-xs text-cyan-300">{t("stablecoinReminder", { symbol: ci.symbol })}</div>
               <div className="text-xs text-neutral-400 tracking-wider uppercase mb-1">{t("selectPaymentMethod")}</div>
-              <button onClick={handleSelectQrPayment} className="w-full p-4 rounded border border-neutral-700 bg-neutral-800/30 hover:bg-cyan-400/10 hover:border-cyan-400/70 focus:bg-cyan-400/10 focus:border-cyan-400 focus:outline-none transition-all text-left group">
+              <button onClick={handleSelectQrPayment} className="w-full p-4 rounded border-2 border-cyan-400/50 bg-cyan-400/5 hover:bg-cyan-400/10 hover:border-cyan-400/70 transition-all text-left group">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-neutral-700/50 group-hover:bg-cyan-400/20 group-focus:bg-cyan-400/20 transition-colors flex items-center justify-center flex-shrink-0"><QrCode className="w-6 h-6 text-neutral-400 group-hover:text-cyan-400 group-focus:text-cyan-400 transition-colors" /></div>
+                  <div className="w-12 h-12 rounded-lg bg-cyan-400/20 flex items-center justify-center flex-shrink-0"><QrCode className="w-6 h-6 text-cyan-400" /></div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2"><span className="text-neutral-300 group-hover:text-white group-focus:text-white font-bold text-sm transition-colors">{t("mobileQrScan")}</span><span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-400/20 text-cyan-400 tracking-wider">{t("recommended")}</span></div>
-                    <p className="text-neutral-500 group-hover:text-neutral-400 group-focus:text-neutral-400 text-xs mt-1 leading-relaxed transition-colors">{t("mobileQrDesc")}</p>
+                    <div className="flex items-center gap-2"><span className="text-white font-bold text-sm">{t("mobileQrScan")}</span><span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-400/20 text-cyan-400 tracking-wider">{t("recommended")}</span></div>
+                    <p className="text-neutral-400 text-xs mt-1 leading-relaxed">{t("mobileQrDesc")}</p>
                   </div>
-                  <Smartphone className="w-5 h-5 text-neutral-500 group-hover:text-cyan-400 group-focus:text-cyan-400 transition-colors flex-shrink-0" />
+                  <Smartphone className="w-5 h-5 text-neutral-500 group-hover:text-cyan-400 transition-colors flex-shrink-0" />
                 </div>
               </button>
-              <button onClick={handleSelectBrowserPayment} disabled={!connected} className="w-full p-4 rounded border border-neutral-700 bg-neutral-800/30 hover:bg-cyan-400/10 hover:border-cyan-400/70 focus:bg-cyan-400/10 focus:border-cyan-400 focus:outline-none transition-all text-left group disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-neutral-800/30 disabled:hover:border-neutral-700">
+              <button onClick={handleSelectBrowserPayment} disabled={!connected} className="w-full p-4 rounded border border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 hover:border-neutral-600 transition-all text-left group disabled:opacity-40 disabled:cursor-not-allowed">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-neutral-700/50 group-hover:bg-cyan-400/20 group-focus:bg-cyan-400/20 transition-colors flex items-center justify-center flex-shrink-0"><Monitor className="w-6 h-6 text-neutral-400 group-hover:text-cyan-400 group-focus:text-cyan-400 transition-colors" /></div>
+                  <div className="w-12 h-12 rounded-lg bg-neutral-700/50 flex items-center justify-center flex-shrink-0"><Monitor className="w-6 h-6 text-neutral-400" /></div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2"><span className="text-neutral-300 group-hover:text-white group-focus:text-white font-bold text-sm transition-colors">{t("browserExtension")}</span></div>
-                    <p className="text-neutral-500 group-hover:text-neutral-400 group-focus:text-neutral-400 text-xs mt-1 leading-relaxed transition-colors">{connected ? t("browserExtConnected") : t("browserExtNotConnected")}</p>
+                    <div className="flex items-center gap-2"><span className="text-neutral-300 font-bold text-sm">{t("browserExtension")}</span></div>
+                    <p className="text-neutral-500 text-xs mt-1 leading-relaxed">{connected ? t("browserExtConnected") : t("browserExtNotConnected")}</p>
                   </div>
-                  <Monitor className="w-5 h-5 text-neutral-500 group-hover:text-cyan-400 group-focus:text-cyan-400 transition-colors flex-shrink-0" />
                 </div>
               </button>
               {error && <div className="flex items-center gap-2 p-3 rounded bg-red-500/20 border border-red-500/50 text-red-500 text-sm"><AlertCircle className="w-4 h-4" />{error}</div>}
@@ -309,11 +424,30 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
 
           {step === "qrPayment" && miningRequest && solanaPayUrl && (
             <div className="space-y-3 2xs:space-y-4">
-              <TerminalBadge variant="info">{t("waitingQrPayment")}</TerminalBadge>
+              <div className="p-3 rounded bg-amber-500/15 border-2 border-amber-500/50 flex items-start gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <div className="text-amber-400 font-bold text-sm mb-1">{t("doNotClose")}</div>
+                  <p className="text-neutral-300 text-xs leading-relaxed">{t("doNotCloseDesc")}</p>
+                </div>
+              </div>
+
               <OrderSummary />
-              <div className="p-2 2xs:p-3 rounded bg-amber-500/10 border border-amber-500/30">
-                <div className="flex items-center gap-2 text-xs 2xs:text-sm"><Shield className="w-4 h-4 text-amber-400 flex-shrink-0" /><span className="text-amber-400 font-bold">{t("confirmPayWithSymbol", { symbol: ci.symbol })}</span></div>
-                <p className="text-neutral-400 text-[10px] 2xs:text-xs mt-1 ml-6">{t("insufficientBalance", { symbol: ci.symbol })}<button onClick={() => { monitorAbortRef.current = true; setStep("input"); setQrMonitoring(false) }} className="text-cyan-400 hover:underline ml-1">{t("switchToken")}</button></p>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-neutral-400 tracking-wider">{statusLabel()}</span>
+                  <span className="text-neutral-500 font-mono">{pollElapsedSec}s</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-neutral-800 overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 transition-all duration-500 ease-out" style={{ width: `${statusProgress()}%` }} />
+                </div>
+                <div className="grid grid-cols-4 gap-1 text-[10px] text-neutral-500">
+                  <div className={`text-center ${backendStatus !== "created" ? "text-cyan-400 font-bold" : ""}`}>{t("stepScan")}</div>
+                  <div className={`text-center ${backendStatus === "submitted" || backendStatus === "distributing" || backendStatus === "completed" ? "text-cyan-400 font-bold" : ""}`}>{t("stepPaid")}</div>
+                  <div className={`text-center ${backendStatus === "distributing" || backendStatus === "completed" ? "text-cyan-400 font-bold" : ""}`}>{t("stepDistributing")}</div>
+                  <div className={`text-center ${backendStatus === "completed" ? "text-cyan-400 font-bold" : ""}`}>{t("stepDone")}</div>
+                </div>
               </div>
 
               <div className="flex flex-col items-center space-y-3 2xs:space-y-4">
@@ -321,11 +455,13 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
                 <div className="bg-white p-3 2xs:p-4 xs:p-5 rounded-xl">
                   <QRCodeSVG value={solanaPayUrl} size={200} level="H" includeMargin={false} className="w-[160px] h-[160px] 2xs:w-[180px] 2xs:h-[180px] xs:w-[220px] xs:h-[220px] sm:w-[280px] sm:h-[280px]" imageSettings={{ src: "/mcc-logo-40.png", x: undefined, y: undefined, height: 40, width: 40, excavate: true }} />
                 </div>
-                <div className="flex items-center gap-2 text-neutral-400 text-[10px] 2xs:text-xs"><Loader2 className="w-3 h-3 animate-spin" />{t("waitingQrScan")}</div>
+                <div className="flex items-center gap-2 text-neutral-400 text-[10px] 2xs:text-xs">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  {backendStatus === "created" ? t("waitingQrScan") : t("monitoringOnchain")}
+                </div>
               </div>
 
-              {qrMonitoring && <div className="flex items-center justify-center gap-2 text-cyan-400 text-xs 2xs:text-sm py-2"><Loader2 className="w-4 h-4 animate-spin" />{t("monitoringOnchain")}</div>}
-              <button onClick={() => { monitorAbortRef.current = true; setStep(isMobile ? "input" : "paymentMethod"); setQrMonitoring(false); setError("") }} className="w-full px-4 py-2 text-neutral-400 hover:text-neutral-300 text-xs 2xs:text-sm transition-colors min-h-[44px]">&larr; {t("goBack")}</button>
+              <button onClick={() => { stopStatusPolling(); setStep(isMobile ? "input" : "paymentMethod"); setError("") }} className="w-full px-4 py-2 text-neutral-400 hover:text-neutral-300 text-xs 2xs:text-sm transition-colors min-h-[44px]">&larr; {t("goBack")}</button>
             </div>
           )}
 
@@ -361,10 +497,12 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
                   <div className="text-3xl font-bold text-white font-mono">+{(confirmationResult.mcc_distributed.user / 1_000_000_000).toLocaleString()} MCC</div>
                   <div className="text-xs text-neutral-400 mt-1">{t("sentToWallet")}</div>
                 </div>
-                <div className="pt-3 border-t border-neutral-700">
-                  <div className="text-xs text-neutral-400 tracking-wider mb-1">{t("paymentTx", { symbol: ci.symbol })}</div>
-                  <TxLink sig={txSignature} />
-                </div>
+                {txSignature && (
+                  <div className="pt-3 border-t border-neutral-700">
+                    <div className="text-xs text-neutral-400 tracking-wider mb-1">{t("paymentTx", { symbol: ci.symbol })}</div>
+                    <TxLink sig={txSignature} />
+                  </div>
+                )}
               </div>
               {confirmationResult.onchain_tx_signature && (
                 <div className="p-4 rounded bg-neutral-800 border border-neutral-700 space-y-2">
@@ -372,7 +510,7 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
                   <TxLink sig={confirmationResult.onchain_tx_signature} />
                 </div>
               )}
-              <div className="flex gap-3"><button onClick={handleClose} className="flex-1 px-4 py-3 bg-cyan-700 hover:bg-cyan-600 text-white rounded transition-colors">{t("doneAndRefresh")}</button></div>
+              <div className="flex gap-3"><button onClick={performClose} className="flex-1 px-4 py-3 bg-cyan-700 hover:bg-cyan-600 text-white rounded transition-colors">{t("doneAndRefresh")}</button></div>
             </div>
           )}
 

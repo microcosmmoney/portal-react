@@ -158,9 +158,9 @@ export function useMCC(userId: string | undefined): UseMCCReturn {
 
   useEffect(() => {
     if (canFetch) {
-      // \u5e76\u884c\u52a0\u8f7d\u6240\u6709\u6570\u636e，\u51cf\u5c11\u6e32\u67d3\u6b21\u6570
+      // \u5e76\u884c\u52a0\u8f7d\u6240\u6709\u6570\u636e\uff0c\u51cf\u5c11\u6e32\u67d3\u6b21\u6570
       Promise.all([refresh(), refreshMinting()]).then(() => {
-        // PDA \u4f59\u989d\u4f9d\u8d56 balance?.user_id，\u5728 refresh \u5b8c\u6210\u540e\u518d\u52a0\u8f7d
+        // PDA \u4f59\u989d\u4f9d\u8d56 balance?.user_id\uff0c\u5728 refresh \u5b8c\u6210\u540e\u518d\u52a0\u8f7d
         refreshPDABalance()
       })
     } else {

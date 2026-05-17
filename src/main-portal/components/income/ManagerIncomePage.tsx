@@ -9,8 +9,8 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from 'sonner';
 import { useAuth } from '../../hooks/useAuth';
-import { getManagerIncome, getTeamCustodySummary } from '../../lib/api-service';
-import type { ManagerIncomeSummary, TeamCustodySummary, ManagerLevel } from '../../lib/types/api';
+import { getManagerIncome } from '../../lib/api-service';
+import type { ManagerIncomeSummary, ManagerLevel } from '../../lib/types/api';
 import { ManagerRoleNames, ManagerShareRatios } from '../../lib/types/api';
 import { cn } from '../../lib/utils';
 import {
@@ -59,9 +59,8 @@ const getLevelLabel = (level: ManagerLevel) => {
 
 export default function ManagerIncomePage() {
   const t = useTranslations('managerIncome');
-  const { isAdmin } = useAuth();
+  
   const [income, setIncome] = useState<ManagerIncomeSummary | null>(null);
-  const [teamCustody, setTeamCustody] = useState<TeamCustodySummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -112,18 +111,6 @@ export default function ManagerIncomePage() {
     } catch (e) {
       console.warn('[ManagerIncome] Failed to fetch income data:', e);
       setIncome(null);
-    }
-
-    if (isAdmin()) {
-      try {
-        const custodyRes = await getTeamCustodySummary();
-        if (custodyRes && custodyRes.success) {
-          setTeamCustody(custodyRes);
-        }
-      } catch (e) {
-        console.warn('[ManagerIncome] Failed to fetch team custody data:', e);
-        setTeamCustody(null);
-      }
     }
 
     setLoading(false);
@@ -368,37 +355,6 @@ export default function ManagerIncomePage() {
         })}
       </div>
 
-      {isAdmin() && teamCustody && (
-        <Card className="bg-neutral-900 border-neutral-700 dash-card">
-          <CardContent className="p-3 sm:p-6">
-            <div className="flex items-center gap-2 text-neutral-400 text-sm mb-4">
-              <PiggyBank className="w-4 h-4" />
-              <span className="tracking-wider">{t('teamCustodySummary')}</span>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-              {teamCustody.wallets.map((wallet, idx) => (
-                <div key={idx} className="p-3 bg-neutral-800 rounded border border-neutral-700">
-                  <div className="text-xs text-neutral-400 tracking-wider mb-1">{wallet.wallet_type}</div>
-                  <div className="text-lg font-bold text-white font-mono">
-                    {parseFloat(wallet.total_received).toLocaleString()}
-                  </div>
-                  {wallet.wallet_address && (
-                    <div className="text-xs text-neutral-500 mt-1 truncate font-mono" title={wallet.wallet_address}>
-                      {wallet.wallet_address.slice(0, 8)}...
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 pt-4 border-t border-neutral-700 flex justify-between items-center">
-              <span className="text-neutral-400 tracking-wider">total_custody</span>
-              <span className="text-2xl font-bold text-white font-mono">
-                {parseFloat(teamCustody.total_received).toLocaleString()} MCC
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <Card className="bg-neutral-900 border-neutral-700 dash-card">
         <CardContent className="p-3 sm:p-6">

@@ -61,7 +61,7 @@ export function MCCPriceProvider({ children }: { children: ReactNode }) {
         miningPrice: (d.base_price ? d.base_price * 4 : null),
       })
     } catch {
-      // Silent — stale data is acceptable
+      // Silent \u2014 stale data is acceptable
     } finally {
       setLoading(false)
     }

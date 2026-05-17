@@ -1,4 +1,3 @@
-export * from './ai'
 export * from './mining'
 export * from './finance'
 export * from './organization'

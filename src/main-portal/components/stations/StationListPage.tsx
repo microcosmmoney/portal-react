@@ -102,7 +102,7 @@ const cropToSquare = (file: File, size: number): Promise<File> => {
 export default function StationListPage() {
   const t = useTranslations('stationList')
   const router = useRouter()
-  const { isAdmin, user } = useAuth()
+  const { user } = useAuth()
   const [units, setUnits] = useState<Unit[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | UnitType>('all')
@@ -209,7 +209,6 @@ export default function StationListPage() {
   })
 
   const canEditUnit = (unit: Unit): boolean => {
-    if (isAdmin()) return true
     if (user?.uid && (unit.manager_uid === user.uid || unit.manager_id === user.uid)) return true
     return false
   }
@@ -538,7 +537,7 @@ export default function StationListPage() {
                     )}
                   </div>
                   <div className="text-[10px] text-neutral-500 text-center">512x512 &middot; &le;2MB</div>
-                  {!isAdmin() && <div className="text-[10px] text-yellow-400/80 text-center">{t('needsReview')}</div>}
+                  <div className="text-[10px] text-yellow-400/80 text-center">{t('needsReview')}</div>
                   <div className="flex items-center justify-center gap-1 flex-wrap">
                     {editingUnit.image_status && editingUnit.image_status !== 'approved' && getImageStatusBadge(editingUnit.image_status)}
                     {editingUnit.image_status === 'approved' && editingUnit.image_url && (
@@ -546,16 +545,6 @@ export default function StationListPage() {
                     )}
                     {imageFile && <Badge className="bg-cyan-400/20 text-cyan-400 text-[10px]">{t('newImage')}</Badge>}
                   </div>
-                  {isAdmin() && editingUnit.image_status === 'pending' && !imageFile && (
-                    <div className="flex gap-1 justify-center">
-                      <Button size="sm" className="h-5 text-[10px] bg-green-700 hover:bg-green-600 text-white px-1.5" onClick={() => handleImageReview(editingUnit.unit_id, 'approved')}>
-                        <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" />{t('approve')}
-                      </Button>
-                      <Button size="sm" className="h-5 text-[10px] bg-red-700 hover:bg-red-600 text-white px-1.5" onClick={() => handleImageReview(editingUnit.unit_id, 'rejected')}>
-                        <XCircle className="w-2.5 h-2.5 mr-0.5" />{t('reject')}
-                      </Button>
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex-1 space-y-3 min-w-0">

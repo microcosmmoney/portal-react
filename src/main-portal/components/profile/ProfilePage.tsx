@@ -89,8 +89,8 @@ export default function ProfilePage() {
     catch {} finally { setLevelLoading(false) }
   }
 
-  const getRoleLabel = (role: string | undefined) => role === "admin" || role === "platform_admin" ? t('platformAdmin') : role === "team_member" ? t('teamMember') : t('normalUser')
-  const getRoleBadgeVariant = (role: string | undefined): "default" | "secondary" | "destructive" | "outline" => role === "admin" || role === "platform_admin" ? "default" : role === "team_member" ? "secondary" : "outline"
+  const getRoleLabel = (role: string | undefined) => role === "team_member" ? t('teamMember') : t('normalUser')
+  const getRoleBadgeVariant = (role: string | undefined): "default" | "secondary" | "destructive" | "outline" => role === "team_member" ? "secondary" : "outline"
   const formatDate = (dateStr: string) => { if (!dateStr) return "-"; try { return new Date(dateStr).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" }) } catch { return "-" } }
 
   const handleSave = async () => {

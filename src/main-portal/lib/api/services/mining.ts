@@ -77,14 +77,19 @@ export const getX402MiningHistory = (limit = 20, offset = 0): Promise<APIRespons
 
 export const getMiningRequestStatus = (requestId: string): Promise<APIResponse<{
   request_id: string;
-  status: 'pending' | 'confirmed' | 'expired' | 'failed';
+  status: 'created' | 'submitted' | 'distributing' | 'completed' | 'failed' | 'expired';
   mcc_amount: number;
-  usdc_amount: number;
-  created_at: string;
-  confirmed_at?: string;
-  tx_signature?: string;
+  payment_amount: number;
+  stablecoin_type: string;
+  payer_wallet?: string;
+  payment_tx_signature?: string;
+  onchain_tx_signature?: string;
+  mcc_distributed?: { user: number; lp_reserve: number; magistrate: number; station_mcd: number };
+  error?: string;
+  created_at?: string;
+  updated_at?: string;
 }>> => {
-  return fetchApi(`/blockchain-service/mining/request/${requestId}`)
+  return fetchApi(`/blockchain-service/mining/request/${requestId}/status`)
 }
 
 export interface MiningPreflightResult {

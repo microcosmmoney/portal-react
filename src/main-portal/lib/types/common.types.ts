@@ -164,41 +164,6 @@ export interface UserQueueStatus {
   error?: string;
 }
 
-export interface AdminQueueStatus {
-  success: boolean;
-  pending_count: number;
-  processing_count: number;
-  oldest_pending?: string;
-  total_in_queue: number;
-  error?: string;
-}
-
-export interface QueueProcessResult {
-  success: boolean;
-  processed: number;
-  assigned: number;
-  failed: number;
-  errors?: string[];
-}
-
-export interface ExpansionCheckResult {
-  success: boolean;
-  needs_expansion: boolean;
-  reason?: string;
-  current_stats: {
-    total_stations: number;
-    full_stations: number;
-    avg_occupancy: number;
-    pending_queue: number;
-  };
-}
-
-export interface ExpansionTriggerResult {
-  success: boolean;
-  new_territory_id?: string;
-  message?: string;
-  error?: string;
-}
 
 export interface PreparedTransaction {
   transaction: string;

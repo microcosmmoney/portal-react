@@ -58,7 +58,7 @@ export function MicrocosmReincarnationPage({
         <TerminalCard>
           <div className="text-[8px] 2xs:text-[9px] sm:text-[10px] text-neutral-400 tracking-wider mb-1 2xs:mb-2">BASE PRICE</div>
           <div className="text-lg 2xs:text-xl xs:text-2xl sm:text-3xl font-bold font-mono text-cyan-400 truncate">
-            {loading ? '—' : formatNumber(basePrice, 4)}
+            {loading ? '\u2014' : formatNumber(basePrice, 4)}
             <span className="text-[10px] 2xs:text-xs sm:text-sm font-normal text-neutral-500 ml-1">USD</span>
           </div>
         </TerminalCard>

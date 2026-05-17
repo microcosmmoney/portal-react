@@ -103,11 +103,9 @@ const distributionPlans = [
   { id: 'weighted_rank', name: '\u7b49\u7ea7\u52a0\u6743', description: '\u6839\u636e\u7528\u6237\u7b49\u7ea7\u52a0\u6743\u5206\u914d' },
   { id: 'weighted_contribution', name: '\u8d21\u732e\u52a0\u6743', description: '\u6839\u636e\u4ea4\u6613\u91cf\u8d21\u732e\u52a0\u6743\u5206\u914d' },
   { id: 'hybrid', name: '\u6df7\u5408\u6a21\u5f0f', description: '\u7b49\u7ea750% + \u8d21\u732e50%' },
-  { id: 'manager_bonus', name: '\u7ba1\u7406\u5458\u5956\u52b1', description: '\u7ba1\u7406\u5458\u989d\u591610%\u5956\u52b1' },
 ];
 
 export default function StationsPage() {
-  const { isAdmin } = useAuth();
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -240,7 +238,7 @@ export default function StationsPage() {
         loadUnits();
       } else {
         if (response.error?.includes('90\u5929') || response.error?.includes('cooldown')) {
-          toast.error(`\u4fee\u6539\u51b7\u5374\u4e2d：${response.error}`);
+          toast.error(`\u4fee\u6539\u51b7\u5374\u4e2d\uff1a${response.error}`);
         } else {
           toast.error(response.error || '\u66f4\u65b0\u5931\u8d25');
         }
@@ -257,7 +255,7 @@ export default function StationsPage() {
       <div className="max-w-7xl mx-auto px-3 py-4 space-y-3 xs:px-4 xs:space-y-4 sm:px-6 sm:py-6 sm:space-y-6">
         <div>
           <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">\u9886\u5730\u7ba1\u7406</h1>
-          <p className="text-xs sm:text-sm text-neutral-400 mt-1">\u7ba1\u7406\u9886\u5730NFT、\u67e5\u770bKPI\u548c\u91d1\u5e93\u4f59\u989d</p>
+          <p className="text-xs sm:text-sm text-neutral-400 mt-1">\u7ba1\u7406\u9886\u5730NFT\u3001\u67e5\u770bKPI\u548c\u91d1\u5e93\u4f59\u989d</p>
         </div>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
@@ -272,7 +270,7 @@ export default function StationsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">\u9886\u5730\u7ba1\u7406</h1>
-          <p className="text-xs sm:text-sm text-neutral-400 mt-1">\u7ba1\u7406\u9886\u5730NFT、\u67e5\u770bKPI\u548c\u91d1\u5e93\u4f59\u989d</p>
+          <p className="text-xs sm:text-sm text-neutral-400 mt-1">\u7ba1\u7406\u9886\u5730NFT\u3001\u67e5\u770bKPI\u548c\u91d1\u5e93\u4f59\u989d</p>
         </div>
         <Button
           variant="outline"
@@ -556,12 +554,12 @@ export default function StationsPage() {
                 {unitDetailsCache[selectedUnit.unit_id].metrics.occupancy_rate >= 50 ? (
                   <div className="flex items-center gap-2 text-white">
                     <CheckCircle2 className="w-5 h-5" />
-                    <span>\u6d3b\u8dc3\u72b6\u6001，\u6301\u7eed\u53d1\u5c55\u4e2d</span>
+                    <span>\u6d3b\u8dc3\u72b6\u6001\uff0c\u6301\u7eed\u53d1\u5c55\u4e2d</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 text-neutral-500">
                     <XCircle className="w-5 h-5" />
-                    <span>\u5f85\u53d1\u5c55，\u9080\u8bf7\u66f4\u591a\u6210\u5458\u52a0\u5165</span>
+                    <span>\u5f85\u53d1\u5c55\uff0c\u9080\u8bf7\u66f4\u591a\u6210\u5458\u52a0\u5165</span>
                   </div>
                 )}
               </div>
@@ -651,7 +649,7 @@ export default function StationsPage() {
               rename_territory {selectedUnit?.unit_id?.toString().slice(0, 8)}
             </DialogTitle>
             <DialogDescription className="text-neutral-400">
-              \u4fee\u6539\u9886\u5730\u540d\u79f0（\u6bcf90\u5929\u53ef\u4fee\u6539\u4e00\u6b21）
+              \u4fee\u6539\u9886\u5730\u540d\u79f0\uff08\u6bcf90\u5929\u53ef\u4fee\u6539\u4e00\u6b21\uff09
             </DialogDescription>
           </DialogHeader>
 
@@ -676,7 +674,7 @@ export default function StationsPage() {
                       <div className="text-sm text-neutral-400 mt-1">
                         \u8fd8\u9700\u7b49\u5f85 <span className="font-bold font-mono">{nameStatus.remaining_days}</span> \u5929
                         {nameStatus.next_modify_date && (
-                          <span className="ml-1">（{nameStatus.next_modify_date} \u53ef\u4fee\u6539）</span>
+                          <span className="ml-1">\uff08{nameStatus.next_modify_date} \u53ef\u4fee\u6539\uff09</span>
                         )}
                       </div>
                     </div>
@@ -691,7 +689,7 @@ export default function StationsPage() {
                     <div>
                       <div className="text-white font-medium">\u56e2\u961f\u4ee3\u7ba1\u9886\u5730</div>
                       <div className="text-sm text-neutral-400 mt-1">
-                        \u9886\u5730\u5f53\u524d\u7531\u56e2\u961f\u4ee3\u7ba1，\u4efb\u4f55\u5df2\u767b\u5f55\u7528\u6237\u90fd\u53ef\u4ee5\u4fee\u6539\u540d\u79f0
+                        \u9886\u5730\u5f53\u524d\u7531\u56e2\u961f\u4ee3\u7ba1\uff0c\u4efb\u4f55\u5df2\u767b\u5f55\u7528\u6237\u90fd\u53ef\u4ee5\u4fee\u6539\u540d\u79f0
                       </div>
                     </div>
                   </div>
@@ -706,10 +704,10 @@ export default function StationsPage() {
                   placeholder="\u8f93\u5165\u65b0\u7684\u9886\u5730\u540d\u79f0"
                   className="bg-neutral-800 border-neutral-600 text-white placeholder-neutral-400 mt-1"
                   maxLength={50}
-                  disabled={!nameStatus.can_modify && !isAdmin()}
+                  disabled={!nameStatus.can_modify}
                 />
                 <div className="text-xs text-neutral-500 mt-1 font-mono">
-                  {newName.length}/50 \u5b57\u7b26（\u81f3\u5c112\u4e2a\u5b57\u7b26）
+                  {newName.length}/50 \u5b57\u7b26\uff08\u81f3\u5c112\u4e2a\u5b57\u7b26\uff09
                 </div>
               </div>
 
@@ -751,7 +749,7 @@ export default function StationsPage() {
                 !newName.trim() ||
                 newName.trim().length < 2 ||
                 newName === nameStatus?.current_name ||
-                (!nameStatus?.can_modify && !isAdmin())
+                !nameStatus?.can_modify
               }
               className="bg-cyan-700 hover:bg-cyan-600 text-white"
             >

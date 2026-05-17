@@ -24,7 +24,7 @@ export interface WalletTokenData {
 export interface WalletTokenBalancesResult {
   wallets: WalletTokenData[]
   aggregated: TokenHolding[]
-  flat: TokenHolding[]       // \u4e0d\u805a\u5408，\u6bcf\u884c\u5e26\u94b1\u5305\u6807\u8bc6
+  flat: TokenHolding[]       // \u4e0d\u805a\u5408\uff0c\u6bcf\u884c\u5e26\u94b1\u5305\u6807\u8bc6
   totalUsdValue: number
   loading: boolean
   error: string | null
@@ -121,7 +121,7 @@ export function useWalletTokenBalances(
     return Array.from(map.values()).sort((a, b) => b.usdValue - a.usdValue)
   }, [walletData])
 
-  // \u4e0d\u805a\u5408\u7684\u5e73\u94fa\u5217\u8868，\u6bcf\u884c\u5e26\u94b1\u5305\u6807\u8bc6 (\u7528\u4e8e "all wallets" \u89c6\u56fe)
+  // \u4e0d\u805a\u5408\u7684\u5e73\u94fa\u5217\u8868\uff0c\u6bcf\u884c\u5e26\u94b1\u5305\u6807\u8bc6 (\u7528\u4e8e "all wallets" \u89c6\u56fe)
   const flat = useMemo(() => {
     const list: TokenHolding[] = []
     for (const w of walletData) {

@@ -42,7 +42,7 @@ const BADGE_VARIANTS: Record<string, string> = {
 
 export default function AuctionsPage() {
   const t = useTranslations('auctionsDash')
-  const { user, isAdmin } = useAuth()
+  const { user } = useAuth()
 
   const UNIT_LABELS: Record<string, string> = {
     station: t('station'), matrix: t('matrix'), sector: t('sector'), system: t('system'),
@@ -185,16 +185,6 @@ export default function AuctionsPage() {
           >
             <RefreshCw className="w-4 h-4 mr-2" />{t('refresh')}
           </Button>
-          {isAdmin() && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent"
-              onClick={() => setIsCreateAuctionDialogOpen(true)}
-            >
-              <Plus className="w-4 h-4 mr-2" />{t('createAuction')}
-            </Button>
-          )}
         </div>
       </div>
 

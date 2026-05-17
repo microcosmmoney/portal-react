@@ -30,7 +30,7 @@ export interface TransactionResult {
   transaction: Transaction;
 }
 
-export type UserRole = 'admin' | 'agent' | 'user';
+export type UserRole = 'agent' | 'user';
 
 export interface UserInfo {
   uid: string;
@@ -233,40 +233,5 @@ export interface IncomeHistoryResponse {
   total: number;
   page: number;
   page_size: number;
-  error?: string;
-}
-
-export interface StrategyConfig {
-  symbol: string;
-  leverage: number;
-  position_size: number;
-  stop_loss?: number;
-  take_profit?: number;
-  parameters: Record<string, unknown>;
-}
-
-export interface BinanceOrderResponse {
-  success: boolean;
-  order?: {
-    orderId: number;
-    clientOrderId: string;
-    symbol: string;
-    status: string;
-    price: string;
-    avgPrice: string;
-    origQty: string;
-    executedQty: string;
-    type: string;
-    side: string;
-    positionSide: string;
-    time: number;
-    updateTime: number;
-  };
-  error?: string;
-}
-
-export interface BinanceCancelResponse {
-  success: boolean;
-  cancelled?: boolean;
   error?: string;
 }

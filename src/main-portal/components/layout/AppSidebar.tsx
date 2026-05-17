@@ -182,17 +182,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroup>
         )}
 
-        {}
-        {menus.adminMenu && menus.adminMenu.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel>{tc('sidebarSystemManagement')}</SidebarGroupLabel>
-            <SidebarMenu>
-              {menus.adminMenu.map((item) => (
-                <NavMenuItem key={item.href} item={item} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroup>
-        )}
       </SidebarContent>
 
       {}
@@ -211,9 +200,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   {userInfo?.email?.split("@")[0] || tc('defaultUser')}
                 </span>
                 <span className="truncate text-xs text-sidebar-foreground/50">
-                  {userRole === "admin" && tc('admin')}
-                  {userRole === "agent" && tc('agent')}
-                  {userRole === "user" && tc('normalUser')}
+                  {userRole === "agent" ? tc('agent') : tc('normalUser')}
                 </span>
               </div>
             </div>

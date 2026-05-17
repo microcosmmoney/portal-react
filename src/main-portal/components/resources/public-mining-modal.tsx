@@ -20,7 +20,7 @@ type Step = "input" | "paymentMethod" | "qrPayment" | "payment" | "confirming" |
 
 const STABLECOIN_MINTS: Record<StablecoinType, PublicKey> = { usdc: new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), usdt: new PublicKey("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB") }
 const STABLECOIN_VAULTS: Record<StablecoinType, PublicKey> = { usdc: new PublicKey("5L8vPTvGH14keLq4R6CGGvSFksZFjb7bRPXarCwZbmUA"), usdt: new PublicKey("BnHA9jSm88wzQS4c2nCgTXch1Byzc3FWn2G7Wgrvazy3") }
-const SOLANA_RPC = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com"
+const SOLANA_RPC = process.env.NEXT_PUBLIC_HELIUS_RPC_URL || process.env.NEXT_PUBLIC_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com"
 const COIN_INFO: Record<StablecoinType, { symbol: string; name: string; icon: string }> = { usdc: { symbol: 'USDC', name: 'USD Coin', icon: '💵' }, usdt: { symbol: 'USDT', name: 'Tether', icon: '💴' } }
 
 export default function PublicMiningModal({ isOpen, onClose, onSuccess }: PublicMiningModalProps) {

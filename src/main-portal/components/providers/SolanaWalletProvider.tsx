@@ -12,7 +12,7 @@ interface SolanaWalletProviderProps {
 
 export function SolanaWalletProvider({ children }: SolanaWalletProviderProps) {
   const endpoint = useMemo(() => {
-    return process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+    return process.env.NEXT_PUBLIC_HELIUS_RPC_URL || process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
   }, []);
 
   const wallets = useMemo(() => [], []);

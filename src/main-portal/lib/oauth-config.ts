@@ -4,12 +4,12 @@ export const OAUTH_CONFIG = {
   tokenEndpoint: process.env.NEXT_PUBLIC_OAUTH_TOKEN_ENDPOINT || 'https://microcosm.money/api/oauth/token',
   firebaseTokenEndpoint: process.env.NEXT_PUBLIC_OAUTH_FIREBASE_ENDPOINT || 'https://microcosm.money/api/oauth/firebase-token',
 
-  clientId: process.env.NEXT_PUBLIC_OAUTH_CLIENT_ID || 'doublehelix',
+  clientId: process.env.NEXT_PUBLIC_OAUTH_CLIENT_ID || '',
   redirectUri: typeof window !== 'undefined'
     ? `${window.location.origin}/auth/callback`
-    : process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || 'https://doublehelix.money/auth/callback',
+    : process.env.NEXT_PUBLIC_OAUTH_REDIRECT_URI || '',
 
-  scopes: ['openid', 'profile', 'email', 'trading'],
+  scopes: ['openid', 'profile', 'email'],
 }
 
 export function generateState(): string {

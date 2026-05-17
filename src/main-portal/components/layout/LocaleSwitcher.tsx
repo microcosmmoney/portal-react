@@ -26,7 +26,7 @@ export function LocaleSwitcher() {
   const currentLabel = locales.find((l) => l.code === locale)?.code.toUpperCase() ?? "EN";
 
   function onSelectLocale(newLocale: string) {
-    // Cookie \u6301\u4e45\u5316\u8bed\u8a00\u9009\u62e9，\u8de8\u9875\u9762/\u767b\u5f55\u540e\u4fdd\u6301
+    // Cookie \u6301\u4e45\u5316\u8bed\u8a00\u9009\u62e9\uff0c\u8de8\u9875\u9762/\u767b\u5f55\u540e\u4fdd\u6301
     document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=${365 * 24 * 60 * 60};SameSite=Lax`;
     router.replace(pathname, { locale: newLocale as "en" | "zh" | "ko" | "ja" });
   }
