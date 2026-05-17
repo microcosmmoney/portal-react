@@ -10,7 +10,7 @@ import type { MiningRequestResponse, MiningRatioInfo } from "../../lib/types/api
 import { useWallet as useSolanaWallet } from "@solana/wallet-adapter-react"
 import { PublicKey, Transaction, Connection } from "@solana/web3.js"
 import { getAssociatedTokenAddressSync } from "@solana/spl-token"
-import { isMobileDevice } from "../../lib/solana/solana-pay"
+import { isMobileDevice, createSolanaPayUrl } from "../../lib/solana/solana-pay"
 import { useTranslations } from "next-intl"
 
 interface MiningModalProps {
@@ -155,13 +155,23 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
     try {
       try { const pf = await getPublicMiningPreflight(); if (pf.success && pf.data && !pf.data.ready) { setError(pf.data.reason || "Mining system is temporarily unavailable. Please try again later."); setStep("error"); setLoading(false); return } } catch {}
 
-      const refKeypair = (await import("@solana/web3.js")).Keypair.generate()
-      const reference = refKeypair.publicKey.toBase58()
+      const { Keypair, PublicKey } = await import("@solana/web3.js")
+      const refKeypair = Keypair.generate()
+      const reference = refKeypair.publicKey
 
-      const response = await createMiningRequest({ mcc_amount: parseFloat(mccAmount) * 1_000_000_000, stablecoin_type: stablecoin, reference })
+      const response = await createMiningRequest({ mcc_amount: parseFloat(mccAmount) * 1_000_000_000, stablecoin_type: stablecoin, reference: reference.toBase58() })
       if (!response.success || !response.data) throw new Error(response.error || t("errorCreateRequest"))
       setMiningRequest(response.data)
-      const payUrl = (response.data as MiningRequestResponse & { solana_pay_url?: string }).solana_pay_url || ""
+      const vault = STABLECOIN_VAULTS[stablecoin]
+      const mint = STABLECOIN_MINTS[stablecoin]
+      const payUrl = createSolanaPayUrl({
+        recipient: vault,
+        amount: response.data.usdc_amount_with_discount / 1_000_000,
+        splToken: mint,
+        reference,
+        label: "Microcosm Mining",
+        message: `Mine ${mccAmount} MCC`,
+      })
       setSolanaPayUrl(payUrl)
       setBackendStatus("created")
       if (isMobile) {
@@ -424,8 +434,8 @@ export default function MiningModal({ isOpen, onClose, userDetails, onSuccess }:
 
           {step === "qrPayment" && miningRequest && solanaPayUrl && (
             <div className="space-y-3 2xs:space-y-4">
-              <div className="p-3 rounded bg-amber-500/15 border-2 border-amber-500/50 flex items-start gap-2">
-                <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <div className="p-3 rounded bg-amber-500/15 border-2 border-amber-500/50 flex items-start gap-2 animate-pulse-warning">
+                <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5 animate-pulse" />
                 <div className="flex-1">
                   <div className="text-amber-400 font-bold text-sm mb-1">{t("doNotClose")}</div>
                   <p className="text-neutral-300 text-xs leading-relaxed">{t("doNotCloseDesc")}</p>
