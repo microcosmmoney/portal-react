@@ -48,9 +48,9 @@ export function MainFooter() {
   return (
     <footer className="bg-[#030712] border-t border-slate-800">
       <div className="max-w-6xl mx-auto px-4 2xs:px-5 xs:px-6 py-8 2xs:py-10 xs:py-12 sm:py-14 md:py-16">
-        {/* Links grid \u2014 1 col on tiny, 2 on small, 3 on medium, 5 on large */}
+        {/* Links grid — 1 col on tiny, 2 on small, 3 on medium, 5 on large */}
         <div className="grid grid-cols-1 2xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 2xs:gap-7 xs:gap-8">
-          {/* Brand column \u2014 full width on small, 1 col on medium+ */}
+          {/* Brand column — full width on small, 1 col on medium+ */}
           <div className="2xs:col-span-2 sm:col-span-3 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 group">
               <Sparkles size={16} className="xs:hidden text-blue-500" />
@@ -85,7 +85,7 @@ export function MainFooter() {
             </div>
           </div>
 
-          {/* Link columns \u2014 hide less important ones on very small screens */}
+          {/* Link columns — hide less important ones on very small screens */}
           {footerLinks.map((group, idx) => (
             <div key={group.title} className={idx >= 3 ? "hidden 2xs:block" : ""}>
               <h3 className="text-xs xs:text-sm font-semibold text-white mb-2.5 xs:mb-4">
@@ -107,7 +107,7 @@ export function MainFooter() {
           ))}
         </div>
 
-        {/* CTA banner \u2014 compact on small screens */}
+        {/* CTA banner — compact on small screens */}
         <div className="mt-10 xs:mt-12 sm:mt-16 p-4 xs:p-5 sm:p-6 rounded-xl xs:rounded-2xl bg-gradient-to-r from-blue-500/10 to-cyan-500/5 border border-blue-500/20">
           <div className="flex flex-col xs:flex-col sm:flex-row sm:items-center justify-between gap-3 xs:gap-4">
             <div className="min-w-0">

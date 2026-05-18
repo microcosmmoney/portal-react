@@ -23,7 +23,7 @@ import { useMCCPrice } from "../../contexts/MCCPriceContext";
 import { Loader2, ExternalLink, Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-// Labels are static English \u2014 ChartLegend/Tooltip uses i18n overrides in MCCChart
+// Labels are static English — ChartLegend/Tooltip uses i18n overrides in MCCChart
 const chartConfig = {
   mcc: {
     label: "MCC",
@@ -531,7 +531,7 @@ function StreamFlowLockSection() {
                         {isActive && miningVaultMcc !== null ? (
                           <span className="text-[#5EEAD4] font-bold">{fmtAmount(Math.round(miningVaultMcc))} MCC</span>
                         ) : (
-                          <span className="text-foreground/20">\u2014</span>
+                          <span className="text-foreground/20">—</span>
                         )}
                       </td>
                       <td className="py-2.5 pl-2">

@@ -117,6 +117,11 @@ export type { MicrocosmVotingPageProps } from './components/voting/voting-page'
 export { MicrocosmReincarnationPage } from './components/reincarnation/reincarnation-page'
 export type { MicrocosmReincarnationPageProps } from './components/reincarnation/reincarnation-page'
 
+export { MicrocosmSharePage } from './components/share/share-page'
+export type { MicrocosmSharePageProps } from './components/share/share-page'
+export { getShareTexts, pickRandomText } from './components/share/share-texts'
+export type { ShareLocale } from './components/share/share-texts'
+
 export { MicrocosmManagerIncomePage } from './components/income/manager-income-page'
 export type { MicrocosmManagerIncomePageProps } from './components/income/manager-income-page'
 

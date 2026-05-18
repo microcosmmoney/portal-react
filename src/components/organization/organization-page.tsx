@@ -283,10 +283,10 @@ export function MicrocosmOrganizationPage({ basePath = '', onNavigate }: Microco
                 The territory system is the organizational backbone of the Microcosm ecosystem, structuring all users into a hierarchical governance model.
               </p>
               <div className="text-xs 2xs:text-sm text-neutral-400 leading-relaxed space-y-1 2xs:space-y-1.5">
-                <p><span className="text-cyan-400/80 font-mono">Station</span> \u2014 Base unit housing up to 1,000 users</p>
-                <p><span className="text-cyan-400/80 font-mono">Matrix</span> \u2014 Regional group managing 10 Stations</p>
-                <p><span className="text-cyan-400/80 font-mono">Sector</span> \u2014 Area governance overseeing 10 Matrices</p>
-                <p><span className="text-cyan-400/80 font-mono">System</span> \u2014 Top-level domain containing 10 Sectors</p>
+                <p><span className="text-cyan-400/80 font-mono">Station</span> — Base unit housing up to 1,000 users</p>
+                <p><span className="text-cyan-400/80 font-mono">Matrix</span> — Regional group managing 10 Stations</p>
+                <p><span className="text-cyan-400/80 font-mono">Sector</span> — Area governance overseeing 10 Matrices</p>
+                <p><span className="text-cyan-400/80 font-mono">System</span> — Top-level domain containing 10 Sectors</p>
               </div>
               <p className="hidden 2xs:block text-xs 2xs:text-sm text-neutral-400 leading-relaxed">
                 Magistrates are territory managers elected through the auction system. They govern their territory and receive a share of mining companion yield.
@@ -328,10 +328,10 @@ export function MicrocosmOrganizationPage({ basePath = '', onNavigate }: Microco
                 Each territory maintains a vault that accumulates MCD from mining companion yield and distributes it to active miners daily.
               </p>
               <div className="text-xs 2xs:text-sm text-neutral-400 leading-relaxed space-y-1 2xs:space-y-1.5">
-                <p><span className="text-cyan-400/80">Source</span> \u2014 30% of mining companion yield flows to territory vault as MCD</p>
-                <p><span className="text-cyan-400/80">Distribution</span> \u2014 1% of vault balance distributed daily to territory miners</p>
-                <p><span className="text-cyan-400/80">Peg</span> \u2014 MCD is pegged 1:1 to USDT/USDC</p>
-                <p className="hidden 2xs:block"><span className="text-cyan-400/80">Transparency</span> \u2014 All vault balances and distributions are on-chain verifiable</p>
+                <p><span className="text-cyan-400/80">Source</span> — 30% of mining companion yield flows to territory vault as MCD</p>
+                <p><span className="text-cyan-400/80">Distribution</span> — 1% of vault balance distributed daily to territory miners</p>
+                <p><span className="text-cyan-400/80">Peg</span> — MCD is pegged 1:1 to USDT/USDC</p>
+                <p className="hidden 2xs:block"><span className="text-cyan-400/80">Transparency</span> — All vault balances and distributions are on-chain verifiable</p>
               </div>
               <p className="hidden 2xs:block text-xs 2xs:text-sm text-neutral-400 leading-relaxed">
                 The vault creates a positive feedback loop: more mining activity increases the vault, which increases daily payouts, attracting more miners.

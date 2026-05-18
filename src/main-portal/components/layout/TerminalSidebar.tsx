@@ -148,7 +148,7 @@ export function TerminalSidebar() {
 
   const sidebarContent = (
     <div className="flex flex-col h-full md:bg-neutral-900 border-r border-neutral-700/50 md:border-neutral-700">
-      {/* Collapse toggle \u2014 hidden on small phones (always expanded in overlay) */}
+      {/* Collapse toggle — hidden on small phones (always expanded in overlay) */}
       <div className="hidden xs:flex items-center justify-end px-2 xs:px-3 py-1">
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -180,7 +180,7 @@ export function TerminalSidebar() {
 
       </nav>
 
-      {/* Bottom section \u2014 compact on small screens */}
+      {/* Bottom section — compact on small screens */}
       <div className="mt-4 xs:mt-6 pt-3 xs:pt-4 border-t border-neutral-800 px-2 xs:px-3 pb-2 xs:pb-3 safe-area-bottom">
         {!collapsed && (
           <Link
@@ -236,7 +236,7 @@ export function TerminalSidebar() {
 
   return (
     <>
-      {/* Mobile menu toggle \u2014 responsive positioning */}
+      {/* Mobile menu toggle — responsive positioning */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
         className="md:hidden fixed top-3 2xs:top-3.5 left-2 2xs:left-3 xs:left-4 z-[60] p-1.5 2xs:p-2 bg-neutral-800/60 backdrop-blur-md border border-neutral-700/50 rounded text-neutral-400 hover:text-white touch-target"
@@ -252,7 +252,7 @@ export function TerminalSidebar() {
         />
       )}
 
-      {/* Sidebar \u2014 full width overlay on small phones, 72% on larger phones, fixed width on desktop */}
+      {/* Sidebar — full width overlay on small phones, 72% on larger phones, fixed width on desktop */}
       <aside
         className={cn(
           "fixed md:relative md:flex-shrink-0 top-14 2xs:top-16 md:top-0 z-[45] md:z-40 sidebar-frost",

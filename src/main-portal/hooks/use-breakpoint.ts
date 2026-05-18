@@ -104,9 +104,9 @@ export function useBreakpoint() {
     hasMounted,
     /** Legacy compat: true when < md (768px) */
     isMobile: hasMounted ? width < BREAKPOINTS.md : false,
-    /** true when < xs (475px) \u2014 small phones */
+    /** true when < xs (475px) — small phones */
     isSmallPhone: hasMounted ? width < BREAKPOINTS.xs : false,
-    /** true when >= md && < lg \u2014 tablets */
+    /** true when >= md && < lg — tablets */
     isTablet: hasMounted ? width >= BREAKPOINTS.md && width < BREAKPOINTS.lg : false,
   }
 }

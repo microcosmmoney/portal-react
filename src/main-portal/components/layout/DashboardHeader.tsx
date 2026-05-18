@@ -120,14 +120,14 @@ export function DashboardHeader() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 2xs:h-16 bg-neutral-950 border-b border-neutral-800">
       <div className="h-full px-2 2xs:px-3 xs:px-4 md:px-6 flex items-center relative">
-        {/* Desktop logo \u2014 hidden below md */}
+        {/* Desktop logo — hidden below md */}
         <Link href="/" className="hidden md:flex items-center gap-2 lg:gap-3 shrink-0">
           <img src="/mcc-logo-40.png" alt="MCC" className="w-8 h-8 lg:w-10 lg:h-10 rounded" />
           <span className="font-bold text-base lg:text-lg tracking-wider text-white">
             M<span className="text-cyan-400">I</span>CROCOSM
           </span>
         </Link>
-        {/* Mobile logo \u2014 left-aligned, with left padding for hamburger */}
+        {/* Mobile logo — left-aligned, with left padding for hamburger */}
         <Link href="/" className="md:hidden flex items-center gap-1.5 2xs:gap-2 ml-10 2xs:ml-12">
           <img src="/mcc-logo-40.png" alt="MCC" className="w-6 h-6 2xs:w-7 2xs:h-7 xs:w-8 xs:h-8 rounded" />
           <span className="font-bold text-xs 2xs:text-sm xs:text-base tracking-wider text-white">
@@ -135,7 +135,7 @@ export function DashboardHeader() {
           </span>
         </Link>
 
-        {/* Nav \u2014 only show on lg+ (1024px) to avoid cramping on tablets */}
+        {/* Nav — only show on lg+ (1024px) to avoid cramping on tablets */}
         <nav className="hidden lg:flex flex-1 items-center justify-center gap-0.5 xl:gap-1">
           {navItems.map((item) => {
             if (item.submenu === "developer") {
@@ -259,12 +259,12 @@ export function DashboardHeader() {
           })}
         </nav>
 
-        {/* Right actions \u2014 responsive sizing */}
+        {/* Right actions — responsive sizing */}
         <div className="flex items-center justify-end gap-0.5 2xs:gap-1 ml-auto">
-          {/* Locale switcher \u2014 always visible but compact on small screens */}
+          {/* Locale switcher — always visible but compact on small screens */}
           <LocaleSwitcher />
 
-          {/* Notifications \u2014 hidden on small phones */}
+          {/* Notifications — hidden on small phones */}
           {user && (
             <Link
               href="/notifications"
@@ -286,7 +286,7 @@ export function DashboardHeader() {
             >
               <button className="flex items-center gap-1 2xs:gap-1.5 xs:gap-2 px-1.5 2xs:px-2 xs:px-2.5 py-1 2xs:py-1.5 rounded hover:bg-neutral-700 transition-colors touch-target">
                 <HoverAvatar src={userInfo?.avatar_url} fallback={userInfo?.display_name || userInfo?.uid} size={28} fallbackClassName="bg-cyan-400/20 text-cyan-400" />
-                {/* Username \u2014 hidden on small phones, truncated on medium */}
+                {/* Username — hidden on small phones, truncated on medium */}
                 <span className="text-xs xs:text-sm text-neutral-300 max-w-[60px] xs:max-w-[80px] sm:max-w-[100px] truncate hidden sm:block">
                   {displayName}
                 </span>

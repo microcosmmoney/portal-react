@@ -192,7 +192,7 @@ export default function WalletPage() {
   const [activeTab, setActiveTab] = useState<string>('all')
   const [hideBalance, setHideBalance] = useState(false)
 
-  // \u76f4\u63a5\u4ece useAuth \u7f13\u5b58\u7684 userInfo \u83b7\u53d6\u94b1\u5305\u5217\u8868\uff0c\u4e0d\u518d\u91cd\u590d\u8c03\u7528 API
+  // \u76f4\u63a5\u4ece useAuth \u7f13\u5b58\u7684 userInfo \u83b7\u53d6\u94b1\u5305\u5217\u8868，\u4e0d\u518d\u91cd\u590d\u8c03\u7528 API
   const wallets: WalletInfo[] = React.useMemo(() => {
     if (!userInfo) return []
     if (userInfo.wallets && userInfo.wallets.length > 0) {
@@ -227,7 +227,7 @@ export default function WalletPage() {
     return () => window.removeEventListener("microcosm:mining-completed", handler)
   }, [refreshBalance, refreshMinting, refreshMCD, tokenBalances])
 
-  // \u591a\u94b1\u5305\u65f6 "all" tab \u7528 flat \u5217\u8868\uff08\u5e26\u94b1\u5305\u6807\u8bc6\uff09\uff0c\u5355\u94b1\u5305 tab \u7528 holdings
+  // \u591a\u94b1\u5305\u65f6 "all" tab \u7528 flat \u5217\u8868（\u5e26\u94b1\u5305\u6807\u8bc6），\u5355\u94b1\u5305 tab \u7528 holdings
   const isAllTab = activeTab === 'all'
   const showWalletCol = isAllTab && wallets.length > 1
 
@@ -235,14 +235,14 @@ export default function WalletPage() {
     ? (wallets.length > 1 ? tokenBalances.flat : tokenBalances.aggregated)
     : tokenBalances.wallets.find(w => w.wallet_address === activeTab)?.holdings || []
 
-  // \u53ea\u663e\u793a ≥$1 \u7684\u8d44\u4ea7\uff0c\u4f4e\u4e8e $1 \u4e0d\u663e\u793a
+  // \u53ea\u663e\u793a ≥$1 \u7684\u8d44\u4ea7，\u4f4e\u4e8e $1 \u4e0d\u663e\u793a
   const activeHoldings = rawHoldings.filter(h => h.usdValue >= 1)
 
   const activeUsdValue = isAllTab
     ? tokenBalances.totalUsdValue
     : tokenBalances.wallets.find(w => w.wallet_address === activeTab)?.totalUsdValue || 0
 
-  // \u4e0d\u518d\u5168\u9875\u963b\u585e\uff0c\u8ba9\u9875\u9762\u6846\u67b6\u5148\u6e32\u67d3\uff0c\u6570\u636e\u533a\u57df\u5185\u8054\u663e\u793a\u52a0\u8f7d\u8fdb\u5ea6\u6761
+  // \u4e0d\u518d\u5168\u9875\u963b\u585e，\u8ba9\u9875\u9762\u6846\u67b6\u5148\u6e32\u67d3，\u6570\u636e\u533a\u57df\u5185\u8054\u663e\u793a\u52a0\u8f7d\u8fdb\u5ea6\u6761
 
   if (error) {
     return (

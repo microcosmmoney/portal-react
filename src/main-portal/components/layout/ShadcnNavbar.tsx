@@ -135,7 +135,7 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/30">
       <div className="max-w-7xl mx-auto px-3 2xs:px-4 md:px-6">
         <div className="flex items-center justify-between h-14 2xs:h-16">
-          {/* Logo \u2014 responsive sizing */}
+          {/* Logo — responsive sizing */}
           <Link href="/" className="flex items-center gap-2 xs:gap-3 shrink-0">
             <img src="/mcc-logo-40.png" alt="MCC" className="w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 rounded" />
             <span className="font-sans font-semibold text-lg xs:text-xl sm:text-2xl tracking-wide text-foreground">
@@ -143,7 +143,7 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop nav \u2014 show from lg (1024px) for CJK language safety */}
+          {/* Desktop nav — show from lg (1024px) for CJK language safety */}
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {navItems.map((item) => {
               // Blockchain submenu (includes Market + Community)
@@ -331,7 +331,7 @@ export function Navbar() {
             })}
           </div>
 
-          {/* Desktop right section \u2014 from lg */}
+          {/* Desktop right section — from lg */}
           <div className="hidden lg:flex items-center gap-2 xl:gap-3">
             <LocaleSwitcher />
             {loading ? (
@@ -408,7 +408,7 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu \u2014 full-screen overlay for better UX on small phones */}
+      {/* Mobile menu — full-screen overlay for better UX on small phones */}
       <div
         className={cn(
           "lg:hidden overflow-y-auto transition-all duration-300 bg-background/95 backdrop-blur-md border-b border-border/30",

@@ -88,7 +88,7 @@ export function MiningDistributionHistory({
         setError(data.error || '\u83b7\u53d6\u6570\u636e\u5931\u8d25')
       }
     } catch (err) {
-      setError('\u7f51\u7edc\u9519\u8bef\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5')
+      setError('\u7f51\u7edc\u9519\u8bef，\u8bf7\u7a0d\u540e\u91cd\u8bd5')
     } finally {
       setLoading(false)
     }
@@ -394,7 +394,7 @@ export function MiningDistributionHistory({
             {totalCount > limit && (
               <div className="flex flex-col xs:flex-row items-center justify-between mt-3 sm:mt-4 gap-2">
                 <p className="text-[10px] sm:text-sm text-neutral-500">
-                  \u663e\u793a {offset + 1} - {Math.min(offset + limit, totalCount)} \u6761\uff0c\u5171 {totalCount} \u6761
+                  \u663e\u793a {offset + 1} - {Math.min(offset + limit, totalCount)} \u6761，\u5171 {totalCount} \u6761
                 </p>
                 <div className="flex gap-2">
                   <Button
