@@ -2,20 +2,20 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Link } from '@/i18n/navigation'
+import { Link } from '../../i18n/navigation'
 import {
   Wallet, Lock, TrendingUp, RefreshCw, Info, Gift,
   CreditCard, Eye, EyeOff, ExternalLink, Loader2, AlertTriangle
 } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { useAuth } from '@/hooks/useAuth'
-import { useWallet } from '@/contexts/WalletContext'
-import { useWalletTokenBalances, type TokenHolding, type WalletTokenData } from '@/hooks/useWalletTokenBalances'
-import { cn } from '@/lib/utils'
+import { Card, CardContent } from '../ui/card'
+import { Badge } from '../ui/badge'
+import { Button } from '../ui/button'
+import { useAuth } from '../../hooks/useAuth'
+import { useWallet } from '../../contexts/WalletContext'
+import { useWalletTokenBalances, type TokenHolding, type WalletTokenData } from '../../hooks/useWalletTokenBalances'
+import { cn } from '../../lib/utils'
 import MCCHistory from './MCCHistory'
-import { FormattedDateTime, FormattedDate, LockDaysHoursRemaining, useLockProgressValue } from '@/components/ui/time-remaining'
+import { FormattedDateTime, FormattedDate, LockDaysHoursRemaining, useLockProgressValue } from '../ui/time-remaining'
 import { useTranslations } from 'next-intl'
 
 interface WalletInfo {
