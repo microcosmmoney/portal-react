@@ -11,6 +11,7 @@ import {
   Ticket,
   Pickaxe,
   Vote,
+  Share2,
   type LucideIcon,
 } from "lucide-react"
 
@@ -34,6 +35,13 @@ export const userMenuItems: MenuItem[] = [
     icon: LayoutDashboard,
     roles: ["user"],
     descriptionKey: "overviewDesc"
+  },
+  {
+    titleKey: "share",
+    href: "/user-system/share",
+    icon: Share2,
+    roles: ["user"],
+    descriptionKey: "shareDesc"
   },
 
   { titleKey: "blockchainSection", href: "#blockchain", icon: Coins, roles: ["user"], isSection: true },
