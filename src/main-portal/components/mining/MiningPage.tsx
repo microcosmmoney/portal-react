@@ -77,6 +77,8 @@ export default function MCCMiningPage() {
   const [historyExpanded, setHistoryExpanded] = useState(false)
   const [poolData, setPoolData] = useState<PoolStatus | null>(null)
   const [poolLoading, setPoolLoading] = useState(false)
+  const [epochInfo, setEpochInfo] = useState<{ current_epoch: number; epoch_minted: number; epoch_yield: number; mining_vault_mcc: number } | null>(null)
+  const [epochCountdownSec, setEpochCountdownSec] = useState(0)
   const X402_PAGE_SIZE = 3
 
   interface WalletMCCInfo {
@@ -212,11 +214,37 @@ export default function MCCMiningPage() {
     }
   }
 
+  const loadEpochInfo = async () => {
+    try {
+      const r = await fetch("/api/stats/custody-vaults", { cache: "no-store" })
+      const j = await r.json()
+      const ep = j?.data?.epoch
+      if (ep && typeof ep.current_epoch === "number") setEpochInfo(ep)
+    } catch {}
+  }
+
+  useEffect(() => {
+    loadEpochInfo()
+    const id = window.setInterval(loadEpochInfo, 60000)
+    return () => window.clearInterval(id)
+  }, [])
+
+  useEffect(() => {
+    const tick = () => {
+      const elapsedMs = Date.now() % (3600 * 1000)
+      setEpochCountdownSec(Math.max(0, Math.floor((3600 * 1000 - elapsedMs) / 1000)))
+    }
+    tick()
+    const id = window.setInterval(tick, 1000)
+    return () => window.clearInterval(id)
+  }, [])
+
   const refreshAll = () => {
     loadRatioInfo()
     loadX402History()
     loadWalletBalances()
     loadPoolData()
+    loadEpochInfo()
   }
 
   useEffect(() => {
@@ -226,6 +254,7 @@ export default function MCCMiningPage() {
       loadX402History()
       loadWalletBalances()
       loadPoolData()
+      loadEpochInfo()
       refreshPDABalance()
     }
     window.addEventListener("microcosm:mining-completed", handler)
@@ -394,6 +423,42 @@ export default function MCCMiningPage() {
                   <div className="text-[10px] sm:text-xs text-neutral-500 mt-1 hidden xs:block">{t('phaseNote')}</div>
                 </div>
               </div>
+
+              {epochInfo && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-3 sm:mb-4">
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded p-2 sm:p-3">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                      <span className="text-[10px] sm:text-xs text-amber-300/80 tracking-wider">{t('epochCurrent')}</span>
+                    </div>
+                    <div className="text-base sm:text-2xl font-bold text-amber-200 font-mono">#{epochInfo.current_epoch}</div>
+                    <div className="text-[10px] sm:text-xs text-neutral-500 mt-1 hidden xs:block font-mono">{epochInfo.epoch_yield.toFixed(2)} MCC / epoch</div>
+                  </div>
+
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded p-2 sm:p-3">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                      <span className="text-[10px] sm:text-xs text-amber-300/80 tracking-wider">{t('epochMinted')}</span>
+                    </div>
+                    <div className="text-base sm:text-2xl font-bold text-white font-mono">{epochInfo.epoch_minted.toFixed(2)}</div>
+                    <div className="text-[10px] sm:text-xs text-neutral-500 mt-1 hidden xs:block">MCC</div>
+                  </div>
+
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded p-2 sm:p-3">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                      <span className="text-[10px] sm:text-xs text-amber-300/80 tracking-wider">{t('epochRemaining')}</span>
+                    </div>
+                    <div className="text-base sm:text-2xl font-bold text-emerald-300 font-mono">{Math.max(0, epochInfo.epoch_yield - epochInfo.epoch_minted).toFixed(2)}</div>
+                    <div className="text-[10px] sm:text-xs text-neutral-500 mt-1 hidden xs:block">MCC</div>
+                  </div>
+
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded p-2 sm:p-3">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                      <span className="text-[10px] sm:text-xs text-amber-300/80 tracking-wider">{t('epochCountdown')}</span>
+                    </div>
+                    <div className="text-base sm:text-2xl font-bold text-cyan-300 font-mono tabular-nums">{Math.floor(epochCountdownSec/60).toString().padStart(2,"0")}:{(epochCountdownSec%60).toString().padStart(2,"0")}</div>
+                    <div className="text-[10px] sm:text-xs text-neutral-500 mt-1 hidden xs:block">{t('epochNext')}</div>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-1">
                 <div className="text-xs text-neutral-500">{t('halvingRemaining', { amount: formatLargeNumber(100_000_000 - (ratioInfo.total_minted % 100_000_000), 0) })}</div>
