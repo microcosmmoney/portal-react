@@ -177,7 +177,6 @@ function buildOgUrl(
     params.set('marks', marks.map(m => `${m.t.toFixed(4)}:${m.p.toFixed(6)}`).join(','))
   }
   params.set('qr', SHARE_QR_TARGET)
-  params.set('_v', String(Math.floor(Date.now() / 30000)))
   return `${origin}${path}?${params.toString()}`
 }
 
