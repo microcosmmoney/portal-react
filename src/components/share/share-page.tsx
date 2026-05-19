@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useMCC, useMCCMiningHistory } from '@microcosmmoney/auth-react'
+import { useMCC, useMCCAcquisitions, usePriceHistory } from '@microcosmmoney/auth-react'
 import { TerminalCard } from '../terminal'
 import { useTranslations } from '../../i18n-context'
 import { pickRandomText, type ShareLocale } from './share-texts'
@@ -17,6 +17,7 @@ type Layout = 'desktop' | 'mobile'
 
 const DEFAULT_ORIGIN = 'https://microcosm.money'
 const SHARE_QR_TARGET = 'https://microcosm.money'
+const MIN_SERIES_POINTS = 8
 
 function detectIOS(): boolean {
   if (typeof navigator === 'undefined') return false
@@ -30,51 +31,135 @@ function fmtNum(n: number, max = 4): string {
   return n.toLocaleString('en-US', { maximumFractionDigits: max })
 }
 
-function fmtUsd(n: number): string {
+function fmtUsd(n: number, max = 2): string {
   if (!Number.isFinite(n)) return '$0.00'
-  return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
+  return '$' + n.toLocaleString('en-US', { maximumFractionDigits: max, minimumFractionDigits: max === 2 ? 2 : 0 })
 }
+
+interface SeriesPoint { ts: number; price: number }
+
+interface AcquisitionMark { t: number; p: number }
 
 interface PositionStats {
   holdings: number
   avgCost: number
   currentPrice: number
+  totalCost: number
+  pnlUsd: number
+  pnlPct: number
+  apyPct: number
   days: number
   entryDate: string
   hasData: boolean
 }
 
-function buildStats(records: any[], currentPrice: number): PositionStats {
-  if (!records || records.length === 0) {
-    return { holdings: 0, avgCost: 0, currentPrice, days: 0, entryDate: '', hasData: false }
-  }
-  let totalMcc = 0
-  let totalPaid = 0
-  let firstDate: Date | null = null
-  for (const r of records) {
-    const mcc = Number(r.mcc_amount ?? r.distribution_user ?? 0)
-    const paid = Number(r.paid_amount ?? r.stablecoin_amount ?? 0)
-    totalMcc += mcc
-    totalPaid += paid
-    const dateStr = r.mined_at ?? r.created_at ?? r.minted_at
-    if (dateStr) {
-      const d = new Date(dateStr)
-      if (!firstDate || d < firstDate) firstDate = d
-    }
-  }
-  if (totalMcc <= 0) {
-    return { holdings: 0, avgCost: 0, currentPrice, days: 0, entryDate: '', hasData: false }
-  }
-  const avg = totalPaid / totalMcc
-  const now = new Date()
-  const days = firstDate ? Math.max(1, Math.floor((now.getTime() - firstDate.getTime()) / 86400000)) : 0
-  const entryDate = firstDate
-    ? firstDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    : ''
-  return { holdings: totalMcc, avgCost: avg, currentPrice, days, entryDate, hasData: true }
+function parseTs(s: string | null | undefined): number | null {
+  if (!s) return null
+  const t = Date.parse(s)
+  return Number.isFinite(t) ? t : null
 }
 
-function buildOgUrl(origin: string, layout: Layout, s: PositionStats): string {
+function computeStats(
+  balanceMcc: number,
+  currentPrice: number,
+  acqTotalMcc: number,
+  acqTotalCost: number,
+  acqFirstAt: string | null,
+): PositionStats {
+  const holdings = balanceMcc > 0 ? balanceMcc : acqTotalMcc
+  if (holdings <= 0) {
+    return {
+      holdings: 0, avgCost: 0, currentPrice, totalCost: 0,
+      pnlUsd: 0, pnlPct: 0, apyPct: 0, days: 0, entryDate: '', hasData: false,
+    }
+  }
+  const avgCost = acqTotalMcc > 0 ? acqTotalCost / acqTotalMcc : 0
+  const totalCost = avgCost * holdings
+  const value = holdings * currentPrice
+  const pnlUsd = value - totalCost
+  const pnlPct = avgCost > 0 ? ((currentPrice - avgCost) / avgCost) * 100 : 0
+
+  let days = 0
+  let entryDate = ''
+  const firstTs = parseTs(acqFirstAt)
+  if (firstTs) {
+    days = Math.max(1, Math.floor((Date.now() - firstTs) / 86400000))
+    entryDate = new Date(firstTs).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
+  let apyPct = 0
+  if (avgCost > 0 && days > 0 && totalCost > 0) {
+    apyPct = (pnlUsd / totalCost) * (365 / days) * 100
+  }
+
+  return {
+    holdings, avgCost, currentPrice, totalCost,
+    pnlUsd, pnlPct, apyPct, days, entryDate, hasData: true,
+  }
+}
+
+function buildSeries(history: any[] | null, currentPrice: number, days: number): SeriesPoint[] {
+  const raw: SeriesPoint[] = []
+  if (Array.isArray(history)) {
+    for (const r of history) {
+      const ts = parseTs(r?.timestamp)
+      const price = Number(r?.price)
+      if (ts && Number.isFinite(price) && price > 0) raw.push({ ts, price })
+    }
+  }
+  raw.sort((a, b) => a.ts - b.ts)
+
+  if (raw.length < MIN_SERIES_POINTS) {
+    const now = Date.now()
+    const span = Math.max(days, 7) * 86400000
+    const start = now - span
+    const fallback: SeriesPoint[] = []
+    const refPrice = currentPrice > 0 ? currentPrice : (raw[raw.length - 1]?.price || 1)
+    for (let i = 0; i < 24; i++) {
+      const t = start + (span * i) / 23
+      fallback.push({ ts: t, price: refPrice * (0.95 + 0.05 * (i / 23)) })
+    }
+    return fallback
+  }
+  return raw
+}
+
+function buildMarks(
+  events: any[] | null,
+  series: SeriesPoint[],
+  currentPrice: number,
+): AcquisitionMark[] {
+  if (!events || events.length === 0 || series.length < 2) return []
+  const tStart = series[0].ts
+  const tEnd = series[series.length - 1].ts
+  const span = tEnd - tStart
+  if (span <= 0) return []
+
+  const buys = events.filter(e => Number(e.mcc_delta) > 0)
+  const marks: AcquisitionMark[] = []
+  for (const e of buys) {
+    const eventTs = parseTs(e.event_at)
+    if (!eventTs) continue
+    if (eventTs < tStart - 86400000) continue
+    let t = (eventTs - tStart) / span
+    if (t < 0) t = 0
+    if (t > 1) t = 1
+    const price = Number(e.price_at_event) > 0 ? Number(e.price_at_event) : currentPrice
+    marks.push({ t, p: price })
+  }
+  return marks
+    .sort((a, b) => a.t - b.t)
+    .filter((m, i, arr) => i === 0 || (m.t - arr[i - 1].t) > 0.04)
+    .slice(0, 8)
+}
+
+function buildOgUrl(
+  origin: string,
+  layout: Layout,
+  s: PositionStats,
+  series: SeriesPoint[],
+  marks: AcquisitionMark[],
+): string {
   const path = layout === 'mobile' ? '/api/og/v2m/position' : '/api/og/v2/position'
   const params = new URLSearchParams()
   if (s.hasData) {
@@ -84,9 +169,25 @@ function buildOgUrl(origin: string, layout: Layout, s: PositionStats): string {
     params.set('days', String(s.days))
     if (s.entryDate) params.set('entry', s.entryDate)
   }
+  if (series.length >= 2) {
+    const seriesStr = series.map(p => p.price.toFixed(6)).join(',')
+    if (seriesStr.length < 2000) params.set('series', seriesStr)
+  }
+  if (marks.length > 0) {
+    params.set('marks', marks.map(m => `${m.t.toFixed(4)}:${m.p.toFixed(6)}`).join(','))
+  }
   params.set('qr', SHARE_QR_TARGET)
   params.set('_v', String(Math.floor(Date.now() / 30000)))
   return `${origin}${path}?${params.toString()}`
+}
+
+function fmtClock(iso: string | null | undefined): string {
+  const t = parseTs(iso || undefined as any)
+  if (!t) return '—'
+  const d = new Date(t)
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+  return `${hh}:${mm}`
 }
 
 export function MicrocosmSharePage({
@@ -96,8 +197,9 @@ export function MicrocosmSharePage({
   origin,
 }: MicrocosmSharePageProps = {}) {
   const t = useTranslations('sharePage')
-  const { balance: mccBalance, price: mccPrice, loading: mccLoading } = useMCC(60_000)
-  const { data: history, loading: historyLoading } = useMCCMiningHistory(180)
+  const { balance: mccBalance, price: mccPrice, loading: mccLoading, refresh: refreshMcc } = useMCC(60_000)
+  const { data: acquisitions, loading: acqLoading, refreshing: acqRefreshing, refresh: refreshAcq } = useMCCAcquisitions({ refetchInterval: 300_000 })
+  const { data: priceHistory, loading: historyLoading } = usePriceHistory('30D', { refetchInterval: 300_000 })
 
   const [layout, setLayout] = useState<Layout>('desktop')
   const [text, setText] = useState<string>('')
@@ -119,30 +221,50 @@ export function MicrocosmSharePage({
     return DEFAULT_ORIGIN
   }, [origin])
 
-  const currentPrice = Number(mccPrice?.price ?? 0)
-  const stats = useMemo(
-    () => buildStats(Array.isArray(history) ? history : [], currentPrice),
-    [history, currentPrice]
-  )
   const balanceMcc = Number(mccBalance?.balance ?? 0)
-  const displayedHoldings = stats.hasData && balanceMcc > 0 ? balanceMcc : stats.holdings
+  const currentPrice = Number(mccPrice?.price ?? 0)
+  const acqTotalMcc = Number(acquisitions?.total_mcc_in ?? 0)
+  const acqTotalCost = Number(acquisitions?.total_usdc_cost ?? 0)
+  const acqFirstAt = acquisitions?.first_event_at ?? null
+  const acqEvents = acquisitions?.events ?? []
+  const lastSyncedAt = acquisitions?.last_synced_at ?? null
+  const wallets = mccBalance?.wallets ?? []
 
-  const finalStats: PositionStats = useMemo(
-    () => ({ ...stats, holdings: displayedHoldings }),
-    [stats, displayedHoldings]
+  const stats = useMemo(
+    () => computeStats(balanceMcc, currentPrice, acqTotalMcc, acqTotalCost, acqFirstAt),
+    [balanceMcc, currentPrice, acqTotalMcc, acqTotalCost, acqFirstAt],
   )
 
-  const ogUrl = useMemo(() => buildOgUrl(resolvedOrigin, layout, finalStats), [resolvedOrigin, layout, finalStats])
+  const series = useMemo(
+    () => buildSeries(priceHistory as any, currentPrice, stats.days || 30),
+    [priceHistory, currentPrice, stats.days],
+  )
+
+  const marks = useMemo(
+    () => buildMarks(acqEvents as any[], series, currentPrice),
+    [acqEvents, series, currentPrice],
+  )
+
+  const ogUrl = useMemo(
+    () => buildOgUrl(resolvedOrigin, layout, stats, series, marks),
+    [resolvedOrigin, layout, stats, series, marks],
+  )
 
   useEffect(() => {
     setImgLoaded(false)
     setImgErr(null)
   }, [ogUrl])
 
-  const loading = mccLoading || historyLoading
+  const loading = mccLoading || acqLoading || historyLoading
+  const refreshing = acqRefreshing
 
   const handleSwap = () => {
     setText(prev => pickRandomText(locale, prev))
+  }
+
+  const handleManualRefresh = async () => {
+    setImgErr(null)
+    await Promise.all([refreshMcc(), refreshAcq(true)])
   }
 
   const handleCopyText = async () => {
@@ -206,6 +328,10 @@ export function MicrocosmSharePage({
     if (onNavigate) onNavigate(`${basePath ?? ''}/mcc/mining`)
   }
 
+  const isUp = stats.pnlUsd >= 0
+  const pnlClass = isUp ? 'text-emerald-400' : 'text-red-400'
+  const updatedLabel = lastSyncedAt ? fmtClock(lastSyncedAt) : (loading ? '…' : '—')
+
   return (
     <div className="max-w-7xl mx-auto px-3 py-4 space-y-4 sm:px-6 sm:py-6 sm:space-y-6 font-mono">
       <div>
@@ -219,7 +345,7 @@ export function MicrocosmSharePage({
 
       <TerminalCard filename="share.png">
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setLayout('desktop')}
               className={
@@ -242,17 +368,33 @@ export function MicrocosmSharePage({
             >
               {t('mobile', 'Mobile')}
             </button>
-            <div className="flex-1" />
-            <div className="text-[10px] sm:text-xs text-neutral-500">
+            <div className="flex-1 min-w-[20px]" />
+            <div className="text-[10px] sm:text-xs text-neutral-500 flex items-center gap-2">
+              <span>{t('updatedAt', 'Data:')} {updatedLabel}</span>
+              <button
+                onClick={handleManualRefresh}
+                disabled={refreshing}
+                className={
+                  'px-2 py-1 rounded border text-[10px] sm:text-xs transition-colors ' +
+                  (refreshing
+                    ? 'border-white/10 text-neutral-500 cursor-not-allowed'
+                    : 'border-white/15 text-neutral-300 hover:border-cyan-400/60 hover:text-cyan-300')
+                }
+                title={t('refreshTooltip', 'Re-scan your wallets from chain (slow)')}
+              >
+                {refreshing ? t('refreshing', 'Syncing…') : `↻ ${t('refresh', 'Refresh')}`}
+              </button>
+            </div>
+            <div className="text-[10px] sm:text-xs text-neutral-500 ml-auto">
               {layout === 'desktop' ? '1200×630' : '1080×1920'}
             </div>
           </div>
 
-          {!loading && !finalStats.hasData ? (
+          {!loading && !stats.hasData ? (
             <div className="bg-zinc-950 border border-zinc-800 rounded p-6 text-center space-y-3">
-              <div className="text-base text-neutral-300">{t('emptyTitle', 'No mining records yet')}</div>
+              <div className="text-base text-neutral-300">{t('emptyTitle', 'No MCC position yet')}</div>
               <div className="text-xs text-neutral-500">
-                {t('emptyHint', 'Mine some MCC first and your position card will be generated automatically.')}
+                {t('emptyHint', 'Mine or buy MCC first, then come back to share your card.')}
               </div>
               {onNavigate && (
                 <button
@@ -291,25 +433,54 @@ export function MicrocosmSharePage({
             </div>
           )}
 
-          {finalStats.hasData && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-              <div className="bg-zinc-950 border border-zinc-800 rounded p-2">
-                <div className="text-[10px] text-neutral-500 tracking-wider">{t('statHoldings', 'HOLDINGS')}</div>
-                <div className="text-cyan-400 font-bold mt-0.5">{fmtNum(finalStats.holdings)} MCC</div>
+          {stats.hasData && (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div className="bg-zinc-950 border border-zinc-800 rounded p-2">
+                  <div className="text-[10px] text-neutral-500 tracking-wider">{t('statHoldings', 'HOLDINGS')}</div>
+                  <div className="text-cyan-400 font-bold mt-0.5">{fmtNum(stats.holdings)} MCC</div>
+                </div>
+                <div className="bg-zinc-950 border border-zinc-800 rounded p-2">
+                  <div className="text-[10px] text-neutral-500 tracking-wider">{t('statAvg', 'AVG COST')}</div>
+                  <div className="text-white font-bold mt-0.5">
+                    {stats.avgCost > 0 ? fmtUsd(stats.avgCost, 4) : '—'}
+                  </div>
+                </div>
+                <div className="bg-zinc-950 border border-zinc-800 rounded p-2">
+                  <div className="text-[10px] text-neutral-500 tracking-wider">{t('statPnl', 'P&L')}</div>
+                  <div className={`font-bold mt-0.5 ${pnlClass}`}>
+                    {stats.avgCost > 0 ? fmtUsd(stats.pnlUsd) : '—'}
+                  </div>
+                </div>
+                <div className="bg-zinc-950 border border-zinc-800 rounded p-2">
+                  <div className="text-[10px] text-neutral-500 tracking-wider">{t('statApy', 'APY')}</div>
+                  <div className={`font-bold mt-0.5 ${pnlClass}`}>
+                    {stats.apyPct !== 0 && Number.isFinite(stats.apyPct)
+                      ? `${stats.apyPct >= 0 ? '+' : ''}${stats.apyPct.toFixed(1)}%`
+                      : '—'}
+                  </div>
+                </div>
               </div>
-              <div className="bg-zinc-950 border border-zinc-800 rounded p-2">
-                <div className="text-[10px] text-neutral-500 tracking-wider">{t('statAvg', 'AVG COST')}</div>
-                <div className="text-white font-bold mt-0.5">{fmtUsd(finalStats.avgCost)}</div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div className="bg-zinc-950/60 border border-zinc-800/60 rounded p-2">
+                  <div className="text-[10px] text-neutral-500 tracking-wider">{t('statValue', 'VALUE')}</div>
+                  <div className="text-white font-bold mt-0.5">{fmtUsd(stats.holdings * stats.currentPrice)}</div>
+                </div>
+                <div className="bg-zinc-950/60 border border-zinc-800/60 rounded p-2">
+                  <div className="text-[10px] text-neutral-500 tracking-wider">{t('statDays', 'HOLDING')}</div>
+                  <div className="text-white font-bold mt-0.5">{stats.days || '—'}d</div>
+                </div>
+                <div className="bg-zinc-950/60 border border-zinc-800/60 rounded p-2">
+                  <div className="text-[10px] text-neutral-500 tracking-wider">{t('statWallets', 'WALLETS')}</div>
+                  <div className="text-white font-bold mt-0.5">{wallets.length}</div>
+                </div>
+                <div className="bg-zinc-950/60 border border-zinc-800/60 rounded p-2">
+                  <div className="text-[10px] text-neutral-500 tracking-wider">{t('statEvents', 'ADDS')}</div>
+                  <div className="text-white font-bold mt-0.5">{marks.length}</div>
+                </div>
               </div>
-              <div className="bg-zinc-950 border border-zinc-800 rounded p-2">
-                <div className="text-[10px] text-neutral-500 tracking-wider">{t('statPrice', 'PRICE')}</div>
-                <div className="text-white font-bold mt-0.5">{fmtUsd(finalStats.currentPrice)}</div>
-              </div>
-              <div className="bg-zinc-950 border border-zinc-800 rounded p-2">
-                <div className="text-[10px] text-neutral-500 tracking-wider">{t('statDays', 'HOLDING')}</div>
-                <div className="text-white font-bold mt-0.5">{finalStats.days}d</div>
-              </div>
-            </div>
+            </>
           )}
 
           <div className="space-y-2">
@@ -338,7 +509,7 @@ export function MicrocosmSharePage({
             </button>
             <button
               onClick={handleImageAction}
-              disabled={imgBusy || !!imgErr || (!finalStats.hasData && !loading)}
+              disabled={imgBusy || !!imgErr || (!stats.hasData && !loading)}
               className={
                 'flex-1 min-w-[120px] px-3 py-2 text-xs sm:text-sm rounded transition-colors ' +
                 (imgBusy
