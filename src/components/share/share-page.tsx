@@ -221,7 +221,12 @@ export function MicrocosmSharePage({
   }, [origin])
 
   const balanceMcc = Number(mccBalance?.balance ?? 0)
-  const currentPrice = Number(mccPrice?.price ?? 0)
+  const currentPrice = Number(
+    (mccPrice as any)?.spot_price
+    ?? (mccPrice as any)?.market_price
+    ?? mccPrice?.price
+    ?? 0
+  )
   const acqTotalMcc = Number(acquisitions?.total_mcc_in ?? 0)
   const acqTotalCost = Number(acquisitions?.total_usdc_cost ?? 0)
   const acqFirstAt = acquisitions?.first_event_at ?? null
