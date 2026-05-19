@@ -18,6 +18,9 @@ type Layout = 'desktop' | 'mobile'
 const DEFAULT_ORIGIN = 'https://microcosm.money'
 const SHARE_QR_TARGET = 'https://microcosm.money'
 const MIN_SERIES_POINTS = 8
+const MAX_HISTORY = 10
+const HISTORY_KEY_D = 'microcosm:share:hist:d'
+const HISTORY_KEY_M = 'microcosm:share:hist:m'
 
 function detectIOS(): boolean {
   if (typeof navigator === 'undefined') return false
@@ -189,6 +192,28 @@ function fmtClock(iso: string | null | undefined): string {
   return `${hh}:${mm}`
 }
 
+function loadHistory(layout: Layout): string[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(layout === 'desktop' ? HISTORY_KEY_D : HISTORY_KEY_M)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed.filter((u): u is string => typeof u === 'string').slice(0, MAX_HISTORY) : []
+  } catch {
+    return []
+  }
+}
+
+function saveHistory(layout: Layout, list: string[]) {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(
+      layout === 'desktop' ? HISTORY_KEY_D : HISTORY_KEY_M,
+      JSON.stringify(list.slice(0, MAX_HISTORY)),
+    )
+  } catch {}
+}
+
 export function MicrocosmSharePage({
   basePath,
   onNavigate,
@@ -209,10 +234,25 @@ export function MicrocosmSharePage({
   const [imgLoaded, setImgLoaded] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
 
+  const [historyDesktop, setHistoryDesktop] = useState<string[]>([])
+  const [historyMobile, setHistoryMobile] = useState<string[]>([])
+  const [activeUrl, setActiveUrl] = useState<string | null>(null)
+  const [pendingPush, setPendingPush] = useState(false)
+
   useEffect(() => {
     setIsIOS(detectIOS())
     setText(pickRandomText(locale))
+    setHistoryDesktop(loadHistory('desktop'))
+    setHistoryMobile(loadHistory('mobile'))
   }, [locale])
+
+  const historyForLayout = layout === 'desktop' ? historyDesktop : historyMobile
+
+  useEffect(() => {
+    setActiveUrl(historyForLayout[0] ?? null)
+    setImgLoaded(false)
+    setImgErr(null)
+  }, [layout, historyForLayout.length])
 
   const resolvedOrigin = useMemo(() => {
     if (origin) return origin.replace(/\/$/, '')
@@ -249,26 +289,71 @@ export function MicrocosmSharePage({
     [acqEvents, series, currentPrice],
   )
 
-  const ogUrl = useMemo(
+  const pendingOgUrl = useMemo(
     () => buildOgUrl(resolvedOrigin, layout, stats, series, marks),
     [resolvedOrigin, layout, stats, series, marks],
   )
 
   useEffect(() => {
+    if (!pendingPush) return
+    if (mccLoading || acqLoading || historyLoading || acqRefreshing) return
+    if (!stats.hasData) {
+      setPendingPush(false)
+      return
+    }
+    if (layout === 'desktop') {
+      setHistoryDesktop(prev => {
+        const filtered = prev.filter(u => u !== pendingOgUrl)
+        const next = [pendingOgUrl, ...filtered].slice(0, MAX_HISTORY)
+        saveHistory('desktop', next)
+        return next
+      })
+    } else {
+      setHistoryMobile(prev => {
+        const filtered = prev.filter(u => u !== pendingOgUrl)
+        const next = [pendingOgUrl, ...filtered].slice(0, MAX_HISTORY)
+        saveHistory('mobile', next)
+        return next
+      })
+    }
+    setActiveUrl(pendingOgUrl)
     setImgLoaded(false)
     setImgErr(null)
-  }, [ogUrl])
+    setPendingPush(false)
+  }, [pendingPush, mccLoading, acqLoading, historyLoading, acqRefreshing, stats.hasData, pendingOgUrl, layout])
 
-  const loading = mccLoading || acqLoading || historyLoading
-  const refreshing = acqRefreshing
+  const dataLoading = mccLoading || acqLoading || historyLoading
+  const refreshing = acqRefreshing || pendingPush
 
   const handleSwap = () => {
     setText(prev => pickRandomText(locale, prev))
   }
 
-  const handleManualRefresh = async () => {
+  const handleGenerate = async () => {
     setImgErr(null)
-    await Promise.all([refreshMcc(), refreshAcq(true)])
+    setPendingPush(true)
+    try {
+      await Promise.all([refreshMcc(), refreshAcq(true)])
+    } catch (e) {
+      setPendingPush(false)
+    }
+  }
+
+  const handleSelectHistory = (url: string) => {
+    setActiveUrl(url)
+    setImgLoaded(false)
+    setImgErr(null)
+  }
+
+  const handleClearHistory = () => {
+    if (layout === 'desktop') {
+      setHistoryDesktop([])
+      saveHistory('desktop', [])
+    } else {
+      setHistoryMobile([])
+      saveHistory('mobile', [])
+    }
+    setActiveUrl(null)
   }
 
   const handleCopyText = async () => {
@@ -283,9 +368,10 @@ export function MicrocosmSharePage({
 
   const handleImageAction = async () => {
     setImgErr(null)
+    if (!activeUrl) return
     if (isIOS) {
       const a = document.createElement('a')
-      a.href = ogUrl
+      a.href = activeUrl
       a.target = '_blank'
       a.rel = 'noopener noreferrer'
       document.body.appendChild(a)
@@ -295,7 +381,7 @@ export function MicrocosmSharePage({
     }
     setImgBusy(true)
     try {
-      const res = await fetch(ogUrl, { cache: 'no-store' })
+      const res = await fetch(activeUrl, { cache: 'no-store' })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const blob = await res.blob()
       const supportsClipboardItem = typeof window !== 'undefined' && typeof (window as any).ClipboardItem !== 'undefined'
@@ -325,7 +411,7 @@ export function MicrocosmSharePage({
     ? t('saveImage', 'Save Image')
     : (imgBusy ? t('processing', 'Processing…') : (imgCopied ? t('copied', 'Copied!') : t('copyImage', 'Copy Image')))
 
-  const aspectRatio = layout === 'mobile' ? '1080 / 1920' : '1200 / 630'
+  const aspectRatio = layout === 'mobile' ? '720 / 1280' : '1200 / 630'
   const imageWrapperMaxWidth = layout === 'mobile' ? 'min(380px, 100%)' : '100%'
 
   const goMining = () => {
@@ -334,7 +420,7 @@ export function MicrocosmSharePage({
 
   const isUp = stats.pnlUsd >= 0
   const pnlClass = isUp ? 'text-emerald-400' : 'text-red-400'
-  const updatedLabel = lastSyncedAt ? fmtClock(lastSyncedAt) : (loading ? '…' : '—')
+  const updatedLabel = lastSyncedAt ? fmtClock(lastSyncedAt) : (dataLoading ? '…' : '—')
 
   return (
     <div className="max-w-7xl mx-auto px-3 py-4 space-y-4 sm:px-6 sm:py-6 sm:space-y-6 font-mono">
@@ -373,28 +459,15 @@ export function MicrocosmSharePage({
               {t('mobile', 'Mobile')}
             </button>
             <div className="flex-1 min-w-[20px]" />
-            <div className="text-[10px] sm:text-xs text-neutral-500 flex items-center gap-2">
-              <span>{t('updatedAt', 'Data:')} {updatedLabel}</span>
-              <button
-                onClick={handleManualRefresh}
-                disabled={refreshing}
-                className={
-                  'px-2 py-1 rounded border text-[10px] sm:text-xs transition-colors ' +
-                  (refreshing
-                    ? 'border-white/10 text-neutral-500 cursor-not-allowed'
-                    : 'border-white/15 text-neutral-300 hover:border-cyan-400/60 hover:text-cyan-300')
-                }
-                title={t('refreshTooltip', 'Re-scan your wallets from chain (slow)')}
-              >
-                {refreshing ? t('refreshing', 'Syncing…') : `↻ ${t('refresh', 'Refresh')}`}
-              </button>
+            <div className="text-[10px] sm:text-xs text-neutral-500">
+              {t('updatedAt', 'Data:')} {updatedLabel}
             </div>
             <div className="text-[10px] sm:text-xs text-neutral-500 ml-auto">
-              {layout === 'desktop' ? '1200×630' : '1080×1920'}
+              {layout === 'desktop' ? '1200×630' : '720×1280'}
             </div>
           </div>
 
-          {!loading && !stats.hasData ? (
+          {!dataLoading && !stats.hasData ? (
             <div className="bg-zinc-950 border border-zinc-800 rounded p-6 text-center space-y-3">
               <div className="text-base text-neutral-300">{t('emptyTitle', 'No MCC position yet')}</div>
               <div className="text-xs text-neutral-500">
@@ -419,20 +492,106 @@ export function MicrocosmSharePage({
                   position: 'relative',
                 }}
               >
-                {!imgLoaded && !imgErr && (
-                  <div className="absolute inset-0 flex items-center justify-center text-xs text-neutral-500">
-                    {t('renderingImage', 'Rendering image…')}
+                {activeUrl ? (
+                  <>
+                    {!imgLoaded && !imgErr && (
+                      <div className="absolute inset-0 flex items-center justify-center text-xs text-neutral-500">
+                        {t('renderingImage', 'Rendering image…')}
+                      </div>
+                    )}
+                    <img
+                      key={activeUrl}
+                      src={activeUrl}
+                      alt={t('alt', 'My MCC position card')}
+                      loading="lazy"
+                      onLoad={() => setImgLoaded(true)}
+                      onError={() => setImgErr(t('imgLoadFail', 'Image failed to load'))}
+                      style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }}
+                    />
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4 text-center">
+                    <div className="text-sm sm:text-base text-neutral-300">
+                      {t('clickToGeneratePrompt', 'Click the button below to render your position card')}
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-neutral-500 max-w-xs">
+                      {t('clickToGenerateHint', 'Image only renders on demand. Last 10 cards are kept in history.')}
+                    </div>
+                    <button
+                      onClick={handleGenerate}
+                      disabled={refreshing || dataLoading}
+                      className={
+                        'mt-2 px-5 py-2 text-xs sm:text-sm rounded border transition-colors ' +
+                        (refreshing || dataLoading
+                          ? 'bg-cyan-500/10 border-cyan-400/30 text-cyan-300/60 cursor-not-allowed'
+                          : 'bg-cyan-500/20 border-cyan-400/60 text-cyan-300 hover:bg-cyan-500/30')
+                      }
+                    >
+                      {refreshing ? t('generating', 'Generating…') : (dataLoading ? t('loading', 'Loading data…') : `↻ ${t('generateNow', 'Generate Image')}`)}
+                    </button>
                   </div>
                 )}
-                <img
-                  key={ogUrl}
-                  src={ogUrl}
-                  alt={t('alt', 'My MCC position card')}
-                  loading="lazy"
-                  onLoad={() => setImgLoaded(true)}
-                  onError={() => setImgErr(t('imgLoadFail', 'Image failed to load'))}
-                  style={{ width: '100%', height: '100%', display: 'block', objectFit: 'contain' }}
-                />
+              </div>
+            </div>
+          )}
+
+          {stats.hasData && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={handleGenerate}
+                disabled={refreshing || dataLoading}
+                className={
+                  'px-4 py-2 text-xs sm:text-sm rounded border transition-colors ' +
+                  (refreshing || dataLoading
+                    ? 'bg-cyan-500/10 border-cyan-400/30 text-cyan-300/60 cursor-not-allowed'
+                    : 'bg-cyan-500/20 border-cyan-400/60 text-cyan-300 hover:bg-cyan-500/30')
+                }
+                title={t('refreshTooltip', 'Re-scan your wallets and render a new image')}
+              >
+                {refreshing ? t('generating', 'Generating…') : `↻ ${t('generateNow', 'Generate Image')}`}
+              </button>
+              {historyForLayout.length > 0 && (
+                <span className="text-[10px] sm:text-xs text-neutral-500">
+                  {t('historyCount', 'History: {n}/{max}', { n: historyForLayout.length, max: MAX_HISTORY })}
+                </span>
+              )}
+              {historyForLayout.length > 0 && (
+                <button
+                  onClick={handleClearHistory}
+                  className="ml-auto text-[10px] sm:text-xs text-neutral-500 hover:text-red-400 transition-colors"
+                >
+                  {t('clearHistory', 'Clear history')}
+                </button>
+              )}
+            </div>
+          )}
+
+          {historyForLayout.length > 0 && (
+            <div className="space-y-2">
+              <div className="text-[10px] sm:text-xs text-neutral-500 tracking-wider">
+                {t('historyTitle', 'RECENT GENERATIONS')}
+              </div>
+              <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5">
+                {historyForLayout.map((url, i) => (
+                  <button
+                    key={url + i}
+                    onClick={() => handleSelectHistory(url)}
+                    className={
+                      'aspect-square rounded overflow-hidden border transition-all ' +
+                      (url === activeUrl
+                        ? 'border-cyan-400 ring-1 ring-cyan-400/50'
+                        : 'border-zinc-800 hover:border-cyan-400/40')
+                    }
+                    title={`#${i + 1}`}
+                  >
+                    <img
+                      src={url}
+                      alt={`history-${i}`}
+                      loading="lazy"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -513,10 +672,10 @@ export function MicrocosmSharePage({
             </button>
             <button
               onClick={handleImageAction}
-              disabled={imgBusy || !!imgErr || (!stats.hasData && !loading)}
+              disabled={imgBusy || !!imgErr || !activeUrl}
               className={
                 'flex-1 min-w-[120px] px-3 py-2 text-xs sm:text-sm rounded transition-colors ' +
-                (imgBusy
+                (imgBusy || !activeUrl
                   ? 'bg-cyan-500/10 border border-cyan-400/30 text-cyan-300/60 cursor-not-allowed'
                   : 'bg-cyan-500/20 border border-cyan-400/60 text-cyan-300 hover:bg-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed')
               }
