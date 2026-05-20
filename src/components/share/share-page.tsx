@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useMCC, useMCCAcquisitions, usePriceHistory } from '@microcosmmoney/auth-react'
 import { TerminalCard } from '../terminal'
 import { useTranslations } from '../../i18n-context'
-import { pickRandomText, type ShareLocale } from './share-texts'
+
+export type ShareLocale = 'en' | 'zh' | 'ja' | 'ko'
 
 export interface MicrocosmSharePageProps {
   basePath?: string
@@ -241,9 +242,13 @@ export function MicrocosmSharePage({
 
   useEffect(() => {
     setIsIOS(detectIOS())
-    setText(pickRandomText(locale))
     setHistoryDesktop(loadHistory('desktop'))
     setHistoryMobile(loadHistory('mobile'))
+    let cancelled = false
+    import('./share-texts').then(mod => {
+      if (!cancelled) setText(mod.pickRandomText(locale))
+    }).catch(() => {})
+    return () => { cancelled = true }
   }, [locale])
 
   const historyForLayout = layout === 'desktop' ? historyDesktop : historyMobile
@@ -326,7 +331,9 @@ export function MicrocosmSharePage({
   const refreshing = acqRefreshing || pendingPush
 
   const handleSwap = () => {
-    setText(prev => pickRandomText(locale, prev))
+    import('./share-texts').then(mod => {
+      setText(prev => mod.pickRandomText(locale, prev))
+    }).catch(() => {})
   }
 
   const handleGenerate = async () => {
