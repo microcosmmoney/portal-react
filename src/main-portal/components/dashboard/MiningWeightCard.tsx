@@ -115,7 +115,7 @@ export default function MiningWeightCard() {
           <div className="bg-neutral-800 rounded p-2 sm:p-3">
             <div className="text-neutral-400 text-[10px] sm:text-xs font-mono tracking-wider mb-2 sm:mb-3">ecosystem_distribution (\u4f34\u751f\u77ff)</div>
             <p className="text-[10px] text-neutral-500 font-mono mb-2 sm:mb-3 hidden xs:block">
-              \u6bcf\u6b21\u6316\u77ff\u540c\u6b65\u8fdb\u884c\u4f34\u751f\u77ff，\u81ea\u52a8\u6ce8\u5165\u9886\u5730\u751f\u6001
+              \u6bcf\u6b21\u6316\u77ff\u540c\u6b65\u8fdb\u884c\u4f34\u751f\u77ff\uff0c\u81ea\u52a8\u6ce8\u5165\u9886\u5730\u751f\u6001
             </p>
 
             <div className="space-y-2">

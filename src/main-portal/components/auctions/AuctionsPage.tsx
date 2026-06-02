@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { useWallet } from '../../contexts/WalletContext'
-import { getActiveAuctions, getMyBids, getAuctionHistory, placeBid, createAuction, refundDeposit } from '../../lib/api-service'
+import { getActiveAuctions, getMyBids, getAuctionHistory, placeBid, createAuction } from '../../lib/api-service'
 import type { Auction, Bid, UnitType } from '../../lib/types/api'
 import { Card, CardContent } from '../ui/card'
 import { Badge } from '../ui/badge'
@@ -152,14 +152,6 @@ export default function AuctionsPage() {
         setCreateForm({ unit_id: '', unit_type: 'station', auction_type: 'first', starting_price: '', reserve_price: '', bid_increment: '', end_time: '' })
       } else throw new Error(response.error || t('createAuctionFailed'))
     } catch (error) { toast.error(error instanceof Error ? error.message : t('createAuctionFailed')) }
-  }
-
-  const handleRefundDeposit = async (bid: Bid) => {
-    try {
-      const response = await refundDeposit(bid.bid_id)
-      if (response.success) { toast.success(t('depositRefunded')); refreshBalance(); loadMyBids() }
-      else throw new Error(response.error || t('refundFailed'))
-    } catch (error) { toast.error(error instanceof Error ? error.message : t('refundFailed')) }
   }
 
   if (loading) return (
@@ -415,16 +407,6 @@ export default function AuctionsPage() {
                       </div>
                       <div className="flex items-center gap-3">
                         <FormattedDateTime dateTime={bid.created_at} className="text-neutral-500 text-xs font-mono" />
-                        {(bid.status === 'lost' || bid.status === 'outbid') && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleRefundDeposit(bid)}
-                            className="border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent text-xs"
-                          >
-                            {t('refund')}
-                          </Button>
-                        )}
                       </div>
                     </div>
                   )

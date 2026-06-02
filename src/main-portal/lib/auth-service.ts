@@ -75,7 +75,7 @@ export const signInWithEmail = async (email: string, password: string): Promise<
   const data = await response.json();
   if (!data.success) {
     if (data.error === 'password_not_set') {
-      throw new Error('\u7cfb\u7edf\u5df2\u5347\u7ea7，\u8bf7\u901a\u8fc7\u90ae\u4ef6\u91cd\u7f6e\u5bc6\u7801\u540e\u767b\u5f55。');
+      throw new Error('\u7cfb\u7edf\u5df2\u5347\u7ea7\uff0c\u8bf7\u901a\u8fc7\u90ae\u4ef6\u91cd\u7f6e\u5bc6\u7801\u540e\u767b\u5f55。');
     }
     throw new Error(data.error || '\u767b\u5f55\u5931\u8d25');
   }
@@ -203,7 +203,7 @@ export const handleAuthFailure = async (status: number) => {
   if (status !== 401 && status !== 403) return;
   if (isForceLoggingOut) return;
   isForceLoggingOut = true;
-  console.warn(`[Auth] \u670d\u52a1\u7aef\u8fd4\u56de ${status}，\u5f3a\u5236\u767b\u51fa`);
+  console.warn(`[Auth] \u670d\u52a1\u7aef\u8fd4\u56de ${status}\uff0c\u5f3a\u5236\u767b\u51fa`);
   clearSessionToken();
   clearAuthFlag();
   window.location.href = `${getLocalePrefix()}/login`;
@@ -351,5 +351,4 @@ export const get2FAStatus = async () => {
 
 // \u517c\u5bb9\u65e7\u4ee3\u7801\u5f15\u7528
 export const isNativeAuth = () => true;
-export const sendEmailVerification = async (): Promise<void> => {};
 export const getEmailVerificationStatus = (): boolean => false;

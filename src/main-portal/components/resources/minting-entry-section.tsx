@@ -87,10 +87,10 @@ export function MintingEntrySection() {
           </h2>
           <div className="max-w-3xl mx-auto space-y-2">
             <p className="font-mono text-sm sm:text-base text-neutral-400 text-balance">
-              \u57fa\u4e8e X402 \u534f\u8bae\u7684\u65e0\u9700\u767b\u5f55\u94f8\u9020 — \u8fde\u63a5\u94b1\u5305\u5373\u53ef\u94f8\u9020，\u94fe\u4e0a\u76f4\u63a5\u7ed3\u7b97
+              \u57fa\u4e8e X402 \u534f\u8bae\u7684\u65e0\u9700\u767b\u5f55\u94f8\u9020 — \u8fde\u63a5\u94b1\u5305\u5373\u53ef\u94f8\u9020\uff0c\u94fe\u4e0a\u76f4\u63a5\u7ed3\u7b97
             </p>
             <p className="font-mono text-xs sm:text-sm text-neutral-500 text-balance">
-              \u9996\u6b21\u94f8\u9020\u5c06\u81ea\u52a8\u9884\u6ce8\u518c\u4e3a\u5e73\u53f0\u7528\u6237（\u63a2\u77ff\u8005\u7ea7\u522b），\u540e\u7eed\u767b\u5f55\u65f6\u7ed1\u5b9a\u540c\u4e00\u94b1\u5305\u5373\u53ef\u7ee7\u627f\u8eab\u4efd\u4e0e\u8d44\u4ea7
+              \u9996\u6b21\u94f8\u9020\u5c06\u81ea\u52a8\u9884\u6ce8\u518c\u4e3a\u5e73\u53f0\u7528\u6237\uff08\u63a2\u77ff\u8005\u7ea7\u522b\uff09\uff0c\u540e\u7eed\u767b\u5f55\u65f6\u7ed1\u5b9a\u540c\u4e00\u94b1\u5305\u5373\u53ef\u7ee7\u627f\u8eab\u4efd\u4e0e\u8d44\u4ea7
             </p>
           </div>
         </header>
@@ -173,7 +173,7 @@ export function MintingEntrySection() {
                 </div>
               </div>
               <button
-                onClick={() => alert('MCD \u6682\u672a\u5f00\u653e\u516c\u5171\u94f8\u9020。\n\nMCD \u76ee\u524d\u901a\u8fc7\u9886\u5730\u91d1\u5e93\u6bcf\u65e5\u514d\u8d39\u53d1\u653e\u7ed9\u77ff\u5de5。\n\u52a0\u5165\u9886\u5730\u6210\u4e3a\u77ff\u5de5（Miner），\u5373\u53ef\u6bcf\u5929\u514d\u8d39\u83b7\u5f97 MCD \u5206\u914d。')}
+                onClick={() => alert('MCD \u6682\u672a\u5f00\u653e\u516c\u5171\u94f8\u9020。\n\nMCD \u76ee\u524d\u901a\u8fc7\u9886\u5730\u91d1\u5e93\u6bcf\u65e5\u514d\u8d39\u53d1\u653e\u7ed9\u77ff\u5de5。\n\u52a0\u5165\u9886\u5730\u6210\u4e3a\u77ff\u5de5\uff08Miner\uff09\uff0c\u5373\u53ef\u6bcf\u5929\u514d\u8d39\u83b7\u5f97 MCD \u5206\u914d。')}
                 className="w-full py-3 rounded-lg font-mono text-sm font-medium transition-colors duration-200 bg-neutral-700/50 text-neutral-500 border border-neutral-600/40 cursor-pointer hover:bg-neutral-700/70"
               >
                 \u6682\u672a\u5f00\u653e
@@ -207,7 +207,7 @@ export function MintingEntrySection() {
                   <div>
                     <p className="font-mono text-xs text-neutral-300 font-medium">\u94b1\u5305\u76f4\u8fde</p>
                     <p className="font-mono text-[10px] text-neutral-500 mt-0.5">
-                      \u8fde\u63a5 Solana \u94b1\u5305\u5373\u53ef\u94f8\u9020，\u94f8\u9020\u8bb0\u5f55\u81ea\u52a8\u4fdd\u5b58
+                      \u8fde\u63a5 Solana \u94b1\u5305\u5373\u53ef\u94f8\u9020\uff0c\u94f8\u9020\u8bb0\u5f55\u81ea\u52a8\u4fdd\u5b58
                     </p>
                   </div>
                 </div>
@@ -229,7 +229,7 @@ export function MintingEntrySection() {
                   <div>
                     <p className="font-mono text-xs text-neutral-300 font-medium">\u8eab\u4efd\u7ee7\u627f</p>
                     <p className="font-mono text-[10px] text-neutral-500 mt-0.5">
-                      \u540e\u7eed\u767b\u5f55\u6ce8\u518c\u65f6\u7ed1\u5b9a\u540c\u4e00\u94b1\u5305，\u7ee7\u627f\u8eab\u4efd\u4e0e\u8d44\u4ea7
+                      \u540e\u7eed\u767b\u5f55\u6ce8\u518c\u65f6\u7ed1\u5b9a\u540c\u4e00\u94b1\u5305\uff0c\u7ee7\u627f\u8eab\u4efd\u4e0e\u8d44\u4ea7
                     </p>
                   </div>
                 </div>
@@ -294,7 +294,7 @@ export function MintingEntrySection() {
 
               {!connected && (
                 <p className="text-xs text-neutral-500 text-center">
-                  \u70b9\u51fb\u4e0a\u65b9\u6309\u94ae\u9009\u62e9\u94b1\u5305，\u5728\u5f39\u51fa\u7a97\u53e3\u4e2d\u786e\u8ba4\u8fde\u63a5
+                  \u70b9\u51fb\u4e0a\u65b9\u6309\u94ae\u9009\u62e9\u94b1\u5305\uff0c\u5728\u5f39\u51fa\u7a97\u53e3\u4e2d\u786e\u8ba4\u8fde\u63a5
                 </p>
               )}
             </div>

@@ -5,7 +5,7 @@ import { Card, CardContent } from "../ui/card"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
 import { useAuth } from "../../hooks/useAuth"
-import { onAuthChange, getCurrentUserToken, sendEmailVerification, checkEmailVerified, resendVerificationEmail, requestEmailChange, verifyEmailChange } from "../../lib/auth-service"
+import { onAuthChange, getCurrentUserToken, checkEmailVerified, resendVerificationEmail, requestEmailChange, verifyEmailChange } from "../../lib/auth-service"
 import { getUserLevelStatus } from "../../lib/api/services"
 import type { UserLevelStatus } from "../../lib/types/api"
 import { toast } from "sonner"
@@ -181,7 +181,7 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <div className="text-cyan-400 font-medium">unverified</div>
                 <div className="flex flex-wrap gap-2">
-                  <Button onClick={async () => { setSendingVerification(true); try { await sendEmailVerification(); toast.success("verification email sent", { description: "check your inbox (and spam folder)" }) } catch (e) { toast.error("send failed", { description: e instanceof Error ? e.message : "send failed" }) } finally { setSendingVerification(false) } }} disabled={sendingVerification} variant="outline" size="sm" className="border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent text-xs">{sendingVerification ? "sending..." : "send email"}</Button>
+                  <Button onClick={async () => { setSendingVerification(true); try { await resendVerificationEmail(); toast.success("verification email sent", { description: "check your inbox (and spam folder)" }) } catch (e) { toast.error("send failed", { description: e instanceof Error ? e.message : "send failed" }) } finally { setSendingVerification(false) } }} disabled={sendingVerification} variant="outline" size="sm" className="border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent text-xs">{sendingVerification ? "sending..." : "send email"}</Button>
                   <Button onClick={async () => { setCheckingVerification(true); try { const v = await checkEmailVerified(); if (v) { setEmailVerified(true); toast.success("email verified!") } else toast.info("email not verified yet", { description: "click the link in the email" }) } catch { toast.error("check failed", { description: "please try again" }) } finally { setCheckingVerification(false) } }} disabled={checkingVerification} variant="outline" size="sm" className="border-neutral-700 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300 bg-transparent text-xs">{checkingVerification ? "checking..." : "check"}</Button>
                   <Button onClick={() => window.location.href = '#change-email'} variant="outline" size="sm" className="border-cyan-800 text-cyan-500 hover:bg-cyan-950 hover:text-cyan-300 bg-transparent text-xs">change email</Button>
                 </div>

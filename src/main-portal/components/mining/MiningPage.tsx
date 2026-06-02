@@ -98,8 +98,8 @@ export default function MCCMiningPage() {
   const { connected, publicKey } = useSolanaWallet()
   const { user: authUser, userInfo, loading: authLoading } = useAuth()
 
-  // \u76f4\u63a5\u4ece useAuth \u7f13\u5b58\u83b7\u53d6 userDetails，\u4e0d\u518d\u91cd\u590d\u8c03\u7528 API
-  // \u7528 uid \u505a\u7a33\u5b9a\u6027\u5b88\u536b：uid \u4e0d\u53d8\u65f6\u4e0d\u91cd\u5efa userDetails，\u907f\u514d\u540e\u53f0\u5237\u65b0\u89e6\u53d1\u8fde\u9501\u91cd\u8f7d
+  // \u76f4\u63a5\u4ece useAuth \u7f13\u5b58\u83b7\u53d6 userDetails\uff0c\u4e0d\u518d\u91cd\u590d\u8c03\u7528 API
+  // \u7528 uid \u505a\u7a33\u5b9a\u6027\u5b88\u536b\uff1auid \u4e0d\u53d8\u65f6\u4e0d\u91cd\u5efa userDetails\uff0c\u907f\u514d\u540e\u53f0\u5237\u65b0\u89e6\u53d1\u8fde\u9501\u91cd\u8f7d
   const prevUidRef = React.useRef<string | null>(null)
   useEffect(() => {
     if (authLoading) return
@@ -117,7 +117,7 @@ export default function MCCMiningPage() {
     }
   }, [authUser, userInfo, authLoading, router])
 
-  // 4 \u4e2a\u6570\u636e\u52a0\u8f7d\u5168\u90e8\u5e76\u884c — \u4ec5\u9996\u6b21\u52a0\u8f7d，\u624b\u52a8\u5237\u65b0\u8d70 refreshAll()
+  // 4 \u4e2a\u6570\u636e\u52a0\u8f7d\u5168\u90e8\u5e76\u884c — \u4ec5\u9996\u6b21\u52a0\u8f7d\uff0c\u624b\u52a8\u5237\u65b0\u8d70 refreshAll()
   const dataLoadedRef = React.useRef(false)
   useEffect(() => {
     if (userDetails && !dataLoadedRef.current) {

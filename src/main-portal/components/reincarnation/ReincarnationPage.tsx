@@ -1,7 +1,7 @@
 // AI-generated · AI-managed · AI-maintained
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import {
   RefreshCw, ArrowDownUp, Wallet, TrendingUp,
   ExternalLink, Copy, Check, DollarSign,
@@ -14,14 +14,8 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip'
 import { toast } from 'sonner'
 import { STABLECOIN_CONFIG } from '../../lib/solana/reincarnation-client'
 import { useTranslations } from 'next-intl'
-
-interface PoolStatus {
-  usdc_balance: string
-  usdt_balance: string
-  total_buyback: string
-  total_mcc_bought: string
-  pool_address: string
-}
+import { useMCCPrice } from '../../contexts/MCCPriceContext'
+import { useEcosystemOperations } from '@microcosmmoney/auth-react'
 
 const formatNumber = (num: number, decimals = 2) => {
   if (num >= 1000000) {
@@ -62,47 +56,12 @@ function InfoTip({ children }: { children: React.ReactNode }) {
 
 export default function ActiveBuybackPage() {
   const t = useTranslations('reincarnationDash')
-  const [loading, setLoading] = useState(true)
-  const [poolStatus, setPoolStatus] = useState<PoolStatus | null>(null)
-  const [basePrice, setBasePrice] = useState<number>(0)
-
-  const loadPoolStatus = useCallback(async () => {
-    try {
-      const response = await fetch('/api/buyback/pool')
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success) {
-          setPoolStatus(data.data)
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load pool status:', error)
-    }
-  }, [])
-
-  const loadPrice = useCallback(async () => {
-    try {
-      const response = await fetch('/api/buyback/price')
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success) {
-          setBasePrice(parseFloat(data.data.base_price) || 0)
-        }
-      }
-    } catch {}
-  }, [])
-
-  useEffect(() => {
-    const loadAll = async () => {
-      setLoading(true)
-      await Promise.all([loadPoolStatus(), loadPrice()])
-      setLoading(false)
-    }
-    loadAll()
-  }, [loadPoolStatus, loadPrice])
+  const ticker = useMCCPrice()
+  const { data: ops, loading, refresh } = useEcosystemOperations({ refetchInterval: 60_000 })
+  const basePrice = ticker.basePrice ?? ticker.price ?? 0
 
   const handleRefresh = async () => {
-    await Promise.all([loadPoolStatus(), loadPrice()])
+    await refresh()
     toast.success(t('refreshed'))
   }
 
@@ -121,11 +80,11 @@ export default function ActiveBuybackPage() {
     )
   }
 
-  const usdtBalance = poolStatus ? parseFloat(poolStatus.usdt_balance) : 0
-  const usdcBalance = poolStatus ? parseFloat(poolStatus.usdc_balance) : 0
-  const totalPool = usdtBalance + usdcBalance
-  const totalMarketMade = poolStatus ? parseFloat(poolStatus.total_buyback) : 0
-  const totalMccBought = poolStatus ? parseFloat(poolStatus.total_mcc_bought) : 0
+  const usdcBalance = ops?.buyback?.pool_usd_balance ?? 0
+  const usdtBalance = 0
+  const totalPool = ops?.buyback?.pool_usd_balance ?? 0
+  const totalMarketMade = ops?.buyback?.total_usd ?? 0
+  const totalMccBought = ops?.buyback?.total_mcc ?? 0
 
   return (
     <div className="max-w-7xl mx-auto px-3 py-4 space-y-3 xs:px-4 xs:space-y-4 sm:px-6 sm:py-6 sm:space-y-6">
@@ -239,12 +198,12 @@ export default function ActiveBuybackPage() {
                 <div>
                   <div className="text-xs text-neutral-400 tracking-wider mb-1">{t('marketMakingPool')}</div>
                   <code className="text-sm font-mono text-cyan-400">
-                    {poolStatus?.pool_address || 'REDEh89TzpwCtoWQuuNPtxskrVoUDQgowR7e7sZpWj9'}
+                    {'REDEh89TzpwCtoWQuuNPtxskrVoUDQgowR7e7sZpWj9'}
                   </code>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CopyButton text={poolStatus?.pool_address || 'REDEh89TzpwCtoWQuuNPtxskrVoUDQgowR7e7sZpWj9'} copiedText={t('copied')} />
-                  <a href={`https://solscan.io/account/${poolStatus?.pool_address || 'REDEh89TzpwCtoWQuuNPtxskrVoUDQgowR7e7sZpWj9'}`} target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-white">
+                  <CopyButton text={'REDEh89TzpwCtoWQuuNPtxskrVoUDQgowR7e7sZpWj9'} copiedText={t('copied')} />
+                  <a href={`https://solscan.io/account/${'REDEh89TzpwCtoWQuuNPtxskrVoUDQgowR7e7sZpWj9'}`} target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-white">
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 </div>

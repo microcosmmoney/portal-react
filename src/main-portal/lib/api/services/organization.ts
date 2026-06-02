@@ -37,18 +37,18 @@ export const updateTerritoryName = (unitId: string, newName: string, force?: boo
 export const getUnitMembers = (unitId: string): Promise<APIResponse<Member[]>> => fetchApi(`/organization-service/units/${unitId}/members`)
 
 export const getActiveAuctions = async (): Promise<APIResponse<Auction[]>> => {
-  const response = await fetchApi('/organization-service/auctions/active') as APIResponse<Auction[]> & { auctions?: Auction[] }
+  const response = await fetchApi('/organization-service/auctions') as APIResponse<Auction[]> & { auctions?: Auction[] }
   if (response.auctions) return { success: response.success, data: response.auctions, message: response.message }
   return response
 }
 
-export const getAuctionDetails = (auctionId: number): Promise<APIResponse<Auction>> => fetchApi(`/organization-service/auctions/${auctionId}`)
+export const getAuctionDetails = (auctionId: number): Promise<APIResponse<Auction>> => fetchApi(`/organization-service/auction/${auctionId}`)
 
 export const createAuction = (auctionData: { unit_id: string; auction_type: 'first' | 'second'; starting_price: number; duration_hours?: number; end_time?: string; reserve_price?: number; bid_increment?: number }): Promise<APIResponse<Auction>> =>
   fetchApi('/organization-service/auctions/create', { method: 'POST', body: JSON.stringify(auctionData) })
 
 export const placeBid = (bidData: PlaceBidRequest): Promise<APIResponse<Bid>> =>
-  fetchApi('/organization-service/auctions/bid', { method: 'POST', body: JSON.stringify(bidData) })
+  fetchApi(`/organization-service/auction/${bidData.auction_id}/bid`, { method: 'POST', body: JSON.stringify({ amount: bidData.bid_amount }) })
 
 export const endAuction = (auctionId: number): Promise<APIResponse<Auction>> =>
   fetchApi(`/organization-service/auctions/${auctionId}/end`, { method: 'POST' })
@@ -63,7 +63,7 @@ export const getAuctionHistory = (params?: AuctionHistoryParams): Promise<APIRes
 }
 
 export const getMyBids = async (): Promise<APIResponse<Bid[]>> => {
-  const response = await fetchApi('/organization-service/auctions/my-bids') as APIResponse<Bid[]> & { bids?: Bid[] }
+  const response = await fetchApi('/organization-service/auction/my-bids') as APIResponse<Bid[]> & { bids?: Bid[] }
   if (response.bids) return { success: response.success, data: response.bids, message: response.message }
   return response
 }

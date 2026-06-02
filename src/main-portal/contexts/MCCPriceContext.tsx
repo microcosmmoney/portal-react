@@ -1,7 +1,7 @@
 // AI-generated · AI-managed · AI-maintained
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react'
 
 const POLL_INTERVAL = 15_000 // 15 seconds
 
@@ -69,12 +69,21 @@ export function MCCPriceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchTicker()
-    const interval = setInterval(fetchTicker, POLL_INTERVAL)
-    return () => clearInterval(interval)
+    const interval = setInterval(() => {
+      if (typeof document === 'undefined' || document.visibilityState === 'visible') fetchTicker()
+    }, POLL_INTERVAL)
+    const onVis = () => { if (document.visibilityState === 'visible') fetchTicker() }
+    if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVis)
+    return () => {
+      clearInterval(interval)
+      if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVis)
+    }
   }, [fetchTicker])
 
+  const value = useMemo(() => ({ ...data, loading, refresh: fetchTicker }), [data, loading, fetchTicker])
+
   return (
-    <MCCPriceContext.Provider value={{ ...data, loading, refresh: fetchTicker }}>
+    <MCCPriceContext.Provider value={value}>
       {children}
     </MCCPriceContext.Provider>
   )

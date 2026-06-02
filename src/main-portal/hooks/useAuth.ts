@@ -1,5 +1,5 @@
 // AI-generated · AI-managed · AI-maintained
-// Native Auth Hook — \u540c\u6b65\u521d\u59cb\u5316 + \u7f13\u5b58，\u5237\u65b0\u65e0\u95ea\u70c1
+// Native Auth Hook — \u540c\u6b65\u521d\u59cb\u5316 + \u7f13\u5b58\uff0c\u5237\u65b0\u65e0\u95ea\u70c1
 import { useState, useEffect, useCallback } from 'react';
 import {
   setAuthFlag, clearAuthFlag, getSessionToken, getNativeUid,
@@ -33,7 +33,7 @@ const ROLE_HIERARCHY: Record<UserRole, UserRole[]> = {
   'user': ['user']
 };
 
-// ── \u7f13\u5b58\u5c42：sessionStorage \u540c\u6b65\u8bfb\u5199 ──
+// ── \u7f13\u5b58\u5c42\uff1asessionStorage \u540c\u6b65\u8bfb\u5199 ──
 
 const USER_INFO_CACHE_KEY = 'mc_user_info';
 
@@ -53,7 +53,7 @@ function clearCachedUserInfo() {
   try { sessionStorage.removeItem(USER_INFO_CACHE_KEY); } catch {}
 }
 
-// ── \u540c\u6b65\u521d\u59cb\u5316：\u7b2c\u4e00\u5e27\u5c31\u786e\u5b9a\u7528\u6237\u72b6\u6001 ──
+// ── \u540c\u6b65\u521d\u59cb\u5316\uff1a\u7b2c\u4e00\u5e27\u5c31\u786e\u5b9a\u7528\u6237\u72b6\u6001 ──
 
 function getInitialState() {
   if (typeof window === 'undefined') {
@@ -65,8 +65,8 @@ function getInitialState() {
   }
   const user: NativeUser = { uid: getNativeUid() || 'native-user' };
   const cached = getCachedUserInfo();
-  // \u6709 token + \u6709\u7f13\u5b58 → loading=false（\u540e\u53f0\u9759\u9ed8\u5237\u65b0）
-  // \u6709 token + \u65e0\u7f13\u5b58 → loading=true（\u9996\u6b21\u767b\u5f55，\u9700\u7b49 API）
+  // \u6709 token + \u6709\u7f13\u5b58 → loading=false\uff08\u540e\u53f0\u9759\u9ed8\u5237\u65b0\uff09
+  // \u6709 token + \u65e0\u7f13\u5b58 → loading=true\uff08\u9996\u6b21\u767b\u5f55\uff0c\u9700\u7b49 API\uff09
   return { user, userInfo: cached, loading: !cached };
 }
 
@@ -125,7 +125,7 @@ export const useAuth = () => {
       return;
     }
     setAuthFlag();
-    // \u540e\u53f0\u5237\u65b0\u6700\u65b0\u6570\u636e（\u5373\u4f7f\u6709\u7f13\u5b58\u4e5f\u8981\u5237\u65b0）
+    // \u540e\u53f0\u5237\u65b0\u6700\u65b0\u6570\u636e\uff08\u5373\u4f7f\u6709\u7f13\u5b58\u4e5f\u8981\u5237\u65b0\uff09
     fetchUserInfo(user);
   }, [user, fetchUserInfo]);
 

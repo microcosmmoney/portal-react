@@ -238,7 +238,7 @@ export default function StationsPage() {
         loadUnits();
       } else {
         if (response.error?.includes('90\u5929') || response.error?.includes('cooldown')) {
-          toast.error(`\u4fee\u6539\u51b7\u5374\u4e2d：${response.error}`);
+          toast.error(`\u4fee\u6539\u51b7\u5374\u4e2d\uff1a${response.error}`);
         } else {
           toast.error(response.error || '\u66f4\u65b0\u5931\u8d25');
         }
@@ -554,12 +554,12 @@ export default function StationsPage() {
                 {unitDetailsCache[selectedUnit.unit_id].metrics.occupancy_rate >= 50 ? (
                   <div className="flex items-center gap-2 text-white">
                     <CheckCircle2 className="w-5 h-5" />
-                    <span>\u6d3b\u8dc3\u72b6\u6001，\u6301\u7eed\u53d1\u5c55\u4e2d</span>
+                    <span>\u6d3b\u8dc3\u72b6\u6001\uff0c\u6301\u7eed\u53d1\u5c55\u4e2d</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 text-neutral-500">
                     <XCircle className="w-5 h-5" />
-                    <span>\u5f85\u53d1\u5c55，\u9080\u8bf7\u66f4\u591a\u6210\u5458\u52a0\u5165</span>
+                    <span>\u5f85\u53d1\u5c55\uff0c\u9080\u8bf7\u66f4\u591a\u6210\u5458\u52a0\u5165</span>
                   </div>
                 )}
               </div>
@@ -649,7 +649,7 @@ export default function StationsPage() {
               rename_territory {selectedUnit?.unit_id?.toString().slice(0, 8)}
             </DialogTitle>
             <DialogDescription className="text-neutral-400">
-              \u4fee\u6539\u9886\u5730\u540d\u79f0（\u6bcf90\u5929\u53ef\u4fee\u6539\u4e00\u6b21）
+              \u4fee\u6539\u9886\u5730\u540d\u79f0\uff08\u6bcf90\u5929\u53ef\u4fee\u6539\u4e00\u6b21\uff09
             </DialogDescription>
           </DialogHeader>
 
@@ -674,7 +674,7 @@ export default function StationsPage() {
                       <div className="text-sm text-neutral-400 mt-1">
                         \u8fd8\u9700\u7b49\u5f85 <span className="font-bold font-mono">{nameStatus.remaining_days}</span> \u5929
                         {nameStatus.next_modify_date && (
-                          <span className="ml-1">（{nameStatus.next_modify_date} \u53ef\u4fee\u6539）</span>
+                          <span className="ml-1">\uff08{nameStatus.next_modify_date} \u53ef\u4fee\u6539\uff09</span>
                         )}
                       </div>
                     </div>
@@ -689,7 +689,7 @@ export default function StationsPage() {
                     <div>
                       <div className="text-white font-medium">\u56e2\u961f\u4ee3\u7ba1\u9886\u5730</div>
                       <div className="text-sm text-neutral-400 mt-1">
-                        \u9886\u5730\u5f53\u524d\u7531\u56e2\u961f\u4ee3\u7ba1，\u4efb\u4f55\u5df2\u767b\u5f55\u7528\u6237\u90fd\u53ef\u4ee5\u4fee\u6539\u540d\u79f0
+                        \u9886\u5730\u5f53\u524d\u7531\u56e2\u961f\u4ee3\u7ba1\uff0c\u4efb\u4f55\u5df2\u767b\u5f55\u7528\u6237\u90fd\u53ef\u4ee5\u4fee\u6539\u540d\u79f0
                       </div>
                     </div>
                   </div>
@@ -707,7 +707,7 @@ export default function StationsPage() {
                   disabled={!nameStatus.can_modify}
                 />
                 <div className="text-xs text-neutral-500 mt-1 font-mono">
-                  {newName.length}/50 \u5b57\u7b26（\u81f3\u5c112\u4e2a\u5b57\u7b26）
+                  {newName.length}/50 \u5b57\u7b26\uff08\u81f3\u5c112\u4e2a\u5b57\u7b26\uff09
                 </div>
               </div>
 
