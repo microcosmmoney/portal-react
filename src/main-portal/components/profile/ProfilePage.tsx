@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react"
 import WalletManagement from "../wallet/WalletManagement"
 import TwoFactorSettings from "./TwoFactorSettings"
 import EmailChangeCard from "./EmailChangeCard"
+import PasswordChangeCard from "./PasswordChangeCard"
 import { useTranslations } from 'next-intl'
 
 const LEVEL_INFO: Record<string, { label: string; description: string; color: string }> = {
@@ -213,6 +214,7 @@ export default function ProfilePage() {
 
       <WalletManagement />
       <EmailChangeCard />
+      <PasswordChangeCard />
       <TwoFactorSettings />
 
       <Card className="bg-neutral-900 border-neutral-700 dash-card"><CardContent className="p-3 sm:p-6">

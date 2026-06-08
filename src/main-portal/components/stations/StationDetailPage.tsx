@@ -465,7 +465,7 @@ export default function StationDetailPage({ stationId }: StationDetailPageProps)
           <div className="p-3 bg-neutral-800 rounded">
             <h4 className="font-semibold text-white mb-2">\u81ea\u52a8\u6309\u52b3\u5206\u914d</h4>
             <p className="text-sm text-neutral-400">
-              \u91d1\u5e93 MCD \u6bcf\u65e5\u81ea\u52a8\u53d1\u653e\u4f59\u989d\u7684 1%\uff0c\u6309\u5f53\u65e5\u4ea7\u77ff\u91cf\u5360\u6bd4\u5206\u914d\u7ed9\u77ff\u5de5。
+              \u91d1\u5e93 MCD \u6bcf\u65e5\u81ea\u52a8\u53d1\u653e\u4f59\u989d\u7684 1%\uff0c\u6309\u5f53\u65e5\u4ea7\u77ff\u91cf\u5360\u6bd4\u5206\u914d\u7ed9\u77ff\u5de5\u3002
             </p>
             <div className="mt-3 text-xs text-neutral-500">
               \u5206\u914d\u6bd4\u4f8b\uff1a\u77ff\u5de5 100%\uff08\u6309\u52b3\u5206\u914d\uff09
@@ -513,7 +513,7 @@ export default function StationDetailPage({ stationId }: StationDetailPageProps)
           <DialogHeader>
             <DialogTitle className="text-white tracking-wider">\u94f8\u9020 Territory NFT</DialogTitle>
             <DialogDescription className="text-neutral-400">
-              \u4e3a <span className="text-white font-semibold">{unit.unit_name}</span> \u94f8\u9020\u94fe\u4e0a NFT\uff0c\u53ef\u7528\u4e8e\u501f\u8d37\u62b5\u62bc\u6216\u8f6c\u8ba9。
+              \u4e3a <span className="text-white font-semibold">{unit.unit_name}</span> \u94f8\u9020\u94fe\u4e0a NFT\uff0c\u53ef\u7528\u4e8e\u501f\u8d37\u62b5\u62bc\u6216\u8f6c\u8ba9\u3002
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -538,7 +538,7 @@ export default function StationDetailPage({ stationId }: StationDetailPageProps)
             </div>
             <div className="p-3 bg-neutral-800 rounded border border-neutral-700">
               <p className="text-sm text-neutral-400">
-                \u94f8\u9020 NFT \u540e\uff0c\u60a8\u53ef\u4ee5\u5c06\u5176\u7528\u4e8e MCC \u501f\u8d37\u534f\u8bae\u7684\u62b5\u62bc\u54c1\uff0c\u6216\u5728\u5e02\u573a\u4e0a\u8f6c\u8ba9。
+                \u94f8\u9020 NFT \u540e\uff0c\u60a8\u53ef\u4ee5\u5c06\u5176\u7528\u4e8e MCC \u501f\u8d37\u534f\u8bae\u7684\u62b5\u62bc\u54c1\uff0c\u6216\u5728\u5e02\u573a\u4e0a\u8f6c\u8ba9\u3002
               </p>
             </div>
           </div>

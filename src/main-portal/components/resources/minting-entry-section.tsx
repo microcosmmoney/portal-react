@@ -173,7 +173,7 @@ export function MintingEntrySection() {
                 </div>
               </div>
               <button
-                onClick={() => alert('MCD \u6682\u672a\u5f00\u653e\u516c\u5171\u94f8\u9020。\n\nMCD \u76ee\u524d\u901a\u8fc7\u9886\u5730\u91d1\u5e93\u6bcf\u65e5\u514d\u8d39\u53d1\u653e\u7ed9\u77ff\u5de5。\n\u52a0\u5165\u9886\u5730\u6210\u4e3a\u77ff\u5de5\uff08Miner\uff09\uff0c\u5373\u53ef\u6bcf\u5929\u514d\u8d39\u83b7\u5f97 MCD \u5206\u914d。')}
+                onClick={() => alert('MCD \u6682\u672a\u5f00\u653e\u516c\u5171\u94f8\u9020\u3002\n\nMCD \u76ee\u524d\u901a\u8fc7\u9886\u5730\u91d1\u5e93\u6bcf\u65e5\u514d\u8d39\u53d1\u653e\u7ed9\u77ff\u5de5\u3002\n\u52a0\u5165\u9886\u5730\u6210\u4e3a\u77ff\u5de5\uff08Miner\uff09\uff0c\u5373\u53ef\u6bcf\u5929\u514d\u8d39\u83b7\u5f97 MCD \u5206\u914d\u3002')}
                 className="w-full py-3 rounded-lg font-mono text-sm font-medium transition-colors duration-200 bg-neutral-700/50 text-neutral-500 border border-neutral-600/40 cursor-pointer hover:bg-neutral-700/70"
               >
                 \u6682\u672a\u5f00\u653e

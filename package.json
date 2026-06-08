@@ -1,6 +1,6 @@
 {
   "name": "@microcosmmoney/portal-react",
-  "version": "3.15.7",
+  "version": "3.16.0",
   "description": "Microcosm Portal UI components for React/Next.js",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -28,8 +28,8 @@
     "next-intl": ">=3.0.0"
   },
   "dependencies": {
-    "@microcosmmoney/auth-core": "^2.3.4",
-    "@microcosmmoney/auth-react": "^2.7.0",
+    "@microcosmmoney/auth-core": "^2.3.5",
+    "@microcosmmoney/auth-react": "^2.8.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.7",

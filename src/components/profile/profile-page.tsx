@@ -5,6 +5,7 @@ import { useMicrocosmApi, useMicrocosmContext, useAuth } from '@microcosmmoney/a
 import { TerminalCard } from '../terminal'
 import { useTranslations } from '../../i18n-context'
 import { MicrocosmEmailChangeCard } from './email-change-card'
+import { MicrocosmPasswordChangeCard } from './password-change-card'
 import { MicrocosmTwoFactorSettings } from './two-factor-settings'
 
 const API_BASE = 'https://api.microcosm.money/v1'
@@ -49,10 +50,12 @@ export interface MicrocosmProfilePageProps {
   basePath?: string
   onNavigate?: (path: string) => void
   walletSection?: ReactNode
+  onSessionRotated?: (newToken: string) => void
 }
 
 export function MicrocosmProfilePage({
   walletSection,
+  onSessionRotated,
 }: MicrocosmProfilePageProps = {}) {
   const t = useTranslations('profile')
   const api = useMicrocosmApi()
@@ -380,6 +383,8 @@ export function MicrocosmProfilePage({
         }}
       />
 
+      <MicrocosmPasswordChangeCard onSessionRotated={onSessionRotated} />
+
       <MicrocosmTwoFactorSettings />
 
       {walletSection}
@@ -390,7 +395,7 @@ export function MicrocosmProfilePage({
         </div>
         <div className="space-y-1 text-sm text-neutral-400">
           <p>- {t('securityTip1', 'Keep your account credentials secure')}</p>
-          <p>- {t('securityTip2', 'Change password periodically via main portal')}</p>
+          <p>- {t('securityTip2', 'Change password periodically')}</p>
           <p>- {t('securityTip3', 'Report suspicious activity immediately')}</p>
           <p>- {t('securityTip4', 'Verify your email to receive important notifications')}</p>
         </div>
