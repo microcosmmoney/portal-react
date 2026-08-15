@@ -1,6 +1,6 @@
 {
   "name": "@microcosmmoney/portal-react",
-  "version": "3.16.0",
+  "version": "3.21.0",
   "description": "Microcosm Portal UI components for React/Next.js",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -12,14 +12,17 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js",
       "default": "./dist/cjs/index.js"
-    }
+    },
+    "./locales/*": "./locales/*"
   },
   "files": [
-    "dist"
+    "dist",
+    "locales"
   ],
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.esm.json",
-    "dev": "tsc --watch"
+    "build": "node scripts/build-locales.mjs && tsc && tsc -p tsconfig.esm.json",
+    "dev": "tsc --watch",
+    "build:locales": "node scripts/build-locales.mjs"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

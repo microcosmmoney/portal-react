@@ -255,7 +255,7 @@ export default function StationsPage() {
       <div className="max-w-7xl mx-auto px-3 py-4 space-y-3 xs:px-4 xs:space-y-4 sm:px-6 sm:py-6 sm:space-y-6">
         <div>
           <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">\u9886\u5730\u7ba1\u7406</h1>
-          <p className="text-xs sm:text-sm text-neutral-400 mt-1">\u7ba1\u7406\u9886\u5730NFT\u3001\u67e5\u770bKPI\u548c\u91d1\u5e93\u4f59\u989d</p>
+          <p className="text-xs sm:text-sm text-neutral-400 mt-1">\u7ba1\u7406\u9886\u5730NFT、\u67e5\u770bKPI\u548c\u91d1\u5e93\u4f59\u989d</p>
         </div>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
@@ -270,7 +270,7 @@ export default function StationsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg sm:text-2xl font-bold text-white tracking-wider">\u9886\u5730\u7ba1\u7406</h1>
-          <p className="text-xs sm:text-sm text-neutral-400 mt-1">\u7ba1\u7406\u9886\u5730NFT\u3001\u67e5\u770bKPI\u548c\u91d1\u5e93\u4f59\u989d</p>
+          <p className="text-xs sm:text-sm text-neutral-400 mt-1">\u7ba1\u7406\u9886\u5730NFT、\u67e5\u770bKPI\u548c\u91d1\u5e93\u4f59\u989d</p>
         </div>
         <Button
           variant="outline"

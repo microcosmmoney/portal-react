@@ -41,7 +41,7 @@ export interface MicrocosmPriceChartProps {
 export function MicrocosmPriceChart({ accentColor }: MicrocosmPriceChartProps = {}) {
   const t = useTranslations('mccDashboard')
   const api = useMicrocosmApi()
-  const [range, setRange] = useState<PriceTimeRange>('7D')
+  const [range, setRange] = useState<PriceTimeRange>('1Y')
   const { data, loading } = usePriceHistory(range as any)
   const gradientId = useId().replace(/:/g, '_') + '_mcPriceGradient'
 

@@ -383,7 +383,7 @@ export default function MCDPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
               { name: 'Double Helix', tagline: t('dhTagline'), desc: t('dhDesc'), icon: TrendingUp, iconBg: 'bg-cyan-400/20', iconColor: 'text-cyan-400', status: t('statusRunning'), statusColor: 'text-white', url: 'https://doublehelix.money' },
-              { name: 'xSocial', tagline: t('xsTagline'), desc: t('xsDesc'), icon: MessageSquare, iconBg: 'bg-cyan-400/20', iconColor: 'text-cyan-400', status: t('statusBeta'), statusColor: 'text-cyan-400', url: 'https://xsocial.cc' },
+              { name: 'Bluv.Dog', tagline: t('xsTagline'), desc: t('xsDesc'), icon: MessageSquare, iconBg: 'bg-cyan-400/20', iconColor: 'text-cyan-400', status: t('statusBeta'), statusColor: 'text-cyan-400', url: 'https://bluv.dog' },
               { name: 'Event Horizon', tagline: t('ehTagline'), desc: t('ehDesc'), icon: Eye, iconBg: 'bg-cyan-400/20', iconColor: 'text-cyan-400', status: t('statusBeta'), statusColor: 'text-cyan-400', url: 'https://poly.microcosm.money' },
               { name: 'GreenSwans', tagline: 'Crypto Guardian', desc: t('gsDesc'), icon: Shield, iconBg: 'bg-cyan-400/20', iconColor: 'text-cyan-400', status: t('statusDev'), statusColor: 'text-neutral-400', url: 'https://greenswans.cc' },
             ].map((p) => (

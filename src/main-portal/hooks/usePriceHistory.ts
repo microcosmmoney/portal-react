@@ -11,7 +11,7 @@ interface UsePriceHistoryReturn {
   refresh: () => Promise<void>
 }
 
-export function usePriceHistory(range: PriceTimeRange = '7D'): UsePriceHistoryReturn {
+export function usePriceHistory(range: PriceTimeRange = '1Y'): UsePriceHistoryReturn {
   const [data, setData] = useState<OHLCVData[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

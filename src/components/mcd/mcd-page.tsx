@@ -180,13 +180,13 @@ const ECOSYSTEM_SERVICES = [
     url: 'https://doublehelix.money',
   },
   {
-    name: 'xSocial',
+    name: 'Bluv.Dog',
     tagline: 'AI Social Platform',
     desc: 'AI-powered social media management and engagement',
     Icon: IconMessageSquare,
     status: 'Beta',
     statusColor: 'text-cyan-400',
-    url: 'https://xsocial.cc',
+    url: 'https://bluv.dog',
   },
   {
     name: 'Event Horizon',
@@ -321,7 +321,7 @@ export function MicrocosmMCDPage({ basePath = '', onNavigate }: MicrocosmMCDPage
                 {t('mcdUsage', 'MCD Usage')}
               </h4>
               <ul className="list-disc list-inside text-neutral-400 space-y-1">
-                <li>Spend on ecosystem services (Double Helix, xSocial, etc.)</li>
+                <li>Spend on ecosystem services (Double Helix, Bluv.Dog, etc.)</li>
                 <li>Transfer between users</li>
                 <li>Future governance participation</li>
               </ul>

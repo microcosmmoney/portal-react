@@ -82,7 +82,7 @@ export const getDistributionPlans = (): Promise<APIResponse<DistributionPlan[]>>
 export const setUnitDistributionPlan = (_unitId: string, _planId: number): Promise<APIResponse<void>> => {
   return Promise.resolve({
     success: false,
-    error: '\u5206\u914d\u65b9\u6848\u8bbe\u7f6e\u529f\u80fd\u5df2\u5e9f\u5f03\u3002\u65b0\u4e1a\u52a1\u903b\u8f91\u4e0b\uff0c\u91d1\u5e93 MCD \u6bcf\u65e5\u81ea\u52a8\u6309\u52b3\u5206\u914d 1%\uff0c\u65e0\u9700\u624b\u52a8\u8bbe\u7f6e\u65b9\u6848\u3002'
+    error: '\u5206\u914d\u65b9\u6848\u8bbe\u7f6e\u529f\u80fd\u5df2\u5e9f\u5f03。\u65b0\u4e1a\u52a1\u903b\u8f91\u4e0b\uff0c\u91d1\u5e93 MCD \u6bcf\u65e5\u81ea\u52a8\u6309\u52b3\u5206\u914d 1%\uff0c\u65e0\u9700\u624b\u52a8\u8bbe\u7f6e\u65b9\u6848。'
   })
 }
 

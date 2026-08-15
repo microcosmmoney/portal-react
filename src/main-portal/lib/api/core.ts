@@ -16,7 +16,7 @@ export const fetchApi = async (endpoint: string, options: RequestInit = {}, isPu
   if (!isPublic) {
     const authToken = await getCurrentUserToken()
     if (!authToken) {
-      throw new Error('\u7528\u6237\u672a\u767b\u5f55\uff0c\u65e0\u6cd5\u53d1\u8d77\u8bf7\u6c42\u3002')
+      throw new Error('\u7528\u6237\u672a\u767b\u5f55\uff0c\u65e0\u6cd5\u53d1\u8d77\u8bf7\u6c42。')
     }
     headers['Authorization'] = `Bearer ${authToken}`
   }

@@ -75,7 +75,7 @@ export const signInWithEmail = async (email: string, password: string): Promise<
   const data = await response.json();
   if (!data.success) {
     if (data.error === 'password_not_set') {
-      throw new Error('\u7cfb\u7edf\u5df2\u5347\u7ea7\uff0c\u8bf7\u901a\u8fc7\u90ae\u4ef6\u91cd\u7f6e\u5bc6\u7801\u540e\u767b\u5f55\u3002');
+      throw new Error('\u7cfb\u7edf\u5df2\u5347\u7ea7\uff0c\u8bf7\u901a\u8fc7\u90ae\u4ef6\u91cd\u7f6e\u5bc6\u7801\u540e\u767b\u5f55。');
     }
     throw new Error(data.error || '\u767b\u5f55\u5931\u8d25');
   }

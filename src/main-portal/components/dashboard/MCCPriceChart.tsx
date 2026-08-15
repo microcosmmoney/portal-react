@@ -34,7 +34,7 @@ function computeChange(data: any[] | null): number | null {
 }
 
 export default function MCCPriceChart() {
-  const [range, setRange] = useState<PriceTimeRange>('7D')
+  const [range, setRange] = useState<PriceTimeRange>('1Y')
   const { data, loading } = usePriceHistory(range)
 
   const [rangeChanges, setRangeChanges] = useState<Record<string, number | null>>({})

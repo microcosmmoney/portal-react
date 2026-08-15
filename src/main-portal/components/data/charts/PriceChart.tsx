@@ -50,7 +50,7 @@ const THEMES = {
 
 export function PriceChart({ theme = "blue" }: PriceChartProps) {
   const t = THEMES[theme]
-  const [timeRange, setTimeRange] = useState<TimeRange>("30D")
+  const [timeRange, setTimeRange] = useState<TimeRange>("1Y")
   const [allHistory, setAllHistory] = useState<PricePoint[]>([])
   const [loading, setLoading] = useState(true)
 
